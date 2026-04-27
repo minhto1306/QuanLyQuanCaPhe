@@ -432,6 +432,11 @@ public class FrmManHinhChinh extends JFrame {
 			dlg.setVisible(true);
 		});
 
+		btnQLDatBan.addActionListener(e -> {
+			DlgDatBan dlg = new DlgDatBan(FrmManHinhChinh.this);
+			dlg.setVisible(true);
+		});
+
 		btnDangXuat.addActionListener(e -> {
 			int xacNhan = JOptionPane.showConfirmDialog(FrmManHinhChinh.this, "Xác nhận đăng xuất?", "Đăng xuất",
 					JOptionPane.YES_NO_OPTION);
