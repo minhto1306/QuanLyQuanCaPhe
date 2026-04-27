@@ -101,20 +101,18 @@ public class SanPhamDAO implements BaseDAO<SanPham, String> {
 
 	@Override
 	public List<SanPham> findAll() {
-		// TODO Auto-generated method stub
 		List<SanPham> danhSach = new ArrayList<SanPham>();
 		String sql = "SELECT * FROM SanPham";
 
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);
-				ResultSet rs = pstmt.executeQuery()) {
+		// RÚT CONNECTION RA NGOÀI TRY:
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
 				danhSach.add(new SanPham(rs.getString("maSanPham"), rs.getString("maDanhMuc"),
 						rs.getString("tenSanPham"), rs.getDouble("giaBan"), rs.getBoolean("trangThai")));
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 

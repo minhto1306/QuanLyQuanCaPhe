@@ -1,9 +1,13 @@
 package controller;
 
+import java.awt.Window;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import dao.BanDAO;
@@ -51,7 +55,7 @@ public class KhuVucController {
 		// Sự kiện đóng form -> Cập nhật lại dữ liệu màn hình chính
 		this.view.addThoatSoDoListener(e -> {
 			this.view.dispose();
-			java.awt.Window parent = javax.swing.SwingUtilities.getWindowAncestor(this.view);
+			Window parent = SwingUtilities.getWindowAncestor(this.view);
 			if (parent instanceof ui.FrmManHinhChinh) {
 				((ui.FrmManHinhChinh) parent).loadDuLieuSoDoBanMain();
 			}
@@ -204,7 +208,7 @@ public class KhuVucController {
 		List<Ban> listBanToanBo = banDAO.findAll();
 		List<KhuVuc> listKhuVucToanBo = khuVucDAO.findAll();
 
-		java.util.Map<String, List<Ban>> mapKhuVucBan = new java.util.LinkedHashMap<>();
+		Map<String, List<Ban>> mapKhuVucBan = new LinkedHashMap<>();
 
 		if (tenKhuVuc == null || tenKhuVuc.equals("--- Chọn khu vực ---")) {
 			for (KhuVuc kv : listKhuVucToanBo) {

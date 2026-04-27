@@ -2,15 +2,20 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,6 +31,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -427,7 +433,7 @@ public class FrmManHinhChinh extends JFrame {
 		List<Ban> listBanToanBo = banDAO.findAll();
 		List<KhuVuc> listKhuVucToanBo = khuVucDAO.findAll();
 
-		java.util.Map<String, List<Ban>> mapKhuVucBan = new java.util.LinkedHashMap<>();
+		Map<String, List<Ban>> mapKhuVucBan = new LinkedHashMap<>();
 
 		for (KhuVuc kv : listKhuVucToanBo) {
 			List<Ban> banCuaKv = new ArrayList<>();
@@ -457,12 +463,12 @@ public class FrmManHinhChinh extends JFrame {
 		return num.isEmpty() ? 0 : Integer.parseInt(num);
 	}
 
-	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
+	public void hienThiDanhSachBanToanBo(Map<String, List<Ban>> mapKhuVucBan) {
 		pnDanhSachBan.removeAll();
 
-		for (java.util.Map.Entry<String, java.util.List<entity.Ban>> entry : mapKhuVucBan.entrySet()) {
+		for (Map.Entry<String, List<Ban>> entry : mapKhuVucBan.entrySet()) {
 			String tenKhuVuc = entry.getKey();
-			java.util.List<entity.Ban> danhSachBan = entry.getValue();
+			List<Ban> danhSachBan = entry.getValue();
 
 			// 1. Tiêu đề Khu Vực
 			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -523,36 +529,36 @@ public class FrmManHinhChinh extends JFrame {
 		}
 	}
 
-	public void addXemBangGiaListener(java.awt.event.ActionListener listener) {
+	public void addXemBangGiaListener(ActionListener listener) {
 		btnXemBangGia.addActionListener(listener);
 	}
 
-	public void addQLNhanVienListener(java.awt.event.ActionListener listener) {
+	public void addQLNhanVienListener(ActionListener listener) {
 		btnQLNhanVien.addActionListener(listener);
 	}
 
-	public void addQLCaLamListener(java.awt.event.ActionListener listener) {
+	public void addQLCaLamListener(ActionListener listener) {
 		btnQLCaLam.addActionListener(listener);
 	}
 
-	public void addQLSoDoListener(java.awt.event.ActionListener listener) {
+	public void addQLSoDoListener(ActionListener listener) {
 		btnQLSoDo.addActionListener(listener);
 	}
 
-	public void addQLHangHoaListener(java.awt.event.ActionListener listener) {
+	public void addQLHangHoaListener(ActionListener listener) {
 		btnQLHangHoa.addActionListener(listener);
 	}
 
-	public void addQLDatBanListener(java.awt.event.ActionListener listener) {
+	public void addQLDatBanListener(ActionListener listener) {
 		btnQLDatBan.addActionListener(listener);
 	}
 
-	public void addDangXuatListener(java.awt.event.ActionListener listener) {
+	public void addDangXuatListener(ActionListener listener) {
 		btnDangXuat.addActionListener(listener);
 	}
 
 	// =========================================================================
-	// BÍ KÍP WRAPLAYOUT ĐỂ CÁC BÀN TỰ ĐỘNG XUỐNG DÒNG
+	// WRAPLAYOUT ĐỂ CÁC BÀN TỰ ĐỘNG XUỐNG DÒNG
 	// =========================================================================
 	class WrapLayout extends FlowLayout {
 		private static final long serialVersionUID = 1L;
@@ -573,7 +579,7 @@ public class FrmManHinhChinh extends JFrame {
 
 		private Dimension layoutSize(Container target, Dimension defaultDim) {
 			Container parent = target.getParent();
-			while (parent != null && !(parent instanceof javax.swing.JViewport)) {
+			while (parent != null && !(parent instanceof JViewport)) {
 				parent = parent.getParent();
 			}
 			if (parent == null)
@@ -584,12 +590,12 @@ public class FrmManHinhChinh extends JFrame {
 				return defaultDim;
 
 			int hgap = getHgap(), vgap = getVgap();
-			java.awt.Insets insets = target.getInsets();
+			Insets insets = target.getInsets();
 			int maxWidth = targetWidth - (insets.left + insets.right + hgap * 2);
 
 			int dimWidth = 0, dimHeight = 0, rowWidth = 0, rowHeight = 0;
 			for (int i = 0; i < target.getComponentCount(); i++) {
-				java.awt.Component m = target.getComponent(i);
+				Component m = target.getComponent(i);
 				if (m.isVisible()) {
 					Dimension d = m.getPreferredSize();
 					if (rowWidth + d.width > maxWidth) {
