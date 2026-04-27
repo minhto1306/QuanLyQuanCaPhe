@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
@@ -19,62 +18,26 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import dao.TaiKhoanDAO;
-import entity.TaiKhoan;
-import util.DataBaseConnection;
-
 public class FrmDangNhap extends JDialog {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
-	JLabel lbTenDangNhap, lbMatKhau;
-	JTextField tfTenDangNhap;
-	JPasswordField pfMatKhau;
-	JButton btnDangNhap, btnThoat;
-	Box b1, b2, b3;
-	TaiKhoanDAO tkDAO;
-
-	private boolean dangNhapThanhCong = false;
+	private JLabel lbTenDangNhap, lbMatKhau;
+	private JTextField tfTenDangNhap;
+	private JPasswordField pfMatKhau;
+	private JButton btnDangNhap, btnThoat;
+	private Box b1, b2;
 
 	public FrmDangNhap(JFrame parent) {
 		super(parent, "🔒 Đăng nhập", true);
 		this.setSize(350, 200);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
+		// Chú ý: Đóng form đăng nhập sẽ không thoát chương trình ngay,
+		// Controller sẽ lo việc này nếu cần thiết.
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		khoiTaoGiaoDien();
-
-		// THOAT DATABASE KHI NHAN DAU X
-//		this.addWindowListener(new WindowAdapter() {
-//			public void windowClosing(WindowEvent e) {
-//				DataBaseConnection.getInstance().disconnect();
-//			}
-//		});
-
-		// NUT THOAT
-		btnThoat.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				DataBaseConnection.getInstance().disconnect();
-				System.exit(0);
-			}
-		});
-
-		// NUT DANG NHAP
-		btnDangNhap.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				dangNhapTaiKhoan();
-			}
-		});
 	}
 
 	public void khoiTaoGiaoDien() {
@@ -99,6 +62,7 @@ public class FrmDangNhap extends JDialog {
 
 		b2.add(lbMatKhau = new JLabel("Mật khẩu:"));
 		b2.add(pfMatKhau = new JPasswordField());
+
 		pnCenter.add(Box.createVerticalStrut(10));
 		pnCenter.add(b1);
 		pnCenter.add(Box.createVerticalStrut(10));
@@ -116,56 +80,35 @@ public class FrmDangNhap extends JDialog {
 		JPanel pnSouth = new JPanel();
 		pnMain.add(pnSouth, BorderLayout.SOUTH);
 		pnSouth.setLayout(new GridLayout(1, 2, 15, 10));
-		pnSouth.add(btnDangNhap = new JButton("Đăng nhập"));
-		pnSouth.add(btnThoat = new JButton("Thoát"));
+
+		btnDangNhap = new JButton("Đăng nhập");
+		btnThoat = new JButton("Thoát");
+		pnSouth.add(btnDangNhap);
+		pnSouth.add(btnThoat);
 
 		pnSouth.setPreferredSize(new Dimension(300, 40));
 		btnDangNhap.setBackground(Color.white);
 		btnThoat.setBackground(Color.white);
 	}
 
-	private void dangNhapTaiKhoan() {
-		String user = tfTenDangNhap.getText();
-		String pwd = new String(pfMatKhau.getPassword());
-
-		// kiem tra du lieu nhap vao
-		if (user.trim().isEmpty() || pwd.trim().isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Tên đăng nhập và mật khẩu không được để trống!");
-			return;
-		}
-
-		tkDAO = new TaiKhoanDAO();
-		TaiKhoan tk = tkDAO.kiemTraDangNhap(user, pwd);
-
-		if (tk != null) {
-			JOptionPane.showMessageDialog(this, "Đăng nhập thành công! Kính chào: " + tk.getVaiTro(), "Thành công!",
-					JOptionPane.INFORMATION_MESSAGE);
-			System.out.println("Tài khoản đang đăng nhập " + tk.getTenDangNhap());
-
-			this.dangNhapThanhCong = true;
-
-			this.dispose();
-
-		} else {
-			JOptionPane.showMessageDialog(this, "Sai tên đăng nhập, mật khẩu hoặc bị khóa!");
-		}
+	public String getUsername() {
+		return tfTenDangNhap.getText();
 	}
 
-	public boolean isDangNhapThanhCong() {
-		return this.dangNhapThanhCong;
+	public String getPassword() {
+		return new String(pfMatKhau.getPassword());
 	}
 
-	public static void main(String[] args) {
-		FrmManHinhChinh frmMain = new FrmManHinhChinh();
-		frmMain.setVisible(true);
-		FrmDangNhap frmLogin = new FrmDangNhap(frmMain);
+	public void addLoginListener(ActionListener listener) {
+		btnDangNhap.addActionListener(listener);
+	}
 
-		frmLogin.setVisible(true);
+	public void addExitListener(ActionListener listener) {
+		btnThoat.addActionListener(listener);
+	}
 
-		if (!frmLogin.isDangNhapThanhCong()) {
-			System.exit(0);
-		}
-
+	public void showMessage(String msg, String title, int type) {
+		JOptionPane.showMessageDialog(this, msg, title, type);
 	}
 
 }

@@ -10,38 +10,33 @@ import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import com.formdev.flatlaf.FlatLightLaf;
 
 public class FrmManHinhChinh extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
 	public JPanel pnDanhSachBan, pnDanhSachMon, pnDanhMuc;
-	JLabel lbLogo, lbTenCuaHang, lbTitleUser, lbValueUSer, lbTitleKhuVuc, lbValueKhuVuc, lbTitleGioVao, lbValueGioVao,
-			lbTitleTienPhaiTra, lbValueTienPhaiTra, lbGiamGia, lbThue, lbTongTien, lbTenKhuVuc, lbTitleTongTien;
-	JButton btnDangXuat, btnThanhToan, btnThemTaiKhoan, btnXemBangGia, btnXemKhuVuc, btnXemHangHoa, btnQLNhanVien,
-			btnQLSoDo, btnQLHangHoa, btnQLBangGia, btnQLCaLam, btnQLDatBan;
-	JTextField tfGiamGia;
-	JComboBox<Integer> cbBoxThue;
-	Box boxThue, boxGiamGia;
-	DefaultTableModel tableModel;
+	private JLabel lbLogo, lbTenCuaHang, lbTitleUser, lbValueUSer, lbTitleKhuVuc, lbValueKhuVuc, lbTitleGioVao,
+			lbValueGioVao, lbTitleTienPhaiTra, lbValueTienPhaiTra, lbGiamGia, lbThue, lbTongTien, lbTenKhuVuc,
+			lbTitleTongTien;
+	private JButton btnDangXuat, btnThanhToan, btnXemBangGia, btnQLNhanVien, btnQLSoDo, btnQLHangHoa, btnQLCaLam,
+			btnQLDatBan;
+	private JTextField tfGiamGia;
+	private JComboBox<Integer> cbBoxThue;
+	private DefaultTableModel tableModel;
 
 	public FrmManHinhChinh() {
 		this.setTitle("Hệ thống quản lý quán cà phê");
@@ -324,7 +319,6 @@ public class FrmManHinhChinh extends JFrame {
 		btnThanhToan.setBackground(new Color(40, 167, 69));
 		btnThanhToan.setForeground(Color.WHITE);
 		btnThanhToan.setFocusPainted(false);
-		// applyIconToButton(btnThanhToan, "procurement.png", 28, 28);
 		pnThanhToan.add(btnThanhToan, BorderLayout.SOUTH);
 
 		JPanel pnMainWorkSpace = new JPanel();
@@ -407,56 +401,6 @@ public class FrmManHinhChinh extends JFrame {
 			pnChucNangQuanLy.add(btn);
 		}
 
-		btnXemBangGia.addActionListener(e -> {
-			DlgBangGia dlg = new DlgBangGia(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnQLNhanVien.addActionListener(e -> {
-			DlgNhanVien dlg = new DlgNhanVien(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnQLCaLam.addActionListener(e -> {
-			DlgCaLamViec dlg = new DlgCaLamViec(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnQLSoDo.addActionListener(e -> {
-			DlgKhuVucBan dlg = new DlgKhuVucBan(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnQLHangHoa.addActionListener(e -> {
-			DlgHangHoa dlg = new DlgHangHoa(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnQLDatBan.addActionListener(e -> {
-			DlgDatBan dlg = new DlgDatBan(FrmManHinhChinh.this);
-			dlg.setVisible(true);
-		});
-
-		btnDangXuat.addActionListener(e -> {
-			int xacNhan = JOptionPane.showConfirmDialog(FrmManHinhChinh.this, "Xác nhận đăng xuất?", "Đăng xuất",
-					JOptionPane.YES_NO_OPTION);
-
-			if (xacNhan == JOptionPane.YES_OPTION) {
-				FrmManHinhChinh.this.setVisible(false);
-				resetDuLieu();
-
-				FrmManHinhChinh.this.setVisible(true);
-				FrmDangNhap frmLogin = new FrmDangNhap(FrmManHinhChinh.this);
-				frmLogin.setVisible(true);
-
-				if (frmLogin.isDangNhapThanhCong()) {
-					FrmManHinhChinh.this.setVisible(true);
-				} else {
-					System.exit(0);
-				}
-			}
-		});
-
 		pnMainWorkSpace.add(pnChucNangQuanLy, BorderLayout.SOUTH);
 	}
 
@@ -478,21 +422,31 @@ public class FrmManHinhChinh extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(new FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println("Failed to initialize LaF");
-		}
+	public void addXemBangGiaListener(java.awt.event.ActionListener listener) {
+		btnXemBangGia.addActionListener(listener);
+	}
 
-		FrmManHinhChinh frmMain = new FrmManHinhChinh();
-		frmMain.setVisible(true);
-		FrmDangNhap frmLogin = new FrmDangNhap(frmMain);
+	public void addQLNhanVienListener(java.awt.event.ActionListener listener) {
+		btnQLNhanVien.addActionListener(listener);
+	}
 
-		frmLogin.setVisible(true);
+	public void addQLCaLamListener(java.awt.event.ActionListener listener) {
+		btnQLCaLam.addActionListener(listener);
+	}
 
-		if (!frmLogin.isDangNhapThanhCong()) {
-			System.exit(0);
-		}
+	public void addQLSoDoListener(java.awt.event.ActionListener listener) {
+		btnQLSoDo.addActionListener(listener);
+	}
+
+	public void addQLHangHoaListener(java.awt.event.ActionListener listener) {
+		btnQLHangHoa.addActionListener(listener);
+	}
+
+	public void addQLDatBanListener(java.awt.event.ActionListener listener) {
+		btnQLDatBan.addActionListener(listener);
+	}
+
+	public void addDangXuatListener(java.awt.event.ActionListener listener) {
+		btnDangXuat.addActionListener(listener);
 	}
 }
