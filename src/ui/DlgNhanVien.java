@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -65,7 +67,6 @@ public class DlgNhanVien extends JDialog {
 		tabbedPane = new JTabbedPane();
 		tabNhanVien = khoiTaoTabNhanVien();
 		tabTaiKhoan = khoiTaoTabTaiKhoan();
-
 		tabbedPane.addTab("THÔNG TIN NHÂN VIÊN", iconNhanVien, tabNhanVien, "Xem thông tin nhân viên");
 		tabbedPane.addTab("THÔNG TIN TÀI KHOẢN", iconTaiKhoan, tabTaiKhoan, "Xem thông tin tài khoản");
 
@@ -105,7 +106,6 @@ public class DlgNhanVien extends JDialog {
 		lbMaNhanVien.setPreferredSize(dLeftLabel);
 		lbHoTenNhanVien.setPreferredSize(dLeftLabel);
 		lbSoDienThoai.setPreferredSize(dLeftLabel);
-
 		Dimension dRightLabel = new Dimension(130, 25);
 		lbTenDangNhap.setPreferredSize(dRightLabel);
 		lbCCCD.setPreferredSize(dRightLabel);
@@ -204,11 +204,15 @@ public class DlgNhanVien extends JDialog {
 		boxTimNV.add(Box.createHorizontalStrut(5));
 		boxTimNV.add(btnTim);
 		pnTimKiem.add(boxTimNV);
-
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
 
 		String[] colNames = { "#", "Mã nhân viên", "Họ & tên", "Tên đăng nhập", "Số điện thoại", "CCCD", "Vai trò" };
-		tmNhanVien = new DefaultTableModel(colNames, 0);
+		tmNhanVien = new DefaultTableModel(colNames, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 		tbNhanVien = new JTable(tmNhanVien);
 		tbNhanVien.getTableHeader().setFont(fontLablel);
 		tbNhanVien.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -217,7 +221,6 @@ public class DlgNhanVien extends JDialog {
 		tbNhanVien.getColumnModel().getColumn(0).setMaxWidth(40);
 		tbNhanVien.getColumnModel().getColumn(1).setPreferredWidth(100);
 		tbNhanVien.getColumnModel().getColumn(3).setPreferredWidth(120);
-
 		JScrollPane scrollPane = new JScrollPane(tbNhanVien);
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 
@@ -225,7 +228,6 @@ public class DlgNhanVien extends JDialog {
 		pnNhanVien.add(pnNutChucNang, BorderLayout.SOUTH);
 		pnNutChucNang.setBorder(brdVienDen);
 		pnNutChucNang.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-
 		Font fontBtn = new Font("Arial", Font.BOLD, 14);
 
 		btnThem = new JButton("Thêm");
@@ -277,11 +279,9 @@ public class DlgNhanVien extends JDialog {
 		boxTK_Row1 = Box.createHorizontalBox();
 		boxTK_Row2 = Box.createHorizontalBox();
 		boxTK_Tim = Box.createHorizontalBox();
-
 		lbTK_Tim = new JLabel("Tìm tài khoản:");
 		lbTK_TenDangNhap = new JLabel("Tên đăng nhập:");
 		lbTK_VaiTro = new JLabel("Vai trò:");
-
 		lbTK_MatKhau = new JLabel("Mật khẩu:");
 		lbTK_TrangThai = new JLabel("Trạng thái:");
 
@@ -290,7 +290,6 @@ public class DlgNhanVien extends JDialog {
 		lbTK_VaiTro.setPreferredSize(dLabel);
 		lbTK_MatKhau.setPreferredSize(dLabel);
 		lbTK_TrangThai.setPreferredSize(dLabel);
-
 		lbTK_Tim.setPreferredSize(dLabel);
 
 		Font fontLablel = new Font("Arial", Font.BOLD, 15);
@@ -302,7 +301,6 @@ public class DlgNhanVien extends JDialog {
 
 		tfTK_Tim = new JTextField();
 		tfTK_Tim.setPreferredSize(new Dimension(300, 25));
-
 		cbTK_TenDangNhap = new JComboBox<String>();
 
 		tfTK_MatKhau = new JTextField();
@@ -324,7 +322,6 @@ public class DlgNhanVien extends JDialog {
 		cbTK_VaiTro.setMaximumSize(dInput);
 		cbTK_TrangThai.setPreferredSize(dInput);
 		cbTK_TrangThai.setMaximumSize(dInput);
-
 		btnTK_Tim = new JButton();
 		btnTK_Tim.setPreferredSize(new Dimension(40, 25));
 		ImageIcon iconTim = taoIconThuNho("/images/search.png", 16, 16);
@@ -364,7 +361,6 @@ public class DlgNhanVien extends JDialog {
 		pnTaiKhoan.add(pnBangDuLieu, BorderLayout.CENTER);
 		pnBangDuLieu
 				.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), brdVienDen));
-
 		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
 		boxTK_Tim.add(lbTK_Tim);
 		boxTK_Tim.add(tfTK_Tim);
@@ -373,9 +369,13 @@ public class DlgNhanVien extends JDialog {
 		pnTimKiem.add(boxTK_Tim);
 
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
-
 		String[] colNames = { "#", "Tên đăng nhập", "Mật khẩu", "Vai trò", "Trạng thái" };
-		tmTaiKhoan = new DefaultTableModel(colNames, 0);
+		tmTaiKhoan = new DefaultTableModel(colNames, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 		tbTaiKhoan = new JTable(tmTaiKhoan);
 		tbTaiKhoan.getTableHeader().setFont(fontLablel);
 		tbTaiKhoan.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -385,14 +385,12 @@ public class DlgNhanVien extends JDialog {
 
 		JScrollPane scrollPane = new JScrollPane(tbTaiKhoan);
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
-
 		JPanel pnNutChucNang = new JPanel();
 		pnTaiKhoan.add(pnNutChucNang, BorderLayout.SOUTH);
 		pnNutChucNang.setBorder(brdVienDen);
 		pnNutChucNang.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10));
 
 		Font fontBtn = new Font("Arial", Font.BOLD, 14);
-
 		btnTK_Them = new JButton("Thêm");
 		btnTK_Them.setFont(fontBtn);
 		ImageIcon iconThem = taoIconThuNho("/images/add.png", 20, 20);
@@ -435,12 +433,172 @@ public class DlgNhanVien extends JDialog {
 		return pnTaiKhoan;
 	}
 
-	public static void main(String[] args) {
-		try {
-			javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println("Lỗi khởi tạo FlatLaf: " + ex.getMessage());
-		}
-		new DlgNhanVien(null).setVisible(true);
+	// =========================================================================
+	// PHẦN MỞ RỘNG: ĐĂNG KÝ SỰ KIỆN & LẤY DỮ LIỆU DÀNH CHO CONTROLLER
+	// =========================================================================
+
+	public void addThemNVListener(ActionListener l) {
+		btnThem.addActionListener(l);
 	}
+
+	public void addXoaNVListener(ActionListener l) {
+		btnXoa.addActionListener(l);
+	}
+
+	public void addSuaNVListener(ActionListener l) {
+		btnSua.addActionListener(l);
+	}
+
+	public void addLuuNVListener(ActionListener l) {
+		btnLuu.addActionListener(l);
+	} // THÊM NÚT LƯU
+
+	public void addXoaTrangNVListener(ActionListener l) {
+		btnXoaTrang.addActionListener(l);
+	}
+
+	public void addTimNVListener(ActionListener l) {
+		btnTim.addActionListener(l);
+	}
+
+	public void addBangNhanVienMouseListener(MouseListener l) {
+		tbNhanVien.addMouseListener(l);
+	}
+
+	public void addThemTKListener(ActionListener l) {
+		btnTK_Them.addActionListener(l);
+	}
+
+	public void addXoaTKListener(ActionListener l) {
+		btnTK_Xoa.addActionListener(l);
+	}
+
+	public void addSuaTKListener(ActionListener l) {
+		btnTK_Sua.addActionListener(l);
+	}
+
+	public void addLuuTKListener(ActionListener l) {
+		btnTK_Luu.addActionListener(l);
+	} // THÊM NÚT LƯU
+
+	public void addXoaTrangTKListener(ActionListener l) {
+		btnTK_XoaTrang.addActionListener(l);
+	}
+
+	public void addTimTKListener(ActionListener l) {
+		btnTK_Tim.addActionListener(l);
+	}
+
+	public void addBangTaiKhoanMouseListener(MouseListener l) {
+		tbTaiKhoan.addMouseListener(l);
+	}
+
+	public String getMaNVInput() {
+		return tfMaNhanVien.getText().trim();
+	}
+
+	public String getHoTenNVInput() {
+		return tfHoTenNhanVien.getText().trim();
+	}
+
+	public String getTenDangNhapNVInput() {
+		return tfTenDangNhap.getText().trim();
+	}
+
+	public String getSDTInput() {
+		return tfSoDienThoai.getText().trim();
+	}
+
+	public String getCCCDInput() {
+		return tfCCCD.getText().trim();
+	}
+
+	public String getTimKiemNVInput() {
+		return tfTimNV.getText().trim();
+	}
+
+	public String getTK_TenDangNhapSelected() {
+		return cbTK_TenDangNhap.getSelectedItem() != null ? cbTK_TenDangNhap.getSelectedItem().toString() : "";
+	}
+
+	public String getTK_MatKhauInput() {
+		return tfTK_MatKhau.getText().trim();
+	}
+
+	public String getTK_VaiTroSelected() {
+		return cbTK_VaiTro.getSelectedItem().toString();
+	}
+
+	public String getTK_TrangThaiSelected() {
+		return cbTK_TrangThai.getSelectedItem().toString();
+	}
+
+	public DefaultTableModel getTmNhanVien() {
+		return tmNhanVien;
+	}
+
+	public DefaultTableModel getTmTaiKhoan() {
+		return tmTaiKhoan;
+	}
+
+	public JTable getTbNhanVien() {
+		return tbNhanVien;
+	}
+
+	public JTable getTbTaiKhoan() {
+		return tbTaiKhoan;
+	}
+
+	public JComboBox<String> getCbTK_TenDangNhap() {
+		return cbTK_TenDangNhap;
+	}
+
+	public JTabbedPane getTabbedPane() {
+		return tabbedPane;
+	} // Trả về TabPane để Controller nhảy tab
+
+	// Cập nhật hàm này: Thêm tham số String vaiTro ở cuối
+	public void dienThongTinNhanVienLenForm(String ma, String hoTen, String tenDN, String sdt, String cccd,
+			String vaiTro) {
+		tfMaNhanVien.setText(ma);
+		tfHoTenNhanVien.setText(hoTen);
+		tfTenDangNhap.setText(tenDN);
+		tfSoDienThoai.setText(sdt);
+		tfCCCD.setText(cccd);
+		// Cập nhật luôn ComboBox
+		if (vaiTro != null && !vaiTro.equals("Chưa cấp")) {
+			cbVaiTro.setSelectedItem(vaiTro);
+		}
+	}
+
+	public void dienThongTinTaiKhoanLenForm(String tenDN, String matKhau, String vaiTro, String trangThai) {
+		cbTK_TenDangNhap.setSelectedItem(tenDN);
+		tfTK_MatKhau.setText(matKhau);
+		cbTK_VaiTro.setSelectedItem(vaiTro);
+		cbTK_TrangThai.setSelectedItem(trangThai);
+	}
+
+	public void xoaTrangFormNhanVien() {
+		tfMaNhanVien.setText("");
+		tfHoTenNhanVien.setText("");
+		tfTenDangNhap.setText("");
+		tfSoDienThoai.setText("");
+		tfCCCD.setText("");
+		cbVaiTro.setSelectedIndex(0); // Reset ComboBox
+		tfMaNhanVien.requestFocus();
+	}
+
+	public void xoaTrangFormTaiKhoan() {
+		if (cbTK_TenDangNhap.getItemCount() > 0)
+			cbTK_TenDangNhap.setSelectedIndex(0);
+		tfTK_MatKhau.setText("");
+		cbTK_VaiTro.setSelectedIndex(0);
+		cbTK_TrangThai.setSelectedIndex(0);
+	}
+
+	// Thêm hàm lấy dữ liệu từ ComboBox Vai trò bên tab Nhân Viên
+	public String getVaiTroNVSelected() {
+		return cbVaiTro.getSelectedItem() != null ? cbVaiTro.getSelectedItem().toString() : "Thu ngân";
+	}
+
 }

@@ -16,10 +16,10 @@ public class MainDashboardController {
 
 	public MainDashboardController(FrmManHinhChinh dashboardView) {
 		this.dashboardView = dashboardView;
-		ketNoiKinhMach();
+		ketNoi();
 	}
 
-	private void ketNoiKinhMach() {
+	private void ketNoi() {
 		dashboardView.addXemBangGiaListener(e -> moCuaSoBangGia());
 		dashboardView.addQLNhanVienListener(e -> moCuaSoNhanVien());
 		dashboardView.addQLCaLamListener(e -> moCuaSoCaLam());
@@ -34,18 +34,18 @@ public class MainDashboardController {
 	}
 
 	private void moCuaSoBangGia() {
-		// Gọi cái form lên, nhét cái dashboardView vô cho nó biết cha nó là ai
 		DlgBangGia dlgBangGia = new DlgBangGia(dashboardView);
 
-		// Đánh thức thằng Controller dậy bưng dữ liệu từ Database lên bảng
 		new BangGiaController(dlgBangGia);
 
-		// Xong xuôi mới mở cửa sổ lên cho người ta coi
 		dlgBangGia.setVisible(true);
 	}
 
 	private void moCuaSoNhanVien() {
-		new DlgNhanVien(dashboardView).setVisible(true);
+
+		DlgNhanVien dialog = new DlgNhanVien(dashboardView);
+		new NhanVienController(dialog);
+		dialog.setVisible(true);
 	}
 
 	private void moCuaSoCaLam() {

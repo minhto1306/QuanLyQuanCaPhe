@@ -30,7 +30,6 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			System.err.println("Lỗi lúc đăng nhập! " + e.getMessage());
 		}
 		return taiKhoan;
@@ -38,11 +37,9 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 
 	@Override
 	public boolean insert(TaiKhoan entity) {
-		// TODO Auto-generated method stub
 		String sql = "INSERT INTO TaiKhoan (tenDangNhap, matKhau, trangThai, maVaiTro) VALUES (?, ?, ?, ?)";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 
 			pstmt.setString(1, entity.getTenDangNhap());
 			pstmt.setString(2, entity.getMatKhau());
@@ -52,7 +49,6 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 			return pstmt.executeUpdate() > 0;
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -60,11 +56,9 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 
 	@Override
 	public boolean update(TaiKhoan entity) {
-		// TODO Auto-generated method stub
 		String sql = "UPDATE TaiKhoan SET matKhau = ?, trangThai = ?, maVaiTro = ? WHERE tenDangNhap = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 
 			pstmt.setString(1, entity.getMatKhau());
 			pstmt.setBoolean(2, entity.isTrangThai());
@@ -74,25 +68,22 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 			return pstmt.executeUpdate() > 0;
 
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 		return false;
 	}
 
 	@Override
 	public boolean delete(String id) {
-		// TODO Auto-generated method stub
 		String sql = "DELETE FROM TaiKhoan WHERE tenDangNhap = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 
 			pstmt.setString(1, id);
 
 			return pstmt.executeUpdate() > 0;
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -102,12 +93,11 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 	public TaiKhoan findById(String id) {
 		TaiKhoan tk = null;
 		String sql = "SELECT * FROM TaiKhoan WHERE tenDangNhap = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 
 			pstmt.setString(1, id);
-			try (ResultSet rs = pstmt.executeQuery();) {
+			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
 					tk = new TaiKhoan(rs.getString("tenDangNhap"), rs.getString("matKhau"), rs.getBoolean("trangThai"),
 							rs.getString("maVaiTro"));
@@ -116,7 +106,6 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 
@@ -127,11 +116,10 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 	public List<TaiKhoan> findAll() {
 		List<TaiKhoan> danhSach = new ArrayList<TaiKhoan>();
 		String sql = "SELECT * FROM TaiKhoan";
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);) {
-
-			try (ResultSet rs = pstmt.executeQuery();) {
+			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
 					TaiKhoan tk = new TaiKhoan(rs.getString("tenDangNhap"), rs.getString("matKhau"),
 							rs.getBoolean("trangThai"), rs.getString("maVaiTro"));
@@ -140,7 +128,6 @@ public class TaiKhoanDAO implements BaseDAO<TaiKhoan, String> {
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return danhSach;

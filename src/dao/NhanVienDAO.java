@@ -14,11 +14,10 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public boolean insert(NhanVien nv) {
-		// TODO Auto-generated method stub
 		String sql = "INSERT INTO NhanVien (maNhanVien, tenDangNhap, hoTenNhanVien, soCCCD, soDienThoai) VALUES (?, ?, ?, ?, ?)";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		// Đưa Connection ra ngoài try-with-resources
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, nv.getMaNhanVien());
 			pstmt.setString(2, nv.getTenDangNhap());
 			pstmt.setString(3, nv.getHoTenNhanVien());
@@ -28,7 +27,6 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			return pstmt.executeUpdate() > 0;
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -37,9 +35,8 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 	@Override
 	public boolean update(NhanVien nv) {
 		String sql = "UPDATE NhanVien SET hoTenNhanVien = ?, soCCCD = ?, soDienThoai = ? WHERE maNhanVien = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, nv.getHoTenNhanVien());
 			pstmt.setString(2, nv.getSoCCCD());
 			pstmt.setString(3, nv.getSoDienThoai());
@@ -48,25 +45,19 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			return pstmt.executeUpdate() > 0;
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
-
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean delete(String id) {
-		// TODO Auto-generated method stub
 		String sql = "DELETE FROM NhanVien WHERE maNhanVien = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			return pstmt.executeUpdate() > 0;
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -74,11 +65,9 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public NhanVien findById(String id) {
-		// TODO Auto-generated method stub
 		String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
@@ -88,22 +77,17 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 
 	@Override
 	public List<NhanVien> findAll() {
-		// TODO Auto-generated method stub
 		List<NhanVien> danhSach = new ArrayList<NhanVien>();
 		String sql = "SELECT * FROM NhanVien";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);
-				ResultSet rs = pstmt.executeQuery()) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
 			while (rs.next()) {
 				danhSach.add(new NhanVien(rs.getString("maNhanVien"), rs.getString("tenDangNhap"),
@@ -111,17 +95,15 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			}
 
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
-
 		return danhSach;
 	}
 
 	public NhanVien timNhanVienTheoTenDangNhap(String tenDangNhap) {
 		String sql = "SELECT * FROM NhanVien WHERE tenDangNhap = ?";
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, tenDangNhap);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
@@ -134,5 +116,4 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 		}
 		return null;
 	}
-
 }
