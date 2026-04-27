@@ -2,12 +2,12 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -27,10 +27,6 @@ import javax.swing.JToggleButton;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-
-import com.formdev.flatlaf.FlatLightLaf;
-
-import entity.Ban;
 
 public class DlgKhuVucBan extends JDialog {
 
@@ -52,7 +48,7 @@ public class DlgKhuVucBan extends JDialog {
 
 	public DlgKhuVucBan(JFrame parent) {
 		super(parent, "SƠ ĐỒ KHU VỰC - BÀN/PHÒNG", true);
-		this.setSize(950, 650);
+		this.setSize(1000, 650);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -68,7 +64,6 @@ public class DlgKhuVucBan extends JDialog {
 		tabbedPane.addTab("Khu vực", iconKhuVuc, tabKhuVuc);
 
 		this.add(tabbedPane);
-		khoiTaoSuKien();
 	}
 
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
@@ -206,12 +201,14 @@ public class DlgKhuVucBan extends JDialog {
 
 		pnLeft.add(pnLeftInner, BorderLayout.NORTH);
 
-		pnSoDoBanRight = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+		pnSoDoBanRight = new JPanel();
+		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
 		pnSoDoBanRight.setBackground(Color.WHITE);
 
 		JScrollPane scrollPane = new JScrollPane(pnSoDoBanRight);
 		scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Sơ đồ",
 				TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 14)));
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
 		pnTopWrapper.add(pnLeft, BorderLayout.WEST);
 		pnTopWrapper.add(scrollPane, BorderLayout.CENTER);
@@ -392,41 +389,253 @@ public class DlgKhuVucBan extends JDialog {
 		return pnDanhMuc;
 	}
 
-	public void hienThiDanhSachBan(List<Ban> danhSachBan) {
+	// =======================================================
+	// HIỂN THỊ DANH SÁCH BÀN VÀ PHÂN KHU VỰC
+	// =======================================================
+	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
 		pnSoDoBanRight.removeAll();
-		for (Ban ban : danhSachBan) {
-			JToggleButton btnBan = new JToggleButton(ban.getTenBan());
-			btnBan.setPreferredSize(new Dimension(80, 80));
-			btnBan.setFont(new Font("Arial", Font.BOLD, 16));
-			btnBan.setFocusPainted(false);
+		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
+		pnSoDoBanRight.setBackground(Color.WHITE);
 
-			if (ban.isTrangThai()) {
-				btnBan.setBackground(Color.RED);
-			} else {
-				btnBan.setBackground(Color.WHITE);
+		for (java.util.Map.Entry<String, java.util.List<entity.Ban>> entry : mapKhuVucBan.entrySet()) {
+			String tenKhuVuc = entry.getKey();
+			java.util.List<entity.Ban> danhSachBan = entry.getValue();
+
+			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			pnTitle.setBackground(Color.WHITE);
+			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+			pnTitle.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT); // Căn lề trái tự động
+
+			JLabel lblKhuVuc = new JLabel(tenKhuVuc);
+			lblKhuVuc.setFont(new Font("Arial", Font.BOLD, 22));
+			lblKhuVuc.setForeground(new Color(220, 53, 69));
+			pnTitle.add(lblKhuVuc);
+
+			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
+			pnTables.setBackground(Color.WHITE);
+			pnTables.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT); // Giữ bảng bám sát lề trái
+
+			for (entity.Ban ban : danhSachBan) {
+				JToggleButton btnBan = new JToggleButton();
+				btnBan.setText(
+						"<html><div style='text-align: center; width: 80px;'>" + ban.getTenBan() + "</div></html>");
+
+				// Lưu mã bàn vào ActionCommand để xử lý chức năng xóa
+				btnBan.setActionCommand(ban.getMaBan());
+
+				btnBan.setPreferredSize(new Dimension(100, 100));
+				btnBan.setFont(new Font("Arial", Font.BOLD, 15));
+				btnBan.setFocusPainted(false);
+				btnBan.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+				if (ban.isTrangThai()) {
+					btnBan.setBackground(Color.RED);
+					btnBan.setForeground(Color.WHITE);
+				} else {
+					btnBan.setBackground(new Color(240, 240, 240));
+					btnBan.setForeground(Color.BLACK);
+				}
+				pnTables.add(btnBan);
 			}
 
-			pnSoDoBanRight.add(btnBan);
+			pnSoDoBanRight.add(pnTitle);
+			pnSoDoBanRight.add(pnTables);
+			pnSoDoBanRight.add(Box.createVerticalStrut(20));
 		}
+
 		pnSoDoBanRight.revalidate();
 		pnSoDoBanRight.repaint();
 	}
 
-	private void khoiTaoSuKien() {
-		btnThemKhuVucNhanh.addActionListener(e -> {
-			DlgThemKhuVuc dlgThem = new DlgThemKhuVuc(this);
-			dlgThem.setVisible(true);
-		});
-
-		btnSDB_Thoat.addActionListener(e -> this.dispose());
+	// =======================================================
+	// QUÉT TÌM CÁC BÀN ĐANG ĐƯỢC CHỌN ĐỂ XÓA
+	// =======================================================
+	public java.util.List<String> getDanhSachMaBanDuocChon() {
+		java.util.List<String> listMaBan = new java.util.ArrayList<>();
+		for (java.awt.Component compKhuVuc : pnSoDoBanRight.getComponents()) {
+			if (compKhuVuc instanceof JPanel) {
+				JPanel pn = (JPanel) compKhuVuc;
+				if (pn.getLayout() instanceof WrapLayout) {
+					for (java.awt.Component compBan : pn.getComponents()) {
+						if (compBan instanceof JToggleButton) {
+							JToggleButton btn = (JToggleButton) compBan;
+							if (btn.isSelected()) {
+								listMaBan.add(btn.getActionCommand());
+							}
+						}
+					}
+				}
+			}
+		}
+		return listMaBan;
 	}
 
-	public static void main(String[] args) {
-		try {
-			FlatLightLaf.setup();
-		} catch (Exception e) {
-			e.printStackTrace();
+	// =======================================================
+	// ĐỒNG BỘ DỮ LIỆU LÊN COMBOBOX TẠI TAB BÀN
+	// =======================================================
+	public void loadDataToComboBoxKhuVuc(java.util.List<entity.KhuVuc> listKhuVuc) {
+		cbKhuVuc.removeAllItems();
+		cbKhuVuc.addItem("--- Chọn khu vực ---");
+		for (entity.KhuVuc kv : listKhuVuc) {
+			cbKhuVuc.addItem(kv.getTenKhuVuc());
 		}
-		new DlgKhuVucBan(null).setVisible(true);
+	}
+
+	// =======================================================
+	// CÁC HÀM GETTER VÀ LISTENER
+	// =======================================================
+	public String getKhuVucDuocChon() {
+		if (cbKhuVuc.getSelectedItem() != null) {
+			return cbKhuVuc.getSelectedItem().toString();
+		}
+		return null;
+	}
+
+	public String getTuSo() {
+		return tfTuSo.getText().trim();
+	}
+
+	public String getDenSo() {
+		return tfDenSo.getText().trim();
+	}
+
+	public void addKhuVucComboBoxListener(java.awt.event.ActionListener listener) {
+		cbKhuVuc.addActionListener(listener);
+	}
+
+	public void addXoaBanListener(java.awt.event.ActionListener listener) {
+		btnXoa.addActionListener(listener);
+	}
+
+	public void addTaoTuDongListener(java.awt.event.ActionListener listener) {
+		btnTaoTuDong.addActionListener(listener);
+	}
+
+	public void addThoatSoDoListener(java.awt.event.ActionListener listener) {
+		btnSDB_Thoat.addActionListener(listener);
+	}
+
+	public String getMaKhuVuc() {
+		return tfKV_Ma.getText().trim();
+	}
+
+	public String getTenKhuVuc() {
+		return tfKV_Ten.getText().trim();
+	}
+
+	public String getPhuThu() {
+		return tfKV_PhuThu.getText().trim();
+	}
+
+	public void setMaKhuVuc(String ma) {
+		tfKV_Ma.setText(ma);
+	}
+
+	public void setTenKhuVuc(String ten) {
+		tfKV_Ten.setText(ten);
+	}
+
+	public void setPhuThu(String phuThu) {
+		tfKV_PhuThu.setText(phuThu);
+	}
+
+	public DefaultTableModel getKhuVucTableModel() {
+		return tmKhuVuc;
+	}
+
+	public JTable getKhuVucTable() {
+		return tbKhuVuc;
+	}
+
+	public void addThemKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_Them.addActionListener(listener);
+	}
+
+	public void addXoaKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_Xoa.addActionListener(listener);
+	}
+
+	public void addSuaKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_Sua.addActionListener(listener);
+	}
+
+	public void addLuuKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_Luu.addActionListener(listener);
+	}
+
+	public void addXoaTrangKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_XoaTrang.addActionListener(listener);
+	}
+
+	public void addThemKhuVucNhanhListener(java.awt.event.ActionListener listener) {
+		btnThemKhuVucNhanh.addActionListener(listener);
+	}
+
+	public int getSelectedRow() {
+		return tbKhuVuc.getSelectedRow();
+	}
+
+	public void addTableSelectionListener(javax.swing.event.ListSelectionListener listener) {
+		tbKhuVuc.getSelectionModel().addListSelectionListener(listener);
+	}
+
+	public void showMessage(String msg, String title, int type) {
+		javax.swing.JOptionPane.showMessageDialog(this, msg, title, type);
+	}
+
+	// =========================================================================
+	// Lớp WrapLayout hỗ trợ tự động xuống dòng và co giãn giao diện
+	// =========================================================================
+	class WrapLayout extends FlowLayout {
+		private static final long serialVersionUID = 1L;
+
+		public WrapLayout(int align, int hgap, int vgap) {
+			super(align, hgap, vgap);
+		}
+
+		@Override
+		public Dimension preferredLayoutSize(Container target) {
+			return layoutSize(target, super.preferredLayoutSize(target));
+		}
+
+		@Override
+		public Dimension minimumLayoutSize(Container target) {
+			return layoutSize(target, super.minimumLayoutSize(target));
+		}
+
+		private Dimension layoutSize(Container target, Dimension defaultDim) {
+			Container parent = target.getParent();
+			while (parent != null && !(parent instanceof javax.swing.JViewport)) {
+				parent = parent.getParent();
+			}
+			if (parent == null)
+				return defaultDim;
+			int targetWidth = parent.getSize().width;
+			if (targetWidth == 0)
+				return defaultDim;
+			int hgap = getHgap(), vgap = getVgap();
+			java.awt.Insets insets = target.getInsets();
+			int maxWidth = targetWidth - (insets.left + insets.right + hgap * 2);
+			int dimWidth = 0, dimHeight = 0, rowWidth = 0, rowHeight = 0;
+			for (int i = 0; i < target.getComponentCount(); i++) {
+				java.awt.Component m = target.getComponent(i);
+				if (m.isVisible()) {
+					Dimension d = m.getPreferredSize();
+					if (rowWidth + d.width > maxWidth) {
+						dimWidth = Math.max(dimWidth, rowWidth);
+						dimHeight += rowHeight + vgap;
+						rowWidth = 0;
+						rowHeight = 0;
+					}
+					rowWidth += d.width + hgap;
+					rowHeight = Math.max(rowHeight, d.height);
+				}
+			}
+			dimWidth = Math.max(dimWidth, rowWidth);
+			dimHeight += rowHeight;
+			dimWidth += insets.left + insets.right + hgap * 2;
+			dimHeight += insets.top + insets.bottom + vgap * 2;
+			return new Dimension(dimWidth, dimHeight);
+		}
 	}
 }

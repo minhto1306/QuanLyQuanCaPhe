@@ -2,14 +2,19 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -20,9 +25,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+import dao.BanDAO;
+import dao.KhuVucDAO;
+import entity.Ban;
+import entity.KhuVuc;
 
 public class FrmManHinhChinh extends JFrame {
 
@@ -30,8 +41,7 @@ public class FrmManHinhChinh extends JFrame {
 
 	public JPanel pnDanhSachBan, pnDanhSachMon, pnDanhMuc;
 	private JLabel lbLogo, lbTenCuaHang, lbTitleUser, lbValueUSer, lbTitleKhuVuc, lbValueKhuVuc, lbTitleGioVao,
-			lbValueGioVao, lbTitleTienPhaiTra, lbValueTienPhaiTra, lbGiamGia, lbThue, lbTongTien, lbTenKhuVuc,
-			lbTitleTongTien;
+			lbValueGioVao, lbTitleTienPhaiTra, lbValueTienPhaiTra, lbGiamGia, lbThue, lbTongTien, lbTitleTongTien;
 	private JButton btnDangXuat, btnThanhToan, btnXemBangGia, btnQLNhanVien, btnQLSoDo, btnQLHangHoa, btnQLCaLam,
 			btnQLDatBan;
 	private JTextField tfGiamGia;
@@ -54,6 +64,9 @@ public class FrmManHinhChinh extends JFrame {
 		}
 
 		khoiTaoGiaoDien();
+
+		// GỌI HÀM NÀY ĐỂ MỞ LÊN LÀ CÓ BÀN LUÔN
+		loadDuLieuSoDoBanMain();
 	}
 
 	private void applyIconToButton(JButton targetButton, String iconFileName, int width, int height) {
@@ -331,19 +344,19 @@ public class FrmManHinhChinh extends JFrame {
 		tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		tabbedPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
+		// --- ĐÃ ĐỒNG BỘ LAYOUT SƠ ĐỒ BÀN Ở ĐÂY ---
 		JPanel pnSoDo = new JPanel(new BorderLayout(10, 10));
 		pnSoDo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		pnSoDo.setBackground(Color.WHITE);
 
-		lbTenKhuVuc = new JLabel("");
-		lbTenKhuVuc.setFont(new Font("Segoe UI", Font.BOLD, 18));
-		pnSoDo.add(lbTenKhuVuc, BorderLayout.NORTH);
-
-		pnDanhSachBan = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
+		pnDanhSachBan = new JPanel();
+		pnDanhSachBan.setLayout(new BoxLayout(pnDanhSachBan, BoxLayout.Y_AXIS));
 		pnDanhSachBan.setBackground(Color.WHITE);
 		JScrollPane scrollSoDo = new JScrollPane(pnDanhSachBan);
 		scrollSoDo.setBorder(null);
+		scrollSoDo.getVerticalScrollBar().setUnitIncrement(16); // Tăng tốc lăn chuột
 		pnSoDo.add(scrollSoDo, BorderLayout.CENTER);
+		// -----------------------------------------
 
 		JPanel pnHangHoa = new JPanel(new BorderLayout(10, 10));
 		pnHangHoa.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -404,6 +417,94 @@ public class FrmManHinhChinh extends JFrame {
 		pnMainWorkSpace.add(pnChucNangQuanLy, BorderLayout.SOUTH);
 	}
 
+	// ====================================================================
+	// TẢI TOÀN BỘ SƠ ĐỒ BÀN TỪ DATABASE LÊN MÀN HÌNH CHÍNH
+	// ====================================================================
+	public void loadDuLieuSoDoBanMain() {
+		BanDAO banDAO = new BanDAO();
+		KhuVucDAO khuVucDAO = new KhuVucDAO();
+
+		List<Ban> listBanToanBo = banDAO.findAll();
+		List<KhuVuc> listKhuVucToanBo = khuVucDAO.findAll();
+
+		java.util.Map<String, List<Ban>> mapKhuVucBan = new java.util.LinkedHashMap<>();
+
+		for (KhuVuc kv : listKhuVucToanBo) {
+			List<Ban> banCuaKv = new ArrayList<>();
+			for (Ban b : listBanToanBo) {
+				if (b != null && b.getMaKhuVuc() != null && b.getMaKhuVuc().equals(kv.getMaKhuVuc())) {
+					banCuaKv.add(b);
+				}
+			}
+			if (!banCuaKv.isEmpty()) {
+				// Sắp xếp tăng dần theo số
+				banCuaKv.sort((b1, b2) -> {
+					int n1 = extractNumber(b1.getTenBan());
+					int n2 = extractNumber(b2.getTenBan());
+					if (n1 == n2)
+						return b1.getTenBan().compareTo(b2.getTenBan());
+					return Integer.compare(n1, n2);
+				});
+				mapKhuVucBan.put(kv.getTenKhuVuc(), banCuaKv);
+			}
+		}
+
+		hienThiDanhSachBanToanBo(mapKhuVucBan);
+	}
+
+	private int extractNumber(String s) {
+		String num = s.replaceAll("\\D", "");
+		return num.isEmpty() ? 0 : Integer.parseInt(num);
+	}
+
+	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
+		pnDanhSachBan.removeAll();
+
+		for (java.util.Map.Entry<String, java.util.List<entity.Ban>> entry : mapKhuVucBan.entrySet()) {
+			String tenKhuVuc = entry.getKey();
+			java.util.List<entity.Ban> danhSachBan = entry.getValue();
+
+			// 1. Tiêu đề Khu Vực
+			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			pnTitle.setBackground(Color.WHITE);
+			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+			JLabel lblKhuVuc = new JLabel(tenKhuVuc);
+			lblKhuVuc.setFont(new Font("Arial", Font.BOLD, 22));
+			lblKhuVuc.setForeground(new Color(220, 53, 69));
+			pnTitle.add(lblKhuVuc);
+
+			// 2. Chứa các nút Bàn với WrapLayout
+			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
+			pnTables.setBackground(Color.WHITE);
+
+			for (entity.Ban ban : danhSachBan) {
+				JToggleButton btnBan = new JToggleButton();
+				btnBan.setText(
+						"<html><div style='text-align: center; width: 80px;'>" + ban.getTenBan() + "</div></html>");
+				btnBan.setPreferredSize(new Dimension(100, 100)); // Hình vuông 100x100
+				btnBan.setFont(new Font("Arial", Font.BOLD, 15));
+				btnBan.setFocusPainted(false);
+				btnBan.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+				if (ban.isTrangThai()) {
+					btnBan.setBackground(Color.RED);
+					btnBan.setForeground(Color.WHITE);
+				} else {
+					btnBan.setBackground(new Color(240, 240, 240));
+					btnBan.setForeground(Color.BLACK);
+				}
+				pnTables.add(btnBan);
+			}
+
+			pnDanhSachBan.add(pnTitle);
+			pnDanhSachBan.add(pnTables);
+			pnDanhSachBan.add(Box.createVerticalStrut(20));
+		}
+
+		pnDanhSachBan.revalidate();
+		pnDanhSachBan.repaint();
+	}
+
 	public void resetDuLieu() {
 		lbValueUSer.setText("Chưa có");
 		lbValueGioVao.setText("__/__/____, __:__");
@@ -448,5 +549,64 @@ public class FrmManHinhChinh extends JFrame {
 
 	public void addDangXuatListener(java.awt.event.ActionListener listener) {
 		btnDangXuat.addActionListener(listener);
+	}
+
+	// =========================================================================
+	// BÍ KÍP WRAPLAYOUT ĐỂ CÁC BÀN TỰ ĐỘNG XUỐNG DÒNG
+	// =========================================================================
+	class WrapLayout extends FlowLayout {
+		private static final long serialVersionUID = 1L;
+
+		public WrapLayout(int align, int hgap, int vgap) {
+			super(align, hgap, vgap);
+		}
+
+		@Override
+		public Dimension preferredLayoutSize(Container target) {
+			return layoutSize(target, super.preferredLayoutSize(target));
+		}
+
+		@Override
+		public Dimension minimumLayoutSize(Container target) {
+			return layoutSize(target, super.minimumLayoutSize(target));
+		}
+
+		private Dimension layoutSize(Container target, Dimension defaultDim) {
+			Container parent = target.getParent();
+			while (parent != null && !(parent instanceof javax.swing.JViewport)) {
+				parent = parent.getParent();
+			}
+			if (parent == null)
+				return defaultDim;
+
+			int targetWidth = parent.getSize().width;
+			if (targetWidth == 0)
+				return defaultDim;
+
+			int hgap = getHgap(), vgap = getVgap();
+			java.awt.Insets insets = target.getInsets();
+			int maxWidth = targetWidth - (insets.left + insets.right + hgap * 2);
+
+			int dimWidth = 0, dimHeight = 0, rowWidth = 0, rowHeight = 0;
+			for (int i = 0; i < target.getComponentCount(); i++) {
+				java.awt.Component m = target.getComponent(i);
+				if (m.isVisible()) {
+					Dimension d = m.getPreferredSize();
+					if (rowWidth + d.width > maxWidth) {
+						dimWidth = Math.max(dimWidth, rowWidth);
+						dimHeight += rowHeight + vgap;
+						rowWidth = 0;
+						rowHeight = 0;
+					}
+					rowWidth += d.width + hgap;
+					rowHeight = Math.max(rowHeight, d.height);
+				}
+			}
+			dimWidth = Math.max(dimWidth, rowWidth);
+			dimHeight += rowHeight;
+			dimWidth += insets.left + insets.right + hgap * 2;
+			dimHeight += insets.top + insets.bottom + vgap * 2;
+			return new Dimension(dimWidth, dimHeight);
+		}
 	}
 }

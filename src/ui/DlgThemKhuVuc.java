@@ -131,4 +131,38 @@ public class DlgThemKhuVuc extends JDialog {
 		pnMain.add(pnBottom, BorderLayout.SOUTH);
 		this.add(pnMain);
 	}
+
+	// =======================================================
+	// CÁC HÀM GETTER VÀ LISTENER CHO FORM THÊM NHANH
+	// =======================================================
+	public String getMaKhuVuc() {
+		return tfMaKhuVuc.getText().trim();
+	}
+
+	public String getTenKhuVuc() {
+		return tfTenKhuVuc.getText().trim();
+	}
+
+	public String getPhuThu() {
+		return tfPhuThu.getText().trim();
+	}
+
+	public void addLuuThemMoiListener(java.awt.event.ActionListener listener) {
+		btnLuuThemMoi.addActionListener(listener);
+	}
+
+	public void addDongListener(java.awt.event.ActionListener listener) {
+		btnDong.addActionListener(listener);
+	}
+
+	public void clearForm() {
+		tfMaKhuVuc.setText("");
+		tfTenKhuVuc.setText("");
+		tfPhuThu.setText("");
+		tfMaKhuVuc.requestFocus();
+	}
+
+	public void showMessage(String msg, String title, int type) {
+		javax.swing.JOptionPane.showMessageDialog(this, msg, title, type);
+	}
 }

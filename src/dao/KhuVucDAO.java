@@ -7,23 +7,28 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import entity.Ban;
+import entity.KhuVuc;
 import util.DataBaseConnection;
 
-public class BanDAO implements BaseDAO<Ban, String> {
+public class KhuVucDAO implements BaseDAO<KhuVuc, String> {
 
 	@Override
-	public boolean insert(Ban ban) {
-		String sql = "INSERT INTO Ban (maBan, maKhuVuc, tenBan, trangThai) VALUES (?, ?, ?, ?)";
+	public boolean insert(KhuVuc kv) {
+		String sql = "INSERT INTO KhuVuc (maKhuVuc, tenKhuVuc, phuThu) VALUES (?, ?, ?)";
+
+		// Lấy connection ra ngoài block try-with-resources để tránh bị auto-close
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 
+		// Chỉ đưa PreparedStatement vào trong try() để nó tự giải phóng bộ nhớ khi chạy
+		// xong
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-			pstmt.setString(1, ban.getMaBan());
-			pstmt.setString(2, ban.getMaKhuVuc());
-			pstmt.setString(3, ban.getTenBan());
-			pstmt.setBoolean(4, ban.isTrangThai());
+
+			pstmt.setString(1, kv.getMaKhuVuc());
+			pstmt.setString(2, kv.getTenKhuVuc());
+			pstmt.setDouble(3, kv.getPhuThu());
 
 			return pstmt.executeUpdate() > 0;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -31,17 +36,18 @@ public class BanDAO implements BaseDAO<Ban, String> {
 	}
 
 	@Override
-	public boolean update(Ban ban) {
-		String sql = "UPDATE Ban SET maKhuVuc = ?, tenBan = ?, trangThai = ? WHERE maBan = ?";
+	public boolean update(KhuVuc kv) {
+		String sql = "UPDATE KhuVuc SET tenKhuVuc = ?, phuThu = ? WHERE maKhuVuc = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-			pstmt.setString(1, ban.getMaKhuVuc());
-			pstmt.setString(2, ban.getTenBan());
-			pstmt.setBoolean(3, ban.isTrangThai());
-			pstmt.setString(4, ban.getMaBan());
+
+			pstmt.setString(1, kv.getTenKhuVuc());
+			pstmt.setDouble(2, kv.getPhuThu());
+			pstmt.setString(3, kv.getMaKhuVuc());
 
 			return pstmt.executeUpdate() > 0;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -50,12 +56,14 @@ public class BanDAO implements BaseDAO<Ban, String> {
 
 	@Override
 	public boolean delete(String id) {
-		String sql = "DELETE FROM Ban WHERE maBan = ?";
+		String sql = "DELETE FROM KhuVuc WHERE maKhuVuc = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+
 			pstmt.setString(1, id);
 			return pstmt.executeUpdate() > 0;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -63,19 +71,19 @@ public class BanDAO implements BaseDAO<Ban, String> {
 	}
 
 	@Override
-	public Ban findById(String id) {
-		String sql = "SELECT * FROM Ban WHERE maBan = ?";
+	public KhuVuc findById(String id) {
+		String sql = "SELECT * FROM KhuVuc WHERE maKhuVuc = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+
 			pstmt.setString(1, id);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
-					// NẾU TÊN CỘT TRONG SQL CỦA BẠN KHÁC, HÃY SỬA LẠI CHỮ TRONG NGOẶC KÉP Ở ĐÂY
-					return new Ban(rs.getString("maBan"), rs.getString("maKhuVuc"), rs.getString("tenBan"),
-							rs.getBoolean("trangThai"));
+					return new KhuVuc(rs.getString("maKhuVuc"), rs.getString("tenKhuVuc"), rs.getDouble("phuThu"));
 				}
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -83,18 +91,17 @@ public class BanDAO implements BaseDAO<Ban, String> {
 	}
 
 	@Override
-	public List<Ban> findAll() {
-		List<Ban> danhSach = new ArrayList<>();
-		String sql = "SELECT * FROM Ban";
+	public List<KhuVuc> findAll() {
+		List<KhuVuc> danhSach = new ArrayList<>();
+		String sql = "SELECT * FROM KhuVuc";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
 			while (rs.next()) {
-				// NẾU TÊN CỘT TRONG SQL CỦA BẠN KHÁC, HÃY SỬA LẠI CHỮ TRONG NGOẶC KÉP Ở ĐÂY
-				danhSach.add(new Ban(rs.getString("maBan"), rs.getString("maKhuVuc"), rs.getString("tenBan"),
-						rs.getBoolean("trangThai")));
+				danhSach.add(new KhuVuc(rs.getString("maKhuVuc"), rs.getString("tenKhuVuc"), rs.getDouble("phuThu")));
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

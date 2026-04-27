@@ -46,7 +46,11 @@ public class MainDashboardController {
 	}
 
 	private void moCuaSoSoDo() {
-		new DlgKhuVucBan(dashboardView).setVisible(true);
+		DlgKhuVucBan view = new DlgKhuVucBan(dashboardView);
+
+		new KhuVucController(view);
+
+		view.setVisible(true);
 	}
 
 	private void moCuaSoHangHoa() {
@@ -68,4 +72,5 @@ public class MainDashboardController {
 			new AuthenticationController(loginView, this).batDau();
 		}
 	}
+
 }
