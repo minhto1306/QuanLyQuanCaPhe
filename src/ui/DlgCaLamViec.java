@@ -7,10 +7,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -18,7 +22,10 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -43,9 +50,11 @@ public class DlgCaLamViec extends JDialog {
 	private LocalDate ngayBatDauTuan;
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+	private List<String> danhSachNhanVien = new ArrayList<>();
+
 	public DlgCaLamViec(JFrame parent) {
 		super(parent, "QUẢN LÝ LỊCH LÀM VIỆC", true);
-		this.setSize(1100, 700);
+		this.setSize(1300, 700);
 		this.setLocationRelativeTo(parent);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -131,9 +140,33 @@ public class DlgCaLamViec extends JDialog {
 		tbCaLamViec.getColumnModel().getColumn(0).setPreferredWidth(150);
 		tbCaLamViec.getColumnModel().getColumn(0).setMaxWidth(200);
 
+		MultiLineCellRenderer multiRenderer = new MultiLineCellRenderer();
 		for (int i = 1; i < 8; i++) {
 			tbCaLamViec.getColumnModel().getColumn(i).setPreferredWidth(120);
+			tbCaLamViec.getColumnModel().getColumn(i).setCellRenderer(multiRenderer);
 		}
+
+		tbCaLamViec.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int row = tbCaLamViec.rowAtPoint(e.getPoint());
+				int col = tbCaLamViec.columnAtPoint(e.getPoint());
+				if (col <= 0 || row < 0)
+					return;
+
+				if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON1) {
+					JPopupMenu popup = taoMenuChonNhanVien(row, col);
+					if (popup != null)
+						popup.show(tbCaLamViec, e.getX(), e.getY());
+
+				} else if (e.getClickCount() == 2) {
+					Object val = tmCaLamViec.getValueAt(row, col);
+					String text = (val == null || val.toString().trim().isEmpty()) ? "Trống!" : val.toString();
+					JOptionPane.showMessageDialog(pnMain, "Nhân viên trực:\n" + text, "Chi tiết",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+		});
 
 		tbCaLamViec.getTableHeader().setResizingAllowed(false);
 		tbCaLamViec.getTableHeader().setReorderingAllowed(false);
@@ -155,24 +188,37 @@ public class DlgCaLamViec extends JDialog {
 		pnMain.add(pnSouth, BorderLayout.SOUTH);
 
 		this.add(pnMain);
-
-		btnTiep.addActionListener(e -> {
-			ngayBatDauTuan = ngayBatDauTuan.plusDays(7);
-			capNhatDuLieuTuan();
-		});
-
-		btnTroVe.addActionListener(e -> {
-			ngayBatDauTuan = ngayBatDauTuan.minusDays(7);
-			capNhatDuLieuTuan();
-		});
-
-		btnHienTai.addActionListener(e -> {
-			ngayBatDauTuan = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-			capNhatDuLieuTuan();
-		});
 	}
 
-	private void capNhatDuLieuTuan() {
+	private JPopupMenu taoMenuChonNhanVien(int row, int col) {
+		if (danhSachNhanVien == null || danhSachNhanVien.isEmpty())
+			return null;
+		JPopupMenu popup = new JPopupMenu();
+
+		JMenuItem itemXoa = new JMenuItem("❌ Xóa trống ô này");
+		itemXoa.setForeground(Color.RED);
+		itemXoa.addActionListener(e -> tmCaLamViec.setValueAt("", row, col));
+		popup.add(itemXoa);
+		popup.addSeparator();
+
+		for (String ten : danhSachNhanVien) {
+			JMenuItem item = new JMenuItem("Thêm: " + ten);
+			item.addActionListener(e -> {
+				String hienTai = (String) tmCaLamViec.getValueAt(row, col);
+				if (hienTai == null || hienTai.trim().isEmpty()) {
+					tmCaLamViec.setValueAt(ten, row, col);
+				} else {
+					if (!hienTai.contains(ten)) {
+						tmCaLamViec.setValueAt(hienTai + "\n" + ten, row, col);
+					}
+				}
+			});
+			popup.add(item);
+		}
+		return popup;
+	}
+
+	public void capNhatDuLieuTuan() {
 		LocalDate ngayKetThucTuan = ngayBatDauTuan.plusDays(6);
 		lbTuanHienTai.setText("Tuần: " + ngayBatDauTuan.format(formatter) + " - " + ngayKetThucTuan.format(formatter));
 
@@ -216,5 +262,84 @@ public class DlgCaLamViec extends JDialog {
 		}
 
 		new DlgCaLamViec(null).setVisible(true);
+	}
+
+	public void setDanhSachNhanVien(List<String> ds) {
+		this.danhSachNhanVien = ds;
+	}
+
+	public DefaultTableModel getTmCaLamViec() {
+		return tmCaLamViec;
+	}
+
+	public JTable getTbCaLamViec() {
+		return tbCaLamViec;
+	}
+
+	public LocalDate getNgayBatDauTuan() {
+		return ngayBatDauTuan;
+	}
+
+	public void setNgayBatDauTuan(LocalDate d) {
+		this.ngayBatDauTuan = d;
+	}
+
+	public void addBtnTroVeListener(java.awt.event.ActionListener l) {
+		btnTroVe.addActionListener(l);
+	}
+
+	public void addBtnTiepListener(java.awt.event.ActionListener l) {
+		btnTiep.addActionListener(l);
+	}
+
+	public void addBtnHienTaiListener(java.awt.event.ActionListener l) {
+		btnHienTai.addActionListener(l);
+	}
+
+	public void addBtnLuuListener(java.awt.event.ActionListener l) {
+		btnLuu.addActionListener(l);
+	}
+
+	class MultiLineCellRenderer extends DefaultTableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
+		// Khoảng cách đệm (Trên, Trái, Dưới, Phải) để chữ không bị dính sát vô vách ô
+		private final java.awt.Insets PADDING = new java.awt.Insets(10, 10, 10, 10);
+		private Font smallFont;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+			// Chỉnh font nhỏ lại xí cho mi nhon
+			if (smallFont == null) {
+				smallFont = table.getFont().deriveFont(table.getFont().getSize() - 1.0f);
+			}
+			setFont(smallFont);
+
+			if (value != null && !value.toString().trim().isEmpty()) {
+				// Cắt dữ liệu ra nếu có nhiều nhân viên trong cùng 1 ca
+				String[] nhanViens = value.toString().split("\n");
+
+				// Dùng HTML dàn layout, line-height 1.8 cho khoảng cách trên dưới giãn đều ra
+				StringBuilder html = new StringBuilder("<html><div style='text-align: center; line-height: 1.8;'>");
+
+				for (String nv : nhanViens) {
+					// In đậm từng dòng tên nhân viên
+					html.append("<b>").append(nv.trim()).append("</b><br>");
+				}
+				html.append("</div></html>");
+
+				setText(html.toString());
+			} else {
+				setText("");
+			}
+
+			setHorizontalAlignment(SwingConstants.CENTER);
+			// Set padding cho ô nó rộng rãi
+			setBorder(BorderFactory.createEmptyBorder(PADDING.top, PADDING.left, PADDING.bottom, PADDING.right));
+			return this;
+		}
 	}
 }

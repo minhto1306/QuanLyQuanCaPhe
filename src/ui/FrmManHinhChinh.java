@@ -71,6 +71,7 @@ public class FrmManHinhChinh extends JFrame {
 
 		khoiTaoGiaoDien();
 		loadDuLieuSoDoBanMain();
+		loadDuLieuHangHoaMain();
 	}
 
 	private void applyIconToButton(JButton targetButton, String iconFileName, int width, int height) {

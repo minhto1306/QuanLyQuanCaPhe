@@ -103,8 +103,8 @@ public class DlgDatBan extends JDialog {
 		tfTimKiem = new JTextField();
 
 		cbTrangThai = new JComboBox<String>();
-		cbTrangThai.addItem("Đã thanh toán");
-		cbTrangThai.addItem("Đã đặt");
+		cbTrangThai.addItem("Chờ nhận bàn");
+		cbTrangThai.addItem("Đã nhận bàn");
 
 		Dimension dInput = new Dimension(250, 25);
 		tfTenKhach.setPreferredSize(dInput);
@@ -183,8 +183,6 @@ public class DlgDatBan extends JDialog {
 		tbDatBan.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
 		tbDatBan.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(new JCheckBox()));
 
-		// Đã xóa dữ liệu ảo ở đây chừ bảng trắng bóc nha Qẹoooo
-
 		JScrollPane scrollPane = new JScrollPane(tbDatBan);
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 		pnDatBan.add(pnBangDuLieu, BorderLayout.CENTER);
@@ -241,9 +239,6 @@ public class DlgDatBan extends JDialog {
 	// CLASS HIỂN THỊ NÚT TRONG BẢNG
 	// =========================================================================
 	class ButtonRenderer extends JButton implements TableCellRenderer {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public ButtonRenderer() {
@@ -263,9 +258,6 @@ public class DlgDatBan extends JDialog {
 	// CLASS BẮT SỰ KIỆN KHI BẤM NÚT TRONG BẢNG
 	// =========================================================================
 	class ButtonEditor extends DefaultCellEditor {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		protected JButton button;
 		private String label;
@@ -324,9 +316,6 @@ public class DlgDatBan extends JDialog {
 	// DIALOG CHI TIẾT (ĐÃ CHUYỂN SANG CHIỀU DỌC)
 	// =========================================================================
 	class DlgChiTietDatBan extends JDialog {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public DlgChiTietDatBan(Dialog parent, String maDB, String tenKhach, String trangThai) {
@@ -374,6 +363,60 @@ public class DlgDatBan extends JDialog {
 		} catch (Exception ex) {
 			System.err.println("Lỗi: " + ex.getMessage());
 		}
-		new DlgDatBan(null).setVisible(true);
+		DlgDatBan dialog = new DlgDatBan(null);
+		new controller.DatBanController(dialog);
+		dialog.setVisible(true);
+	}
+
+	public JTextField getTfTenKhach() {
+		return tfTenKhach;
+	}
+
+	public JTextField getTfSoDienThoai() {
+		return tfSoDienThoai;
+	}
+
+	public JTextField getTfThoiGianDat() {
+		return tfThoiGian;
+	}
+
+	public JComboBox<String> getCbTrangThai() {
+		return cbTrangThai;
+	}
+
+	public JTextField getTfTimKiem() {
+		return tfTimKiem;
+	}
+
+	public JTable getTbDatBan() {
+		return tbDatBan;
+	}
+
+	public DefaultTableModel getTmDatBan() {
+		return tmDatBan;
+	}
+
+	public void addBtnThemListener(ActionListener l) {
+		btnThem.addActionListener(l);
+	}
+
+	public void addBtnXoaListener(ActionListener l) {
+		btnXoa.addActionListener(l);
+	}
+
+	public void addBtnSuaListener(ActionListener l) {
+		btnSua.addActionListener(l);
+	}
+
+	public void addBtnXoaTrangListener(ActionListener l) {
+		btnXoaTrang.addActionListener(l);
+	}
+
+	public void addBtnTimListener(ActionListener l) {
+		btnTim.addActionListener(l);
+	}
+
+	public void addBtnLuuListener(ActionListener l) {
+		btnLuu.addActionListener(l);
 	}
 }

@@ -32,7 +32,6 @@ public class KhuVucController {
 	}
 
 	private void initEvents() {
-		// --- SỰ KIỆN TAB KHU VỰC ---
 		this.view.addThemKhuVucListener(e -> handleAddKhuVuc());
 		this.view.addXoaKhuVucListener(e -> handleDeleteKhuVuc());
 		this.view.addSuaKhuVucListener(e -> handleUpdateKhuVuc());
@@ -44,15 +43,12 @@ public class KhuVucController {
 			}
 		});
 
-		// --- SỰ KIỆN TAB SƠ ĐỒ BÀN ---
 		this.view.addThemKhuVucNhanhListener(e -> handleShowQuickAdd());
 		this.view.addTaoTuDongListener(e -> handleTaoTuDong());
 		this.view.addKhuVucComboBoxListener(e -> handleFilterBanByKhuVuc());
 
-		// Sự kiện xóa bàn
 		this.view.addXoaBanListener(e -> handleDeleteBan());
 
-		// Sự kiện đóng form -> Cập nhật lại dữ liệu màn hình chính
 		this.view.addThoatSoDoListener(e -> {
 			this.view.dispose();
 			Window parent = SwingUtilities.getWindowAncestor(this.view);
@@ -286,18 +282,41 @@ public class KhuVucController {
 			}
 
 			int xacNhan = JOptionPane.showConfirmDialog(null,
-					"Bạn có chắc muốn tạo " + (denBan - tuBan + 1) + " bàn cho " + tenKhuVuc + " không?",
+					"Bạn có chắc muốn tạo bàn từ số " + tuBan + " đến số " + denBan + " cho " + tenKhuVuc + " không?",
 					"Xác nhận tạo tự động", JOptionPane.YES_NO_OPTION);
 
 			if (xacNhan == JOptionPane.YES_OPTION) {
+				List<Ban> dsBanHienTai = banDAO.findAll();
+				int soBanTaoMoi = 0;
+				int soBanBoQua = 0;
+
 				for (int i = tuBan; i <= denBan; i++) {
 					String maBan = maKhuVuc + "_B" + i;
-					String tenBan = "Bàn " + i;
-					Ban banMoi = new Ban(maBan, maKhuVuc, tenBan, false);
-					banDAO.insert(banMoi);
+					boolean daTonTai = false;
+
+					for (Ban b : dsBanHienTai) {
+						if (b.getMaBan().equals(maBan)) {
+							daTonTai = true;
+							break;
+						}
+					}
+
+					if (!daTonTai) {
+						String tenBan = "Bàn " + i;
+						Ban banMoi = new Ban(maBan, maKhuVuc, tenBan, false);
+						if (banDAO.insert(banMoi)) {
+							soBanTaoMoi++;
+						}
+					} else {
+						soBanBoQua++;
+					}
 				}
 
-				view.showMessage("Tạo tự động thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+				String thongBao = "Tạo tự động hoàn tất!\n- Đã thêm mới: " + soBanTaoMoi + " bàn.";
+				if (soBanBoQua > 0) {
+					thongBao += "\n- Đã bỏ qua: " + soBanBoQua + " bàn (do đã tồn tại trước đó).";
+				}
+				view.showMessage(thongBao, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 				handleFilterBanByKhuVuc();
 			}
 

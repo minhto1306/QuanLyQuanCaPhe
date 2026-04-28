@@ -14,8 +14,7 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public boolean insert(NhanVien nv) {
-		String sql = "INSERT INTO NhanVien (maNhanVien, tenDangNhap, hoTenNhanVien, soCCCD, soDienThoai) VALUES (?, ?, ?, ?, ?)";
-		// Đưa Connection ra ngoài try-with-resources
+		String sql = "INSERT INTO NhanVien (maNhanVien, tenDangNhap, hoTenNhanVien, soCCCD, soDienThoai, trangThai) VALUES (?, ?, ?, ?, ?, ?)";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, nv.getMaNhanVien());
@@ -23,9 +22,8 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			pstmt.setString(3, nv.getHoTenNhanVien());
 			pstmt.setString(4, nv.getSoCCCD());
 			pstmt.setString(5, nv.getSoDienThoai());
-
+			pstmt.setBoolean(6, nv.isTrangThai());
 			return pstmt.executeUpdate() > 0;
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -34,16 +32,15 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public boolean update(NhanVien nv) {
-		String sql = "UPDATE NhanVien SET hoTenNhanVien = ?, soCCCD = ?, soDienThoai = ? WHERE maNhanVien = ?";
+		String sql = "UPDATE NhanVien SET hoTenNhanVien = ?, soCCCD = ?, soDienThoai = ?, trangThai = ? WHERE maNhanVien = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, nv.getHoTenNhanVien());
 			pstmt.setString(2, nv.getSoCCCD());
 			pstmt.setString(3, nv.getSoDienThoai());
-			pstmt.setString(4, nv.getMaNhanVien());
-
+			pstmt.setBoolean(4, nv.isTrangThai());
+			pstmt.setString(5, nv.getMaNhanVien());
 			return pstmt.executeUpdate() > 0;
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -52,7 +49,7 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public boolean delete(String id) {
-		String sql = "DELETE FROM NhanVien WHERE maNhanVien = ?";
+		String sql = "UPDATE NhanVien SET trangThai = 0 WHERE maNhanVien = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
@@ -72,10 +69,10 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
 					return new NhanVien(rs.getString("maNhanVien"), rs.getString("tenDangNhap"),
-							rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai"));
+							rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai"),
+							rs.getBoolean("trangThai"));
 				}
 			}
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -84,16 +81,15 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 
 	@Override
 	public List<NhanVien> findAll() {
-		List<NhanVien> danhSach = new ArrayList<NhanVien>();
-		String sql = "SELECT * FROM NhanVien";
+		List<NhanVien> danhSach = new ArrayList<>();
+		String sql = "SELECT * FROM NhanVien WHERE trangThai = 1";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
-
 			while (rs.next()) {
 				danhSach.add(new NhanVien(rs.getString("maNhanVien"), rs.getString("tenDangNhap"),
-						rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai")));
+						rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai"),
+						rs.getBoolean("trangThai")));
 			}
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -108,7 +104,8 @@ public class NhanVienDAO implements BaseDAO<NhanVien, String> {
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
 					return new NhanVien(rs.getString("maNhanVien"), rs.getString("tenDangNhap"),
-							rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai"));
+							rs.getString("hoTenNhanVien"), rs.getString("soCCCD"), rs.getString("soDienThoai"),
+							rs.getBoolean("trangThai"));
 				}
 			}
 		} catch (SQLException e) {

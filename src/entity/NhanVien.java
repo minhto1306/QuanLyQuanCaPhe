@@ -6,17 +6,16 @@ public class NhanVien {
 	private String hoTenNhanVien;
 	private String soCCCD;
 	private String soDienThoai;
+	private boolean trangThai;
 
-	public NhanVien() {
-
-	}
-
-	public NhanVien(String maNhanVien, String tenDangNhap, String hoTenNhanVien, String soCCCD, String soDienThoai) {
+	public NhanVien(String maNhanVien, String tenDangNhap, String hoTenNhanVien, String soCCCD, String soDienThoai,
+			boolean trangThai) {
 		this.maNhanVien = maNhanVien;
 		this.tenDangNhap = tenDangNhap;
 		this.hoTenNhanVien = hoTenNhanVien;
 		this.soCCCD = soCCCD;
 		this.soDienThoai = soDienThoai;
+		this.trangThai = trangThai;
 	}
 
 	public String getMaNhanVien() {
@@ -59,4 +58,11 @@ public class NhanVien {
 		this.soDienThoai = soDienThoai;
 	}
 
+	public boolean isTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(boolean trangThai) {
+		this.trangThai = trangThai;
+	}
 }

@@ -31,21 +31,57 @@ public class DlgNhanVien extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JTabbedPane tabbedPane;
-	private JPanel tabNhanVien, tabTaiKhoan, pnNhanVien, pnTaiKhoan;
+	private JPanel tabNhanVien;
+	private JPanel tabTaiKhoan;
+	private JPanel pnNhanVien;
+	private JPanel pnTaiKhoan;
 
-	private JButton btnThem, btnXoa, btnXoaTrang, btnSua, btnLuu, btnTim;
-	private JLabel lbMaNhanVien, lbHoTenNhanVien, lbSoDienThoai, lbCCCD, lbTenDangNhap, lbVaiTro, lbTimNV;
+	private JButton btnThem;
+	private JButton btnXoa;
+	private JButton btnXoaTrang;
+	private JButton btnSua;
+	private JButton btnLuu;
+	private JButton btnTim;
+	private JLabel lbMaNhanVien;
+	private JLabel lbHoTenNhanVien;
+	private JLabel lbSoDienThoai;
+	private JLabel lbCCCD;
+	private JLabel lbTenDangNhap;
+	private JLabel lbVaiTro;
+	private JLabel lbTimNV;
 	private JComboBox<String> cbVaiTro;
-	private JTextField tfMaNhanVien, tfHoTenNhanVien, tfSoDienThoai, tfCCCD, tfTenDangNhap, tfTimNV;
-	private Box boxRow1, boxRow2, boxRow3, boxTimNV;
+	private JTextField tfMaNhanVien;
+	private JTextField tfHoTenNhanVien;
+	private JTextField tfSoDienThoai;
+	private JTextField tfCCCD;
+	private JTextField tfTenDangNhap;
+	private JTextField tfTimNV;
+	private Box boxRow1;
+	private Box boxRow2;
+	private Box boxRow3;
+	private Box boxTimNV;
 	private JTable tbNhanVien;
 	private DefaultTableModel tmNhanVien;
 
-	private JButton btnTK_Them, btnTK_Xoa, btnTK_XoaTrang, btnTK_Sua, btnTK_Luu, btnTK_Tim;
-	private JLabel lbTK_TenDangNhap, lbTK_MatKhau, lbTK_TrangThai, lbTK_VaiTro, lbTK_Tim;
-	private JComboBox<String> cbTK_TenDangNhap, cbTK_VaiTro, cbTK_TrangThai;
-	private JTextField tfTK_MatKhau, tfTK_Tim;
-	private Box boxTK_Row1, boxTK_Row2, boxTK_Tim;
+	private JButton btnTK_Them;
+	private JButton btnTK_Xoa;
+	private JButton btnTK_XoaTrang;
+	private JButton btnTK_Sua;
+	private JButton btnTK_Luu;
+	private JButton btnTK_Tim;
+	private JLabel lbTK_TenDangNhap;
+	private JLabel lbTK_MatKhau;
+	private JLabel lbTK_TrangThai;
+	private JLabel lbTK_VaiTro;
+	private JLabel lbTK_Tim;
+	private JComboBox<String> cbTK_TenDangNhap;
+	private JComboBox<String> cbTK_VaiTro;
+	private JComboBox<String> cbTK_TrangThai;
+	private JTextField tfTK_MatKhau;
+	private JTextField tfTK_Tim;
+	private Box boxTK_Row1;
+	private Box boxTK_Row2;
+	private Box boxTK_Tim;
 	private JTable tbTaiKhoan;
 	private DefaultTableModel tmTaiKhoan;
 
@@ -433,10 +469,6 @@ public class DlgNhanVien extends JDialog {
 		return pnTaiKhoan;
 	}
 
-	// =========================================================================
-	// PHẦN MỞ RỘNG: ĐĂNG KÝ SỰ KIỆN & LẤY DỮ LIỆU DÀNH CHO CONTROLLER
-	// =========================================================================
-
 	public void addThemNVListener(ActionListener l) {
 		btnThem.addActionListener(l);
 	}
@@ -451,7 +483,7 @@ public class DlgNhanVien extends JDialog {
 
 	public void addLuuNVListener(ActionListener l) {
 		btnLuu.addActionListener(l);
-	} // THÊM NÚT LƯU
+	}
 
 	public void addXoaTrangNVListener(ActionListener l) {
 		btnXoaTrang.addActionListener(l);
@@ -479,7 +511,7 @@ public class DlgNhanVien extends JDialog {
 
 	public void addLuuTKListener(ActionListener l) {
 		btnTK_Luu.addActionListener(l);
-	} // THÊM NÚT LƯU
+	}
 
 	public void addXoaTrangTKListener(ActionListener l) {
 		btnTK_XoaTrang.addActionListener(l);
@@ -515,6 +547,10 @@ public class DlgNhanVien extends JDialog {
 
 	public String getTimKiemNVInput() {
 		return tfTimNV.getText().trim();
+	}
+
+	public String getTK_TimInput() {
+		return tfTK_Tim.getText().trim();
 	}
 
 	public String getTK_TenDangNhapSelected() {
@@ -555,9 +591,8 @@ public class DlgNhanVien extends JDialog {
 
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
-	} // Trả về TabPane để Controller nhảy tab
+	}
 
-	// Cập nhật hàm này: Thêm tham số String vaiTro ở cuối
 	public void dienThongTinNhanVienLenForm(String ma, String hoTen, String tenDN, String sdt, String cccd,
 			String vaiTro) {
 		tfMaNhanVien.setText(ma);
@@ -565,7 +600,6 @@ public class DlgNhanVien extends JDialog {
 		tfTenDangNhap.setText(tenDN);
 		tfSoDienThoai.setText(sdt);
 		tfCCCD.setText(cccd);
-		// Cập nhật luôn ComboBox
 		if (vaiTro != null && !vaiTro.equals("Chưa cấp")) {
 			cbVaiTro.setSelectedItem(vaiTro);
 		}
@@ -584,7 +618,7 @@ public class DlgNhanVien extends JDialog {
 		tfTenDangNhap.setText("");
 		tfSoDienThoai.setText("");
 		tfCCCD.setText("");
-		cbVaiTro.setSelectedIndex(0); // Reset ComboBox
+		cbVaiTro.setSelectedIndex(0);
 		tfMaNhanVien.requestFocus();
 	}
 
@@ -596,7 +630,6 @@ public class DlgNhanVien extends JDialog {
 		cbTK_TrangThai.setSelectedIndex(0);
 	}
 
-	// Thêm hàm lấy dữ liệu từ ComboBox Vai trò bên tab Nhân Viên
 	public String getVaiTroNVSelected() {
 		return cbVaiTro.getSelectedItem() != null ? cbVaiTro.getSelectedItem().toString() : "Thu ngân";
 	}

@@ -33,16 +33,38 @@ public class DlgKhuVucBan extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JTabbedPane tabbedPane;
-	private JPanel tabSoDoBan, tabKhuVuc, pnSoDoBanRight;
+	private JPanel tabSoDoBan;
+	private JPanel tabKhuVuc;
+	private JPanel pnSoDoBanRight;
 
 	private JComboBox<String> cbKhuVuc;
-	private JButton btnThemKhuVucNhanh, btnXoa, btnTaoTuDong, btnSDB_Luu, btnSDB_Thoat;
-	private JTextField tfKyHieu, tfChieuDaiSo, tfTuSo, tfDenSo;
+	private JButton btnThemKhuVucNhanh;
+	private JButton btnXoa;
+	private JButton btnTaoTuDong;
+	private JButton btnSDB_Luu;
+	private JButton btnSDB_Thoat;
+	private JTextField tfKyHieu;
+	private JTextField tfChieuDaiSo;
+	private JTextField tfTuSo;
+	private JTextField tfDenSo;
 
-	private JButton btnKV_Them, btnKV_Xoa, btnKV_XoaTrang, btnKV_Sua, btnKV_Luu, btnKV_Tim;
-	private JLabel lbKV_Ma, lbKV_Ten, lbKV_PhuThu, lbKV_Tim;
-	private JTextField tfKV_Ma, tfKV_Ten, tfKV_PhuThu, tfKV_Tim;
-	private Box boxKV_Row1, boxKV_Row2, boxKV_Tim;
+	private JButton btnKV_Them;
+	private JButton btnKV_Xoa;
+	private JButton btnKV_XoaTrang;
+	private JButton btnKV_Sua;
+	private JButton btnKV_Luu;
+	private JButton btnKV_Tim;
+	private JLabel lbKV_Ma;
+	private JLabel lbKV_Ten;
+	private JLabel lbKV_PhuThu;
+	private JLabel lbKV_Tim;
+	private JTextField tfKV_Ma;
+	private JTextField tfKV_Ten;
+	private JTextField tfKV_PhuThu;
+	private JTextField tfKV_Tim;
+	private Box boxKV_Row1;
+	private Box boxKV_Row2;
+	private Box boxKV_Tim;
 	private JTable tbKhuVuc;
 	private DefaultTableModel tmKhuVuc;
 
@@ -98,6 +120,8 @@ public class DlgKhuVucBan extends JDialog {
 		Dimension dLabel = new Dimension(110, 25);
 		Dimension dInput = new Dimension(150, 25);
 		Font fontLabel = new Font("Arial", Font.BOLD, 15);
+
+		Box boxSDB_Tim = Box.createHorizontalBox();
 
 		Box boxKhuVuc = Box.createHorizontalBox();
 		JLabel lbKhuVuc = new JLabel("Khu vực");
@@ -189,6 +213,8 @@ public class DlgKhuVucBan extends JDialog {
 		boxButtons.add(btnTaoTuDong);
 		boxButtons.add(Box.createHorizontalGlue());
 
+		pnLeftInner.add(boxSDB_Tim);
+		pnLeftInner.add(Box.createVerticalStrut(12));
 		pnLeftInner.add(boxKhuVuc);
 		pnLeftInner.add(Box.createVerticalStrut(12));
 		pnLeftInner.add(boxKyHieu);
@@ -389,9 +415,6 @@ public class DlgKhuVucBan extends JDialog {
 		return pnDanhMuc;
 	}
 
-	// =======================================================
-	// HIỂN THỊ DANH SÁCH BÀN VÀ PHÂN KHU VỰC
-	// =======================================================
 	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
 		pnSoDoBanRight.removeAll();
 		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
@@ -404,7 +427,7 @@ public class DlgKhuVucBan extends JDialog {
 			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			pnTitle.setBackground(Color.WHITE);
 			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-			pnTitle.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT); // Căn lề trái tự động
+			pnTitle.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
 			JLabel lblKhuVuc = new JLabel(tenKhuVuc);
 			lblKhuVuc.setFont(new Font("Arial", Font.BOLD, 22));
@@ -413,14 +436,13 @@ public class DlgKhuVucBan extends JDialog {
 
 			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
 			pnTables.setBackground(Color.WHITE);
-			pnTables.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT); // Giữ bảng bám sát lề trái
+			pnTables.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
 			for (entity.Ban ban : danhSachBan) {
 				JToggleButton btnBan = new JToggleButton();
 				btnBan.setText(
 						"<html><div style='text-align: center; width: 80px;'>" + ban.getTenBan() + "</div></html>");
 
-				// Lưu mã bàn vào ActionCommand để xử lý chức năng xóa
 				btnBan.setActionCommand(ban.getMaBan());
 
 				btnBan.setPreferredSize(new Dimension(100, 100));
@@ -447,9 +469,6 @@ public class DlgKhuVucBan extends JDialog {
 		pnSoDoBanRight.repaint();
 	}
 
-	// =======================================================
-	// QUÉT TÌM CÁC BÀN ĐANG ĐƯỢC CHỌN ĐỂ XÓA
-	// =======================================================
 	public java.util.List<String> getDanhSachMaBanDuocChon() {
 		java.util.List<String> listMaBan = new java.util.ArrayList<>();
 		for (java.awt.Component compKhuVuc : pnSoDoBanRight.getComponents()) {
@@ -470,9 +489,6 @@ public class DlgKhuVucBan extends JDialog {
 		return listMaBan;
 	}
 
-	// =======================================================
-	// ĐỒNG BỘ DỮ LIỆU LÊN COMBOBOX TẠI TAB BÀN
-	// =======================================================
 	public void loadDataToComboBoxKhuVuc(java.util.List<entity.KhuVuc> listKhuVuc) {
 		cbKhuVuc.removeAllItems();
 		cbKhuVuc.addItem("--- Chọn khu vực ---");
@@ -481,9 +497,14 @@ public class DlgKhuVucBan extends JDialog {
 		}
 	}
 
-	// =======================================================
-	// CÁC HÀM GETTER VÀ LISTENER
-	// =======================================================
+	public String getKV_TimInput() {
+		return tfKV_Tim.getText().trim();
+	}
+
+	public void addTimKhuVucListener(java.awt.event.ActionListener listener) {
+		btnKV_Tim.addActionListener(listener);
+	}
+
 	public String getKhuVucDuocChon() {
 		if (cbKhuVuc.getSelectedItem() != null) {
 			return cbKhuVuc.getSelectedItem().toString();
@@ -583,9 +604,6 @@ public class DlgKhuVucBan extends JDialog {
 		javax.swing.JOptionPane.showMessageDialog(this, msg, title, type);
 	}
 
-	// =========================================================================
-	// Lớp WrapLayout hỗ trợ tự động xuống dòng và co giãn giao diện
-	// =========================================================================
 	class WrapLayout extends FlowLayout {
 		private static final long serialVersionUID = 1L;
 

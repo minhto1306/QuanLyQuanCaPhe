@@ -16,10 +16,10 @@ public class MainDashboardController {
 
 	public MainDashboardController(FrmManHinhChinh dashboardView) {
 		this.dashboardView = dashboardView;
-		ketNoi();
+		ketNoiKinhMach();
 	}
 
-	private void ketNoi() {
+	private void ketNoiKinhMach() {
 		dashboardView.addXemBangGiaListener(e -> moCuaSoBangGia());
 		dashboardView.addQLNhanVienListener(e -> moCuaSoNhanVien());
 		dashboardView.addQLCaLamListener(e -> moCuaSoCaLam());
@@ -35,28 +35,25 @@ public class MainDashboardController {
 
 	private void moCuaSoBangGia() {
 		DlgBangGia dlgBangGia = new DlgBangGia(dashboardView);
-
 		new BangGiaController(dlgBangGia);
-
 		dlgBangGia.setVisible(true);
 	}
 
 	private void moCuaSoNhanVien() {
-
 		DlgNhanVien dialog = new DlgNhanVien(dashboardView);
 		new NhanVienController(dialog);
 		dialog.setVisible(true);
 	}
 
 	private void moCuaSoCaLam() {
-		new DlgCaLamViec(dashboardView).setVisible(true);
+		DlgCaLamViec dlg = new DlgCaLamViec(dashboardView);
+		new CaLamViecController(dlg);
+		dlg.setVisible(true);
 	}
 
 	private void moCuaSoSoDo() {
 		DlgKhuVucBan view = new DlgKhuVucBan(dashboardView);
-
 		new KhuVucController(view);
-
 		view.setVisible(true);
 	}
 
@@ -68,7 +65,9 @@ public class MainDashboardController {
 	}
 
 	private void moCuaSoDatBan() {
-		new DlgDatBan(dashboardView).setVisible(true);
+		DlgDatBan dlg = new DlgDatBan(dashboardView);
+		new DatBanController(dlg);
+		dlg.setVisible(true);
 	}
 
 	private void xuLyDangXuat() {
@@ -82,5 +81,4 @@ public class MainDashboardController {
 			new AuthenticationController(loginView, this).batDau();
 		}
 	}
-
 }
