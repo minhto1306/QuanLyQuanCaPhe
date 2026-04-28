@@ -1,20 +1,26 @@
 package dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import entity.DanhMuc;
+import util.DataBaseConnection;
 
 public class DanhMucDAO implements BaseDAO<DanhMuc, String> {
 
 	@Override
 	public boolean insert(DanhMuc dm) {
 		String sql = "INSERT INTO DanhMuc (maDanhMuc, tenDanhMuc) VALUES (?, ?)";
-		try (java.sql.Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
-				java.sql.PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, dm.getMaDanhMuc());
 			pstmt.setString(2, dm.getTenDanhMuc());
 			return pstmt.executeUpdate() > 0;
-		} catch (java.sql.SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -23,12 +29,12 @@ public class DanhMucDAO implements BaseDAO<DanhMuc, String> {
 	@Override
 	public boolean update(DanhMuc dm) {
 		String sql = "UPDATE DanhMuc SET tenDanhMuc = ? WHERE maDanhMuc = ?";
-		try (java.sql.Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
-				java.sql.PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, dm.getTenDanhMuc());
 			pstmt.setString(2, dm.getMaDanhMuc());
 			return pstmt.executeUpdate() > 0;
-		} catch (java.sql.SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -37,11 +43,11 @@ public class DanhMucDAO implements BaseDAO<DanhMuc, String> {
 	@Override
 	public boolean delete(String id) {
 		String sql = "DELETE FROM DanhMuc WHERE maDanhMuc = ?";
-		try (java.sql.Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
-				java.sql.PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			return pstmt.executeUpdate() > 0;
-		} catch (java.sql.SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -49,39 +55,36 @@ public class DanhMucDAO implements BaseDAO<DanhMuc, String> {
 
 	@Override
 	public DanhMuc findById(String id) {
+		DanhMuc dm = null;
 		String sql = "SELECT * FROM DanhMuc WHERE maDanhMuc = ?";
-		try (java.sql.Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
-				java.sql.PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
-			try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
-					return new DanhMuc(rs.getString("maDanhMuc"), rs.getString("tenDanhMuc"));
+					dm = new DanhMuc(rs.getString("maDanhMuc"), rs.getString("tenDanhMuc"));
 				}
 			}
-		} catch (java.sql.SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return null;
-	} // <-- CÁI NGOẶC NHỌN BỊ THIẾU NẰM Ở ĐÂY NÌ QUÝ VỊ
+		return dm;
+	}
 
 	@Override
 	public List<DanhMuc> findAll() {
-		List<DanhMuc> danhSach = new java.util.ArrayList<DanhMuc>();
+		List<DanhMuc> danhSach = new ArrayList<DanhMuc>();
 		String sql = "SELECT * FROM DanhMuc";
-
-		// RÚT CONNECTION RA NGOÀI TRY:
-		java.sql.Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
-		try (java.sql.PreparedStatement pstmt = cnnct.prepareStatement(sql);
-				java.sql.ResultSet rs = pstmt.executeQuery()) {
-
-			while (rs.next()) {
-				danhSach.add(new DanhMuc(rs.getString("maDanhMuc"), rs.getString("tenDanhMuc")));
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					danhSach.add(new DanhMuc(rs.getString("maDanhMuc"), rs.getString("tenDanhMuc")));
+				}
 			}
-
-		} catch (java.sql.SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return danhSach;
 	}
-
 }

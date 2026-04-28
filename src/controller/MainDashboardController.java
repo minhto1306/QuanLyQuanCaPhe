@@ -61,7 +61,10 @@ public class MainDashboardController {
 	}
 
 	private void moCuaSoHangHoa() {
-		new DlgHangHoa(dashboardView).setVisible(true);
+		DlgHangHoa dlgHangHoa = new DlgHangHoa(dashboardView);
+		new HangHoaController(dlgHangHoa);
+		dlgHangHoa.setVisible(true);
+		dashboardView.loadDuLieuHangHoaMain();
 	}
 
 	private void moCuaSoDatBan() {

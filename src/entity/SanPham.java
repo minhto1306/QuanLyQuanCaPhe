@@ -6,17 +6,19 @@ public class SanPham {
 	private String tenSanPham;
 	private double giaBan;
 	private boolean trangThai;
+	private String hinhAnh;
 
-	public SanPham(String maSanPham, String maDanhMuc, String tenSanPham, double giaBan, boolean trangThai) {
+	public SanPham(String maSanPham, String maDanhMuc, String tenSanPham, double giaBan, boolean trangThai,
+			String hinhAnh) {
 		this.maSanPham = maSanPham;
 		this.maDanhMuc = maDanhMuc;
 		this.tenSanPham = tenSanPham;
 		this.giaBan = giaBan;
 		this.trangThai = trangThai;
+		this.hinhAnh = hinhAnh;
 	}
 
 	public SanPham() {
-
 	}
 
 	public String getMaSanPham() {
@@ -59,4 +61,11 @@ public class SanPham {
 		this.trangThai = trangThai;
 	}
 
+	public String getHinhAnh() {
+		return hinhAnh;
+	}
+
+	public void setHinhAnh(String hinhAnh) {
+		this.hinhAnh = hinhAnh;
+	}
 }

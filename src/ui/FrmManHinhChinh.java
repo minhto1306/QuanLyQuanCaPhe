@@ -45,7 +45,7 @@ public class FrmManHinhChinh extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	public JPanel pnDanhSachBan, pnDanhSachMon, pnDanhMuc;
+	public JPanel pnDanhSachBan, pnDanhSachMon;
 	private JLabel lbLogo, lbTenCuaHang, lbTitleUser, lbValueUSer, lbTitleKhuVuc, lbValueKhuVuc, lbTitleGioVao,
 			lbValueGioVao, lbTitleTienPhaiTra, lbValueTienPhaiTra, lbGiamGia, lbThue, lbTongTien, lbTitleTongTien;
 	private JButton btnDangXuat, btnThanhToan, btnXemBangGia, btnQLNhanVien, btnQLSoDo, btnQLHangHoa, btnQLCaLam,
@@ -70,8 +70,6 @@ public class FrmManHinhChinh extends JFrame {
 		}
 
 		khoiTaoGiaoDien();
-
-		// GỌI HÀM NÀY ĐỂ MỞ LÊN LÀ CÓ BÀN LUÔN
 		loadDuLieuSoDoBanMain();
 	}
 
@@ -350,7 +348,6 @@ public class FrmManHinhChinh extends JFrame {
 		tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		tabbedPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-		// --- ĐÃ ĐỒNG BỘ LAYOUT SƠ ĐỒ BÀN Ở ĐÂY ---
 		JPanel pnSoDo = new JPanel(new BorderLayout(10, 10));
 		pnSoDo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		pnSoDo.setBackground(Color.WHITE);
@@ -360,9 +357,8 @@ public class FrmManHinhChinh extends JFrame {
 		pnDanhSachBan.setBackground(Color.WHITE);
 		JScrollPane scrollSoDo = new JScrollPane(pnDanhSachBan);
 		scrollSoDo.setBorder(null);
-		scrollSoDo.getVerticalScrollBar().setUnitIncrement(16); // Tăng tốc lăn chuột
+		scrollSoDo.getVerticalScrollBar().setUnitIncrement(16);
 		pnSoDo.add(scrollSoDo, BorderLayout.CENTER);
-		// -----------------------------------------
 
 		JPanel pnHangHoa = new JPanel(new BorderLayout(10, 10));
 		pnHangHoa.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -376,13 +372,7 @@ public class FrmManHinhChinh extends JFrame {
 		JScrollPane scrollMon = new JScrollPane(pnDanhSachMon);
 		scrollMon.setBorder(null);
 
-		pnDanhMuc = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
-		pnDanhMuc.setPreferredSize(new Dimension(220, 0));
-		pnDanhMuc.setBackground(new Color(250, 250, 250));
-		pnDanhMuc.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
-
 		pnMainHangHoa.add(scrollMon, BorderLayout.CENTER);
-		pnMainHangHoa.add(pnDanhMuc, BorderLayout.EAST);
 
 		pnHangHoa.add(pnMainHangHoa, BorderLayout.CENTER);
 
@@ -423,9 +413,6 @@ public class FrmManHinhChinh extends JFrame {
 		pnMainWorkSpace.add(pnChucNangQuanLy, BorderLayout.SOUTH);
 	}
 
-	// ====================================================================
-	// TẢI TOÀN BỘ SƠ ĐỒ BÀN TỪ DATABASE LÊN MÀN HÌNH CHÍNH
-	// ====================================================================
 	public void loadDuLieuSoDoBanMain() {
 		BanDAO banDAO = new BanDAO();
 		KhuVucDAO khuVucDAO = new KhuVucDAO();
@@ -443,7 +430,6 @@ public class FrmManHinhChinh extends JFrame {
 				}
 			}
 			if (!banCuaKv.isEmpty()) {
-				// Sắp xếp tăng dần theo số
 				banCuaKv.sort((b1, b2) -> {
 					int n1 = extractNumber(b1.getTenBan());
 					int n2 = extractNumber(b2.getTenBan());
@@ -470,7 +456,6 @@ public class FrmManHinhChinh extends JFrame {
 			String tenKhuVuc = entry.getKey();
 			List<Ban> danhSachBan = entry.getValue();
 
-			// 1. Tiêu đề Khu Vực
 			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			pnTitle.setBackground(Color.WHITE);
 			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
@@ -479,7 +464,6 @@ public class FrmManHinhChinh extends JFrame {
 			lblKhuVuc.setForeground(new Color(220, 53, 69));
 			pnTitle.add(lblKhuVuc);
 
-			// 2. Chứa các nút Bàn với WrapLayout
 			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
 			pnTables.setBackground(Color.WHITE);
 
@@ -487,7 +471,7 @@ public class FrmManHinhChinh extends JFrame {
 				JToggleButton btnBan = new JToggleButton();
 				btnBan.setText(
 						"<html><div style='text-align: center; width: 80px;'>" + ban.getTenBan() + "</div></html>");
-				btnBan.setPreferredSize(new Dimension(100, 100)); // Hình vuông 100x100
+				btnBan.setPreferredSize(new Dimension(100, 100));
 				btnBan.setFont(new Font("Arial", Font.BOLD, 15));
 				btnBan.setFocusPainted(false);
 				btnBan.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -557,9 +541,6 @@ public class FrmManHinhChinh extends JFrame {
 		btnDangXuat.addActionListener(listener);
 	}
 
-	// =========================================================================
-	// WRAPLAYOUT ĐỂ CÁC BÀN TỰ ĐỘNG XUỐNG DÒNG
-	// =========================================================================
 	class WrapLayout extends FlowLayout {
 		private static final long serialVersionUID = 1L;
 
@@ -614,5 +595,81 @@ public class FrmManHinhChinh extends JFrame {
 			dimHeight += insets.top + insets.bottom + vgap * 2;
 			return new Dimension(dimWidth, dimHeight);
 		}
+	}
+
+	public void loadDuLieuHangHoaMain() {
+		dao.SanPhamDAO sanPhamDAO = new dao.SanPhamDAO();
+		dao.DanhMucDAO danhMucDAO = new dao.DanhMucDAO();
+
+		List<entity.SanPham> listSanPham = sanPhamDAO.findAll();
+		List<entity.DanhMuc> listDanhMuc = danhMucDAO.findAll();
+
+		pnDanhSachMon.removeAll();
+		pnDanhSachMon.setLayout(new BoxLayout(pnDanhSachMon, BoxLayout.Y_AXIS));
+
+		for (entity.DanhMuc dm : listDanhMuc) {
+			JPanel pnGroupDanhMuc = new JPanel(new BorderLayout());
+			pnGroupDanhMuc.setBackground(Color.WHITE);
+
+			JLabel lblTieuDeDM = new JLabel(dm.getTenDanhMuc());
+			lblTieuDeDM.setFont(new Font("Segoe UI", Font.BOLD, 22));
+			lblTieuDeDM.setForeground(new Color(66, 133, 244));
+			lblTieuDeDM.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
+			pnGroupDanhMuc.add(lblTieuDeDM, BorderLayout.NORTH);
+
+			JPanel pnDanhSachSpCuaDM = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
+			pnDanhSachSpCuaDM.setBackground(Color.WHITE);
+
+			for (entity.SanPham sp : listSanPham) {
+				if (sp.getMaDanhMuc().equals(dm.getMaDanhMuc()) && sp.isTrangThai()) {
+					JButton btnSp = new JButton();
+					btnSp.setPreferredSize(new Dimension(140, 140));
+					btnSp.setLayout(new BorderLayout());
+					btnSp.setBackground(new Color(245, 245, 245));
+					btnSp.setFocusPainted(false);
+
+					JLabel lblImage = new JLabel();
+					lblImage.setHorizontalAlignment(JLabel.CENTER);
+					lblImage.setPreferredSize(new Dimension(140, 90));
+
+					String pathAnh = sp.getHinhAnh();
+					if (pathAnh != null && !pathAnh.trim().isEmpty()) {
+						try {
+							ImageIcon icon = new ImageIcon(pathAnh);
+							Image img = icon.getImage().getScaledInstance(140, 90, Image.SCALE_SMOOTH);
+							lblImage.setIcon(new ImageIcon(img));
+						} catch (Exception ex) {
+							lblImage.setText("Lỗi ảnh");
+						}
+					} else {
+						lblImage.setText("Trống");
+					}
+
+					btnSp.add(lblImage, BorderLayout.NORTH);
+
+					JPanel pnInfoText = new JPanel(new GridLayout(2, 1));
+					pnInfoText.setOpaque(false);
+
+					JLabel lblTenSp = new JLabel(sp.getTenSanPham(), SwingConstants.CENTER);
+					lblTenSp.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+					JLabel lblGia = new JLabel(String.valueOf(sp.getGiaBan()) + " VNĐ", SwingConstants.CENTER);
+					lblGia.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+					lblGia.setForeground(new Color(220, 53, 69));
+
+					pnInfoText.add(lblTenSp);
+					pnInfoText.add(lblGia);
+					btnSp.add(pnInfoText, BorderLayout.CENTER);
+
+					pnDanhSachSpCuaDM.add(btnSp);
+				}
+			}
+
+			pnGroupDanhMuc.add(pnDanhSachSpCuaDM, BorderLayout.CENTER);
+			pnDanhSachMon.add(pnGroupDanhMuc);
+		}
+
+		pnDanhSachMon.revalidate();
+		pnDanhSachMon.repaint();
 	}
 }

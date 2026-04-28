@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -19,9 +20,12 @@ import javax.swing.border.EmptyBorder;
 public class DlgThemDanhMuc extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField tfMaDanhMuc, tfTenDanhMuc;
-	private JButton btnLuuThemMoi, btnDong;
-	private JLabel lbMaDanhMuc, lbTenDanhMuc;
+	private JTextField tfMaDanhMuc;
+	private JTextField tfTenDanhMuc;
+	private JButton btnLuuThemMoi;
+	private JButton btnDong;
+	private JLabel lbMaDanhMuc;
+	private JLabel lbTenDanhMuc;
 
 	public DlgThemDanhMuc(JDialog parent) {
 		super(parent, "DANH MỤC", true);
@@ -29,7 +33,6 @@ public class DlgThemDanhMuc extends JDialog {
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
 		khoiTaoGiaoDien();
 	}
 
@@ -100,21 +103,43 @@ public class DlgThemDanhMuc extends JDialog {
 		btnLuuThemMoi = new JButton("Lưu + Thêm mới");
 		btnLuuThemMoi.setFont(fontBtn);
 		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
-		if (iconLuu != null)
+		if (iconLuu != null) {
 			btnLuuThemMoi.setIcon(iconLuu);
+		}
 
 		btnDong = new JButton("Đóng");
 		btnDong.setFont(fontBtn);
 		ImageIcon iconDong = taoIconThuNho("/images/close.png", 20, 20);
-		if (iconDong != null)
+		if (iconDong != null) {
 			btnDong.setIcon(iconDong);
+		}
 
 		pnBottom.add(btnLuuThemMoi);
 		pnBottom.add(btnDong);
 
-		btnDong.addActionListener(e -> this.dispose());
-
 		pnMain.add(pnBottom, BorderLayout.SOUTH);
 		this.add(pnMain);
+	}
+
+	public String getMaDanhMuc() {
+		return tfMaDanhMuc.getText().trim();
+	}
+
+	public String getTenDanhMuc() {
+		return tfTenDanhMuc.getText().trim();
+	}
+
+	public void xoaTrangThongTin() {
+		tfMaDanhMuc.setText("");
+		tfTenDanhMuc.setText("");
+		tfMaDanhMuc.requestFocus();
+	}
+
+	public void addLuuThemMoiListener(ActionListener listener) {
+		btnLuuThemMoi.addActionListener(listener);
+	}
+
+	public void addDongListener(ActionListener listener) {
+		btnDong.addActionListener(listener);
 	}
 }

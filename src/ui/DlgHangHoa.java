@@ -7,6 +7,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.dnd.DropTarget;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -22,7 +25,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 
@@ -31,19 +33,58 @@ public class DlgHangHoa extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JTabbedPane tabbedPane;
-	private JPanel tabHangHoa, tabDanhMuc, pnHangHoa, pnDanhMuc;
+	private JPanel tabHangHoa;
+	private JPanel tabDanhMuc;
+	private JPanel pnHangHoa;
+	private JPanel pnDanhMuc;
 
-	private JButton btnThem, btnXoa, btnXoaTrang, btnSua, btnLuu, btnTim, btnThemDanhMuc, btnChonAnh, btnXoaAnh;
-	private JLabel lbMaSanPham, lbTenSanPham, lbGiaBan, lbDanhMuc, lbTrangThai, lbTimSP, lbHinhAnhText, lbHinhAnh;
-	private JComboBox<String> cbDanhMuc, cbTrangThai;
-	private JTextField tfMaSanPham, tfTenSanPham, tfGiaBan, tfTimSP;
+	private JButton btnThem;
+	private JButton btnXoa;
+	private JButton btnXoaTrang;
+	private JButton btnSua;
+	private JButton btnLuu;
+	private JButton btnTim;
+	private JButton btnThemDanhMuc;
+	private JButton btnChonAnh;
+	private JButton btnXoaAnh;
+
+	private JLabel lbMaSanPham;
+	private JLabel lbTenSanPham;
+	private JLabel lbGiaBan;
+	private JLabel lbDanhMuc;
+	private JLabel lbTrangThai;
+	private JLabel lbTimSP;
+	private JLabel lbHinhAnhText;
+	private JLabel lbHinhAnh;
+
+	private JComboBox<String> cbDanhMuc;
+	private JComboBox<String> cbTrangThai;
+	private JTextField tfMaSanPham;
+	private JTextField tfTenSanPham;
+	private JTextField tfGiaBan;
+	private JTextField tfTimSP;
+
 	private JTable tbSanPham;
 	private DefaultTableModel tmSanPham;
 
-	private JButton btnDM_Them, btnDM_Xoa, btnDM_XoaTrang, btnDM_Sua, btnDM_Luu, btnDM_Tim;
-	private JLabel lbDM_Ma, lbDM_Ten, lbDM_Tim;
-	private JTextField tfDM_Ma, tfDM_Ten, tfDM_Tim;
-	private Box boxDM_Row1, boxDM_Tim;
+	private JButton btnDM_Them;
+	private JButton btnDM_Xoa;
+	private JButton btnDM_XoaTrang;
+	private JButton btnDM_Sua;
+	private JButton btnDM_Luu;
+	private JButton btnDM_Tim;
+
+	private JLabel lbDM_Ma;
+	private JLabel lbDM_Ten;
+	private JLabel lbDM_Tim;
+
+	private JTextField tfDM_Ma;
+	private JTextField tfDM_Ten;
+	private JTextField tfDM_Tim;
+
+	private Box boxDM_Row1;
+	private Box boxDM_Tim;
+
 	private JTable tbDanhMuc;
 	private DefaultTableModel tmDanhMuc;
 
@@ -70,7 +111,6 @@ public class DlgHangHoa extends JDialog {
 		tabbedPane.addTab("THÔNG TIN DANH MỤC", iconDanhMuc, tabDanhMuc, "Xem thông tin danh mục");
 
 		this.add(tabbedPane);
-		khoiTaoSuKien();
 	}
 
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
@@ -94,7 +134,6 @@ public class DlgHangHoa extends JDialog {
 		lbTenSanPham = new JLabel("Tên sản phẩm:");
 		lbGiaBan = new JLabel("Giá bán:");
 		lbTrangThai = new JLabel("Trạng thái:");
-
 		lbDanhMuc = new JLabel("Danh mục:");
 		lbHinhAnhText = new JLabel("Hình ảnh:");
 
@@ -107,7 +146,6 @@ public class DlgHangHoa extends JDialog {
 		Dimension dRightLabel = new Dimension(90, 25);
 		lbDanhMuc.setPreferredSize(dRightLabel);
 		lbHinhAnhText.setPreferredSize(dRightLabel);
-
 		lbTimSP.setPreferredSize(new Dimension(120, 25));
 
 		Font fontLablel = new Font("Arial", Font.BOLD, 15);
@@ -168,6 +206,7 @@ public class DlgHangHoa extends JDialog {
 		lbHinhAnh.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		lbHinhAnh.setOpaque(true);
 		lbHinhAnh.setBackground(Color.WHITE);
+		lbHinhAnh.setHorizontalAlignment(JLabel.CENTER);
 
 		btnChonAnh = new JButton("Browse");
 		btnXoaAnh = new JButton("Xóa");
@@ -266,16 +305,15 @@ public class DlgHangHoa extends JDialog {
 
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
 
-		String[] colNames = { "#", "Mã SP", "Tên sản phẩm", "Danh mục", "Giá bán", "Trạng thái" };
+		String[] colNames = { "Mã SP", "Tên sản phẩm", "Danh mục", "Giá bán", "Trạng thái" };
 		tmSanPham = new DefaultTableModel(colNames, 0);
 		tbSanPham = new JTable(tmSanPham);
 		tbSanPham.getTableHeader().setFont(fontLablel);
 		tbSanPham.setFont(new Font("Arial", Font.PLAIN, 14));
 		tbSanPham.setRowHeight(25);
 
-		tbSanPham.getColumnModel().getColumn(0).setMaxWidth(40);
-		tbSanPham.getColumnModel().getColumn(1).setPreferredWidth(80);
-		tbSanPham.getColumnModel().getColumn(2).setPreferredWidth(200);
+		tbSanPham.getColumnModel().getColumn(0).setPreferredWidth(80);
+		tbSanPham.getColumnModel().getColumn(1).setPreferredWidth(200);
 
 		JScrollPane scrollPane = new JScrollPane(tbSanPham);
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
@@ -313,6 +351,7 @@ public class DlgHangHoa extends JDialog {
 
 		btnLuu = new JButton("Lưu");
 		btnLuu.setFont(fontBtn);
+		btnLuu.setEnabled(false);
 		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
 		if (iconLuu != null)
 			btnLuu.setIcon(iconLuu);
@@ -403,15 +442,12 @@ public class DlgHangHoa extends JDialog {
 
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
 
-		String[] colNames = { "#", "Mã danh mục", "Tên danh mục" };
+		String[] colNames = { "Mã danh mục", "Tên danh mục" };
 		tmDanhMuc = new DefaultTableModel(colNames, 0);
 		tbDanhMuc = new JTable(tmDanhMuc);
 		tbDanhMuc.getTableHeader().setFont(fontLablel);
 		tbDanhMuc.setFont(new Font("Arial", Font.PLAIN, 14));
 		tbDanhMuc.setRowHeight(25);
-
-		tbDanhMuc.getColumnModel().getColumn(0).setMaxWidth(40);
-		tbDanhMuc.getColumnModel().getColumn(1).setPreferredWidth(150);
 
 		JScrollPane scrollPane = new JScrollPane(tbDanhMuc);
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
@@ -449,6 +485,7 @@ public class DlgHangHoa extends JDialog {
 
 		btnDM_Luu = new JButton("Lưu");
 		btnDM_Luu.setFont(fontBtn);
+		btnDM_Luu.setEnabled(false);
 		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
 		if (iconLuu != null)
 			btnDM_Luu.setIcon(iconLuu);
@@ -465,19 +502,147 @@ public class DlgHangHoa extends JDialog {
 		return pnDanhMuc;
 	}
 
-	private void khoiTaoSuKien() {
-		btnThemDanhMuc.addActionListener(e -> {
-			DlgThemDanhMuc dlgThem = new DlgThemDanhMuc(this);
-			dlgThem.setVisible(true);
-		});
+	public void addBtnThemSPListener(ActionListener listener) {
+		btnThem.addActionListener(listener);
 	}
 
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		new DlgHangHoa(null).setVisible(true);
+	public void addBtnXoaSPListener(ActionListener listener) {
+		btnXoa.addActionListener(listener);
+	}
+
+	public void addBtnXoaTrangSPListener(ActionListener listener) {
+		btnXoaTrang.addActionListener(listener);
+	}
+
+	public void addBtnSuaSPListener(ActionListener listener) {
+		btnSua.addActionListener(listener);
+	}
+
+	public void addBtnLuuSPListener(ActionListener listener) {
+		btnLuu.addActionListener(listener);
+	}
+
+	public void addBtnTimSPListener(ActionListener listener) {
+		btnTim.addActionListener(listener);
+	}
+
+	public void addBtnThemDanhMucNhanhListener(ActionListener listener) {
+		btnThemDanhMuc.addActionListener(listener);
+	}
+
+	public void addBtnChonAnhListener(ActionListener listener) {
+		btnChonAnh.addActionListener(listener);
+	}
+
+	public void addBtnXoaAnhListener(ActionListener listener) {
+		btnXoaAnh.addActionListener(listener);
+	}
+
+	public void addTbSanPhamMouseListener(MouseAdapter adapter) {
+		tbSanPham.addMouseListener(adapter);
+	}
+
+	public void addHinhAnhDropTarget(DropTarget dt) {
+		lbHinhAnh.setDropTarget(dt);
+	}
+
+	public void addBtnThemDMListener(ActionListener listener) {
+		btnDM_Them.addActionListener(listener);
+	}
+
+	public void addBtnXoaDMListener(ActionListener listener) {
+		btnDM_Xoa.addActionListener(listener);
+	}
+
+	public void addBtnXoaTrangDMListener(ActionListener listener) {
+		btnDM_XoaTrang.addActionListener(listener);
+	}
+
+	public void addBtnSuaDMListener(ActionListener listener) {
+		btnDM_Sua.addActionListener(listener);
+	}
+
+	public void addBtnLuuDMListener(ActionListener listener) {
+		btnDM_Luu.addActionListener(listener);
+	}
+
+	public void addBtnTimDMListener(ActionListener listener) {
+		btnDM_Tim.addActionListener(listener);
+	}
+
+	public void addTbDanhMucMouseListener(MouseAdapter adapter) {
+		tbDanhMuc.addMouseListener(adapter);
+	}
+
+	public JTextField getTfMaSanPham() {
+		return tfMaSanPham;
+	}
+
+	public JTextField getTfTenSanPham() {
+		return tfTenSanPham;
+	}
+
+	public JTextField getTfGiaBan() {
+		return tfGiaBan;
+	}
+
+	public JTextField getTfTimSP() {
+		return tfTimSP;
+	}
+
+	public JComboBox<String> getCbDanhMuc() {
+		return cbDanhMuc;
+	}
+
+	public JComboBox<String> getCbTrangThai() {
+		return cbTrangThai;
+	}
+
+	public JLabel getLbHinhAnh() {
+		return lbHinhAnh;
+	}
+
+	public JTable getTbSanPham() {
+		return tbSanPham;
+	}
+
+	public DefaultTableModel getTmSanPham() {
+		return tmSanPham;
+	}
+
+	public JTextField getTfDM_Ma() {
+		return tfDM_Ma;
+	}
+
+	public JTextField getTfDM_Ten() {
+		return tfDM_Ten;
+	}
+
+	public JTextField getTfDM_Tim() {
+		return tfDM_Tim;
+	}
+
+	public JTable getTbDanhMuc() {
+		return tbDanhMuc;
+	}
+
+	public DefaultTableModel getTmDanhMuc() {
+		return tmDanhMuc;
+	}
+
+	public void batTatNutSanPham(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
+		btnThem.setEnabled(them);
+		btnXoa.setEnabled(xoa);
+		btnSua.setEnabled(sua);
+		btnLuu.setEnabled(luu);
+		tfMaSanPham.setEditable(tfMaState);
+	}
+
+	public void batTatNutDanhMuc(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
+		btnDM_Them.setEnabled(them);
+		btnDM_Xoa.setEnabled(xoa);
+		btnDM_Sua.setEnabled(sua);
+		btnDM_Luu.setEnabled(luu);
+		tfDM_Ma.setEditable(tfMaState);
 	}
 }
