@@ -4,13 +4,12 @@ public class Ban {
 	private String maBan;
 	private String maKhuVuc;
 	private String tenBan;
-	private boolean trangThai;
+	private String trangThai; // Đã đổi về String để khớp 100% với nvarchar(100) trong DB
 
 	public Ban() {
-
 	}
 
-	public Ban(String maBan, String maKhuVuc, String tenBan, boolean trangThai) {
+	public Ban(String maBan, String maKhuVuc, String tenBan, String trangThai) {
 		this.maBan = maBan;
 		this.maKhuVuc = maKhuVuc;
 		this.tenBan = tenBan;
@@ -41,12 +40,11 @@ public class Ban {
 		this.tenBan = tenBan;
 	}
 
-	public boolean isTrangThai() {
+	public String getTrangThai() {
 		return trangThai;
 	}
 
-	public void setTrangThai(boolean trangThai) {
+	public void setTrangThai(String trangThai) {
 		this.trangThai = trangThai;
 	}
-
 }

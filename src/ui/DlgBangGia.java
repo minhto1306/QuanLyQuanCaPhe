@@ -1,9 +1,12 @@
-
 package ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
+import java.io.InputStream;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -11,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -20,6 +24,11 @@ public class DlgBangGia extends JDialog {
 
 	private JTable table;
 	private DefaultTableModel tbModel;
+
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
+	private Font fontBungeeBase;
 
 	public DlgBangGia(JFrame parent) {
 		super(parent, "BẢNG GIÁ", true);
@@ -33,41 +42,57 @@ public class DlgBangGia extends JDialog {
 			this.setIconImage(new ImageIcon(imageUrl).getImage());
 		}
 
+		loadCustomFont();
 		khoiTaoGiaoDien();
-//		loadDuLieu(); // Gọi hàm châm dữ liệu vô bảng ngay khi mở Form
+	}
+
+	private void loadCustomFont() {
+		try {
+			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
+			if (is != null) {
+				fontBungeeBase = Font.createFont(Font.TRUETYPE_FONT, is);
+			} else {
+				fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+			}
+		} catch (Exception e) {
+			fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+		}
 	}
 
 	public void khoiTaoGiaoDien() {
+		JPanel pnMainLayout = new JPanel(new BorderLayout());
+		pnMainLayout.setBackground(MAU_NEN_CHINH);
+		pnMainLayout.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4));
+		this.setContentPane(pnMainLayout);
+
 		JPanel pnTieuDe = new JPanel();
-		this.add(pnTieuDe, BorderLayout.NORTH);
-		JLabel lbTieuDe = new JLabel("BẢNG GIÁ HÀNG HÓA");
+		pnTieuDe.setBackground(MAU_NEN_CHINH);
+		pnTieuDe.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+		pnMainLayout.add(pnTieuDe, BorderLayout.NORTH);
+
+		JLabel lbTieuDe = new JLabel("BẢNG GIÁ HÀNG HÓA", SwingConstants.CENTER);
+		lbTieuDe.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 28f));
+		lbTieuDe.setForeground(MAU_NAU_VIEN);
 		pnTieuDe.add(lbTieuDe);
-		lbTieuDe.setFont(new Font("Arial", Font.BOLD, 18));
 
 		String[] tenCot = { "#", "Mã SP", "Tên SP", "Tên DM", "Giá bán", "Trạng thái" };
 		tbModel = new DefaultTableModel(tenCot, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
-				return false; // Khóa bảng không cho người ta click đúp vô sửa bậy
+				return false;
 			}
 		};
 		table = new JTable(tbModel);
 
-		JPanel pnTrai = new JPanel();
-		this.add(pnTrai, BorderLayout.WEST);
-		JPanel pnPhai = new JPanel();
-		this.add(pnPhai, BorderLayout.EAST);
-		JPanel pnDuoi = new JPanel();
-		this.add(pnDuoi, BorderLayout.SOUTH);
+		table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 15));
+		table.getTableHeader().setBackground(MAU_HEADER);
+		table.getTableHeader().setForeground(MAU_NAU_VIEN);
+		table.getTableHeader().setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
-		JScrollPane scrllPane = new JScrollPane(table);
-		this.add(scrllPane, BorderLayout.CENTER);
-		table.getTableHeader().setReorderingAllowed(false);
-		table.getTableHeader().setResizingAllowed(false);
-
-		table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
-		table.setFont(new Font("Arial", Font.PLAIN, 14));
-		table.setRowHeight(30); // Nới dòng ra xí cho dễ dòm
+		table.setFont(new Font("Tahoma", Font.BOLD, 14));
+		table.setRowHeight(30);
+		table.setBackground(MAU_NEN_CHINH);
+		table.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
 		table.getColumnModel().getColumn(0).setMaxWidth(40);
 		table.getColumnModel().getColumn(1).setPreferredWidth(80);
@@ -76,67 +101,55 @@ public class DlgBangGia extends JDialog {
 		table.getColumnModel().getColumn(4).setPreferredWidth(90);
 		table.getColumnModel().getColumn(5).setPreferredWidth(90);
 
-		// Căn giữa cho mấy cột STT, Mã, Trạng thái
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 		table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
-		table.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
 
-		// Căn lề phải cho cột Tiền
 		DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
 		rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
 		table.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
-	}
 
-	// ===============================================
-	// HÀM CHÂM DỮ LIỆU TỪ DATABASE LÊN BẢNG
-	// ===============================================
-//	private void loadDuLieu() {
-//		SanPhamDAO spDAO = new SanPhamDAO();
-//		DanhMucDAO dmDAO = new DanhMucDAO();
-//
-//		// Bợ nguyên kho dữ liệu lên
-//		List<SanPham> danhSachSP = spDAO.findAll();
-//		List<DanhMuc> danhSachDM = dmDAO.findAll();
-//
-//		// Tạo Map để tra cứu Tên Danh Mục cho lẹ (ví dụ DM01 -> Cà phê)
-//		Map<String, String> mapDM = new HashMap<>();
-//		if (danhSachDM != null) {
-//			for (DanhMuc dm : danhSachDM) {
-//				mapDM.put(dm.getMaDanhMuc(), dm.getTenDanhMuc());
-//			}
-//		}
-//
-//		tbModel.setRowCount(0); // Xóa trắng bảng cũ trước khi đắp dữ liệu mới
-//		int stt = 1;
-//		DecimalFormat df = new DecimalFormat("#,### VNĐ");
-//
-//		if (danhSachSP != null) {
-//			for (SanPham sp : danhSachSP) {
-//				// Lấy Tên danh mục từ Map
-//				String tenDM = mapDM.getOrDefault(sp.getMaDanhMuc(), "Không rõ");
-//
-//				// Định dạng lại tiền cho có dấu phẩy đồ
-//				String giaBan = df.format(sp.getGiaBan());
-//
-//				// Đổi True/False thành chữ Đang bán/Ngừng bán
-//				String trangThai = sp.isTrangThai() ? "Đang bán" : "Ngừng bán";
-//
-//				// Quăng nguyên dòng vô bảng
-//				tbModel.addRow(new Object[] { stt++, sp.getMaSanPham(), sp.getTenSanPham(), tenDM, giaBan, trangThai });
-//			}
-//		}
-//	}
+		// CHIÊU THỨC CẤP MÀU SẮC CHO TRẠNG THÁI
+		table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = 1L;
 
-	public static void main(String[] args) {
-		try {
-			javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println("Failed to initialize LaF");
-		}
-		DlgBangGia run = new DlgBangGia(null);
-		run.setVisible(true);
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				setHorizontalAlignment(JLabel.CENTER);
+
+				if (value != null) {
+					String status = value.toString();
+					// Nếu "Ngừng bán" thì nhuộm Đỏ, "Đang bán" thì nhuộm Xanh
+					if (status.equalsIgnoreCase("Ngừng bán")) {
+						c.setForeground(Color.RED);
+					} else if (status.equalsIgnoreCase("Đang bán")) {
+						c.setForeground(new Color(0, 153, 0)); // Màu xanh lá đậm để không chói lóa
+					} else {
+						c.setForeground(Color.BLACK); // Phòng hờ lỗi
+					}
+				}
+
+				// Khi người dùng click chọn dòng thì chữ vẫn phải giữ nguyên màu hoặc theo màu
+				// hệ thống
+				if (isSelected) {
+					c.setBackground(table.getSelectionBackground());
+				} else {
+					c.setBackground(table.getBackground());
+				}
+
+				return c;
+			}
+		});
+
+		JScrollPane scrllPane = new JScrollPane(table);
+		scrllPane.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3));
+		pnMainLayout.add(scrllPane, BorderLayout.CENTER);
+
+		table.getTableHeader().setReorderingAllowed(false);
+		table.getTableHeader().setResizingAllowed(false);
 	}
 
 	public DefaultTableModel getTbModel() {

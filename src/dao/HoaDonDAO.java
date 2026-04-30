@@ -15,11 +15,9 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public boolean insert(HoaDon hd) {
-		// TODO Auto-generated method stub
 		String sql = "INSERT INTO HoaDon (maHoaDon, maNhanVien, maBan, thoiGianLap, tongTien, thueVAT, giamGia, thanhTien, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, hd.getMaHoaDon());
 			pstmt.setString(2, hd.getMaNhanVien());
 			pstmt.setString(3, hd.getMaBan());
@@ -32,9 +30,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 			pstmt.setBoolean(10, hd.isTrangThai());
 
 			return pstmt.executeUpdate() > 0;
-
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -42,12 +38,9 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public boolean update(HoaDon hd) {
-		// TODO Auto-generated method stub
 		String sql = "UPDATE HoaDon SET maNhanVien = ?, maBan = ?, thoiGianLap = ?, tongTien = ?, thueVAT = ?, giamGia = ?, thanhTien = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, hd.getMaNhanVien());
 			pstmt.setString(2, hd.getMaBan());
 			pstmt.setTimestamp(3, Timestamp.valueOf(hd.getThoiGianLap()));
@@ -60,9 +53,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 			pstmt.setString(10, hd.getMaHoaDon());
 
 			return pstmt.executeUpdate() > 0;
-
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -70,17 +61,12 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public boolean delete(String id) {
-		// TODO Auto-generated method stub
 		String sql = "DELETE FROM HoaDon WHERE maHoaDon = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			return pstmt.executeUpdate() > 0;
-
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return false;
@@ -88,12 +74,9 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public HoaDon findById(String id) {
-		// TODO Auto-generated method stub
 		String sql = "SELECT * FROM HoaDon WHERE maHoaDon = ?";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
@@ -103,9 +86,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 							rs.getString("phuongThucThanhToan"), rs.getBoolean("trangThai"));
 				}
 			}
-
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return null;
@@ -113,23 +94,17 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public List<HoaDon> findAll() {
-		// TODO Auto-generated method stub
 		List<HoaDon> danhSach = new ArrayList<HoaDon>();
 		String sql = "SELECT * FROM HoaDon";
-
-		try (Connection cnnct = DataBaseConnection.getInstance().getConnection();
-				PreparedStatement pstmt = cnnct.prepareStatement(sql);
-				ResultSet rs = pstmt.executeQuery()) {
-
+		Connection cnnct = DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
 				danhSach.add(new HoaDon(rs.getString("maHoaDon"), rs.getString("maNhanVien"), rs.getString("maBan"),
 						rs.getTimestamp("thoiGianLap").toLocalDateTime(), rs.getDouble("tongTien"),
 						rs.getDouble("thueVAT"), rs.getDouble("giamGia"), rs.getDouble("thanhTien"),
 						rs.getString("phuongThucThanhToan"), rs.getBoolean("trangThai")));
 			}
-
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return danhSach;

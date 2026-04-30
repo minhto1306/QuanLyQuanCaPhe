@@ -7,7 +7,6 @@ public class ChiTietDatBan {
 	private String ghiChu;
 
 	public ChiTietDatBan() {
-
 	}
 
 	public ChiTietDatBan(String maDatBan, String maSanPham, int soLuong, String ghiChu) {
@@ -49,8 +48,7 @@ public class ChiTietDatBan {
 		this.ghiChu = ghiChu;
 	}
 
-	public double tinhTienMon(double giaBanSanPham) {
-		return this.soLuong * giaBanSanPham;
+	public double tinhTienMon(double giaBan) {
+		return soLuong * giaBan;
 	}
-
 }

@@ -3,13 +3,16 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -24,10 +27,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
 public class DlgDatBan extends JDialog {
@@ -35,16 +43,23 @@ public class DlgDatBan extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private JPanel pnMain;
 	private JButton btnThem, btnXoa, btnXoaTrang, btnSua, btnLuu, btnTim;
-	private JLabel lbTenKhach, lbSoDienThoai, lbThoiGian, lbTrangThai, lbTimKiem;
-	private JTextField tfTenKhach, tfSoDienThoai, tfThoiGian, tfTimKiem;
-	private JComboBox<String> cbTrangThai;
-	private Box boxRow1, boxRow2, boxTimKiem;
+	private JLabel lbTenKhach, lbSoDienThoai, lbMaKhuVuc, lbMaBan, lbThoiGianNhan, lbTrangThai, lbTimKiem;
+	private JTextField tfTenKhach, tfSoDienThoai, tfTimKiem;
+	private JComboBox<String> cbTrangThai, cbMaKhuVuc, cbMaBan;
+	private JSpinner spThoiGianNhan;
+	private Box boxRow1, boxRow2, boxRow3, boxTimKiem;
 	private JTable tbDatBan;
 	private DefaultTableModel tmDatBan;
 
+	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
+	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private Font fontBungeeBase;
+
 	public DlgDatBan(JFrame parent) {
-		super(parent, "ĐẶT BÀN", true);
-		this.setSize(900, 600);
+		super(parent, "QUẢN LÝ ĐẶT BÀN", true);
+		this.setSize(1400, 700);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -54,179 +69,277 @@ public class DlgDatBan extends JDialog {
 			this.setIconImage(new ImageIcon(urllogo).getImage());
 		}
 
+		loadCustomFont();
+
+		// Bọc lại y hệt DlgHangHoa để tạo viền ngoài
+		JPanel container = new JPanel(new BorderLayout());
+		container.setBackground(MAU_NAU_VIEN);
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+
 		pnMain = khoiTaoGiaoDien();
-		this.add(pnMain);
+		container.add(pnMain, BorderLayout.CENTER);
+
+		this.setContentPane(container);
+	}
+
+	private void loadCustomFont() {
+		try {
+			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
+			if (is != null) {
+				fontBungeeBase = Font.createFont(Font.TRUETYPE_FONT, is);
+			} else {
+				fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+			}
+		} catch (Exception e) {
+			fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+		}
 	}
 
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
-		if (url == null) {
+		if (url == null)
 			return null;
+		return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+	}
+
+	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	private void setupRetroInput(Component comp) {
+		if (comp instanceof JTextField) {
+			JTextField tf = (JTextField) comp;
+			tf.setFont(new Font("Arial", Font.BOLD, 15));
+			tf.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2),
+					BorderFactory.createEmptyBorder(2, 5, 2, 5)));
+		} else if (comp instanceof JComboBox) {
+			JComboBox<?> cb = (JComboBox<?>) comp;
+			cb.setFont(new Font("Arial", Font.BOLD, 15));
+			cb.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 		}
-		ImageIcon iconGoc = new ImageIcon(url);
-		Image imgGoc = iconGoc.getImage();
-		Image imgThuNho = imgGoc.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-		return new ImageIcon(imgThuNho);
+	}
+
+	// CHIÊU THỨC: Trang trí Nút Bấm Retro chuẩn bài
+	private void setupRetroButton(JButton btn) {
+		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
+		btn.setBackground(MAU_NEN_CHINH);
+		btn.setForeground(MAU_NAU_VIEN);
+		btn.setFocusPainted(false);
+		btn.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2),
+				BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 	}
 
 	private JPanel khoiTaoGiaoDien() {
 		JPanel pnDatBan = new JPanel(new BorderLayout());
+		pnDatBan.setBackground(MAU_NEN_CHINH);
+		pnDatBan.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		// --- PHẦN NHẬP LIỆU ---
+		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
+
 		boxRow1 = Box.createHorizontalBox();
 		boxRow2 = Box.createHorizontalBox();
+		boxRow3 = Box.createHorizontalBox();
 		boxTimKiem = Box.createHorizontalBox();
 
-		lbTenKhach = new JLabel("Tên khách hàng:");
-		lbSoDienThoai = new JLabel("Số điện thoại:");
-		lbThoiGian = new JLabel("Thời gian đặt:");
-		lbTrangThai = new JLabel("Trạng thái:");
-		lbTimKiem = new JLabel("Tìm đặt bàn:");
+		lbTenKhach = new JLabel("TÊN KHÁCH HÀNG:");
+		lbSoDienThoai = new JLabel("SỐ ĐIỆN THOẠI:");
+		lbMaKhuVuc = new JLabel("MÃ KHU VỰC:");
+		lbMaBan = new JLabel("MÃ BÀN:");
+		lbThoiGianNhan = new JLabel("THỜI GIAN NHẬN:");
+		lbTrangThai = new JLabel("TRẠNG THÁI:");
+		lbTimKiem = new JLabel("TÌM KIẾM:");
 
-		Dimension dLabel = new Dimension(120, 25);
-		lbTenKhach.setPreferredSize(dLabel);
-		lbSoDienThoai.setPreferredSize(dLabel);
-		lbThoiGian.setPreferredSize(dLabel);
-		lbTrangThai.setPreferredSize(dLabel);
-		lbTimKiem.setPreferredSize(dLabel);
-
-		Font fontLabel = new Font("Arial", Font.BOLD, 14);
-		lbTenKhach.setFont(fontLabel);
-		lbSoDienThoai.setFont(fontLabel);
-		lbThoiGian.setFont(fontLabel);
-		lbTrangThai.setFont(fontLabel);
-		lbTimKiem.setFont(fontLabel);
+		// Nới rộng đan điền của Nhãn lên 180
+		Dimension dLabel = new Dimension(180, 25);
+		JLabel[] labels = { lbTenKhach, lbSoDienThoai, lbMaKhuVuc, lbMaBan, lbThoiGianNhan, lbTrangThai, lbTimKiem };
+		for (JLabel lb : labels) {
+			lb.setPreferredSize(dLabel);
+			lb.setFont(fontLabelRetro);
+			lb.setForeground(MAU_NAU_VIEN);
+		}
+		lbTimKiem.setPreferredSize(new Dimension(120, 25));
 
 		tfTenKhach = new JTextField();
 		tfSoDienThoai = new JTextField();
-		tfThoiGian = new JTextField();
 		tfTimKiem = new JTextField();
 
-		cbTrangThai = new JComboBox<String>();
-		cbTrangThai.addItem("Chờ nhận bàn");
-		cbTrangThai.addItem("Đã nhận bàn");
+		cbMaKhuVuc = new JComboBox<>();
+		cbMaBan = new JComboBox<>();
+		cbTrangThai = new JComboBox<>(new String[] { "Chờ nhận bàn", "Đã nhận bàn" });
 
-		Dimension dInput = new Dimension(250, 25);
-		tfTenKhach.setPreferredSize(dInput);
-		tfTenKhach.setMaximumSize(dInput);
-		tfSoDienThoai.setPreferredSize(dInput);
-		tfSoDienThoai.setMaximumSize(dInput);
-		tfThoiGian.setPreferredSize(dInput);
-		tfThoiGian.setMaximumSize(dInput);
-		cbTrangThai.setPreferredSize(dInput);
-		cbTrangThai.setMaximumSize(dInput);
-		tfTimKiem.setPreferredSize(new Dimension(300, 25));
+		SpinnerDateModel dateModel = new SpinnerDateModel(new Date(), null, null, Calendar.MINUTE);
+		spThoiGianNhan = new JSpinner(dateModel);
+		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spThoiGianNhan, "dd/MM/yyyy HH:mm");
+		spThoiGianNhan.setEditor(timeEditor);
 
-		btnTim = new JButton();
-		btnTim.setPreferredSize(new Dimension(40, 25));
-		ImageIcon iconTim = taoIconThuNho("/images/search.png", 16, 16);
-		if (iconTim != null) {
-			btnTim.setIcon(iconTim);
-		} else {
-			btnTim.setText("Tìm");
+		// Trang trí cho JSpinner
+		spThoiGianNhan.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+		JTextField tfSpinner = ((JSpinner.DefaultEditor) spThoiGianNhan.getEditor()).getTextField();
+		tfSpinner.setFont(new Font("Arial", Font.BOLD, 15));
+		tfSpinner.setForeground(MAU_NAU_VIEN);
+
+		Dimension dInput = new Dimension(250, 30);
+		Component[] inputs = { tfTenKhach, tfSoDienThoai, cbMaKhuVuc, cbMaBan, cbTrangThai };
+		for (Component cp : inputs) {
+			cp.setPreferredSize(dInput);
+			cp.setMaximumSize(dInput);
+			if (cp instanceof JTextField)
+				setupRetroInput((JTextField) cp);
+			if (cp instanceof JComboBox)
+				setupRetroInput((JComboBox<?>) cp);
 		}
+		spThoiGianNhan.setPreferredSize(dInput);
+		spThoiGianNhan.setMaximumSize(dInput);
 
-		JPanel pnNhapThongTin = new JPanel();
-		pnNhapThongTin.setLayout(new BoxLayout(pnNhapThongTin, BoxLayout.Y_AXIS));
-		Border brdVienDen = BorderFactory.createLineBorder(Color.gray);
-		Border brdThutVao = BorderFactory.createEmptyBorder(15, 10, 15, 10);
-		pnNhapThongTin.setBorder(BorderFactory.createCompoundBorder(brdVienDen, brdThutVao));
+		btnTim = new JButton(taoIconThuNho("/images/search.png", 20, 20));
+		btnTim.setPreferredSize(new Dimension(40, 30));
+		btnTim.setBackground(MAU_NEN_CHINH);
+		btnTim.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
+		JPanel pnNhap = new JPanel();
+		pnNhap.setLayout(new BoxLayout(pnNhap, BoxLayout.Y_AXIS));
+		pnNhap.setBackground(MAU_NEN_CHINH);
+		Border brdVienDen = BorderFactory.createLineBorder(MAU_NAU_VIEN, 4);
+		Border brdThutVao = BorderFactory.createEmptyBorder(20, 20, 20, 20);
+		pnNhap.setBorder(BorderFactory.createCompoundBorder(brdVienDen, brdThutVao));
+
+		// Bơm chân khí tạo khoảng cách
 		boxRow1.add(lbTenKhach);
+		boxRow1.add(Box.createHorizontalStrut(15));
 		boxRow1.add(tfTenKhach);
-		boxRow1.add(Box.createHorizontalStrut(50));
+		boxRow1.add(Box.createHorizontalStrut(40));
 		boxRow1.add(lbSoDienThoai);
+		boxRow1.add(Box.createHorizontalStrut(15));
 		boxRow1.add(tfSoDienThoai);
 		boxRow1.add(Box.createHorizontalGlue());
 
-		boxRow2.add(lbThoiGian);
-		boxRow2.add(tfThoiGian);
-		boxRow2.add(Box.createHorizontalStrut(50));
-		boxRow2.add(lbTrangThai);
-		boxRow2.add(cbTrangThai);
+		boxRow2.add(lbMaKhuVuc);
+		boxRow2.add(Box.createHorizontalStrut(15));
+		boxRow2.add(cbMaKhuVuc);
+		boxRow2.add(Box.createHorizontalStrut(40));
+		boxRow2.add(lbMaBan);
+		boxRow2.add(Box.createHorizontalStrut(15));
+		boxRow2.add(cbMaBan);
 		boxRow2.add(Box.createHorizontalGlue());
 
-		pnNhapThongTin.add(boxRow1);
-		pnNhapThongTin.add(Box.createVerticalStrut(15));
-		pnNhapThongTin.add(boxRow2);
-		pnDatBan.add(pnNhapThongTin, BorderLayout.NORTH);
+		boxRow3.add(lbThoiGianNhan);
+		boxRow3.add(Box.createHorizontalStrut(15));
+		boxRow3.add(spThoiGianNhan);
+		boxRow3.add(Box.createHorizontalStrut(40));
+		boxRow3.add(lbTrangThai);
+		boxRow3.add(Box.createHorizontalStrut(15));
+		boxRow3.add(cbTrangThai);
+		boxRow3.add(Box.createHorizontalGlue());
 
-		// --- PHẦN BẢNG DỮ LIỆU ---
+		pnNhap.add(boxRow1);
+		pnNhap.add(Box.createVerticalStrut(20));
+		pnNhap.add(boxRow2);
+		pnNhap.add(Box.createVerticalStrut(20));
+		pnNhap.add(boxRow3);
+		pnDatBan.add(pnNhap, BorderLayout.NORTH);
+
+		// VÙNG BẢNG DỮ LIỆU
 		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
-		pnBangDuLieu
-				.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), brdVienDen));
+		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
+		pnBangDuLieu.setBorder(
+				BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0), brdVienDen));
 
-		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+		pnTimKiem.setBackground(MAU_HEADER);
+		pnTimKiem.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 0, MAU_NAU_VIEN));
+		
+		// Bơm nốt chân khí vào ô tìm kiếm
 		boxTimKiem.add(lbTimKiem);
+		boxTimKiem.add(Box.createHorizontalStrut(15));
+		tfTimKiem.setPreferredSize(new Dimension(300, 30));
+		tfTimKiem.setMaximumSize(new Dimension(300, 30));
+		setupRetroInput(tfTimKiem);
 		boxTimKiem.add(tfTimKiem);
-		boxTimKiem.add(Box.createHorizontalStrut(5));
+		boxTimKiem.add(Box.createHorizontalStrut(15));
 		boxTimKiem.add(btnTim);
 		pnTimKiem.add(boxTimKiem);
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
 
-		String[] colNames = { "#", "Mã đặt bàn", "Tên khách", "Số ĐT", "Thời gian", "Trạng thái", "Chi tiết" };
+		String[] colNames = { "#", "Mã ĐB", "Khu Vực", "Bàn", "Tên Khách", "Số ĐT", "Thời Gian", "Trạng Thái",
+				"Chi Tiết" };
 		tmDatBan = new DefaultTableModel(colNames, 0) {
 			@Override
-			public boolean isCellEditable(int row, int column) {
-				return column == 6;
+			public boolean isCellEditable(int row, int col) {
+				return col == 8;
 			}
 		};
 		tbDatBan = new JTable(tmDatBan);
-		tbDatBan.getTableHeader().setFont(fontLabel);
-		tbDatBan.setFont(new Font("Arial", Font.PLAIN, 14));
-		tbDatBan.setRowHeight(30);
+
+		// Style bảng Retro
+		JTableHeader header = tbDatBan.getTableHeader();
+		header.setFont(new Font("Tahoma", Font.BOLD, 16));
+		header.setBackground(MAU_HEADER);
+		header.setForeground(MAU_NAU_VIEN);
+		header.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+
+		tbDatBan.setRowHeight(35);
+		tbDatBan.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tbDatBan.setBackground(MAU_NEN_CHINH);
+		tbDatBan.setGridColor(MAU_NAU_VIEN);
+		tbDatBan.setShowGrid(true);
 
 		tbDatBan.getColumnModel().getColumn(0).setMaxWidth(40);
-		tbDatBan.getColumnModel().getColumn(6).setMaxWidth(80);
+		tbDatBan.getColumnModel().getColumn(8).setCellRenderer(new ButtonRenderer());
+		tbDatBan.getColumnModel().getColumn(8).setCellEditor(new ButtonEditor(new JCheckBox()));
 
-		// Gắn nút vào cột
-		tbDatBan.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
-		tbDatBan.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(new JCheckBox()));
+		// Render căn lề và đổ màu trạng thái
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+		for (int i = 0; i <= 3; i++)
+			tbDatBan.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+		tbDatBan.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				setHorizontalAlignment(SwingConstants.CENTER);
+				c.setFont(c.getFont().deriveFont(Font.BOLD));
+				if (value != null) {
+					String status = value.toString();
+					if (status.equalsIgnoreCase("Chờ nhận bàn")) {
+						c.setForeground(Color.RED);
+					} else if (status.equalsIgnoreCase("Đã nhận bàn")) {
+						c.setForeground(new Color(0, 153, 0));
+					} else {
+						c.setForeground(MAU_NAU_VIEN);
+					}
+				}
+				if (isSelected)
+					c.setBackground(table.getSelectionBackground());
+				else
+					c.setBackground(table.getBackground());
+				return c;
+			}
+		});
 
 		JScrollPane scrollPane = new JScrollPane(tbDatBan);
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 		pnDatBan.add(pnBangDuLieu, BorderLayout.CENTER);
 
-		// --- PHẦN NÚT CHỨC NĂNG CÓ THÊM ICON ---
-		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+		// VÙNG NÚT CHỨC NĂNG
+		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+		pnNutChucNang.setBackground(MAU_NEN_CHINH);
 		pnNutChucNang.setBorder(brdVienDen);
-		Font fontBtn = new Font("Arial", Font.BOLD, 14);
 
-		btnThem = new JButton("Thêm");
-		btnThem.setFont(fontBtn);
-		ImageIcon iconThem = taoIconThuNho("/images/add.png", 20, 20);
-		if (iconThem != null)
-			btnThem.setIcon(iconThem);
+		btnThem = new JButton(" THÊM", taoIconThuNho("/images/add.png", 20, 20));
+		btnXoa = new JButton(" XÓA", taoIconThuNho("/images/delete.png", 20, 20));
+		btnXoaTrang = new JButton(" XÓA TRẮNG", taoIconThuNho("/images/clear.png", 20, 20));
+		btnSua = new JButton(" SỬA", taoIconThuNho("/images/edit.png", 20, 20));
+		btnLuu = new JButton(" LƯU", taoIconThuNho("/images/save.png", 20, 20));
+		btnLuu.setEnabled(false);
 
-		btnXoa = new JButton("Xóa");
-		btnXoa.setFont(fontBtn);
-		ImageIcon iconXoa = taoIconThuNho("/images/delete.png", 20, 20);
-		if (iconXoa != null)
-			btnXoa.setIcon(iconXoa);
-
-		btnXoaTrang = new JButton("Xóa trắng");
-		btnXoaTrang.setFont(fontBtn);
-		ImageIcon iconXoaTrang = taoIconThuNho("/images/clear.png", 20, 20);
-		if (iconXoaTrang != null)
-			btnXoaTrang.setIcon(iconXoaTrang);
-
-		btnSua = new JButton("Sửa");
-		btnSua.setFont(fontBtn);
-		ImageIcon iconSua = taoIconThuNho("/images/edit.png", 20, 20);
-		if (iconSua != null)
-			btnSua.setIcon(iconSua);
-
-		btnLuu = new JButton("Lưu");
-		btnLuu.setFont(fontBtn);
-		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
-		if (iconLuu != null)
-			btnLuu.setIcon(iconLuu);
-
-		pnNutChucNang.add(btnThem);
-		pnNutChucNang.add(btnXoa);
-		pnNutChucNang.add(btnXoaTrang);
-		pnNutChucNang.add(btnSua);
-		pnNutChucNang.add(btnLuu);
+		JButton[] btns = { btnThem, btnXoa, btnXoaTrang, btnSua, btnLuu };
+		for (JButton b : btns) {
+			setupRetroButton(b);
+			pnNutChucNang.add(b);
+		}
 		pnDatBan.add(pnNutChucNang, BorderLayout.SOUTH);
 
 		tbDatBan.getTableHeader().setResizingAllowed(false);
@@ -235,137 +348,48 @@ public class DlgDatBan extends JDialog {
 		return pnDatBan;
 	}
 
-	// =========================================================================
-	// CLASS HIỂN THỊ NÚT TRONG BẢNG
-	// =========================================================================
 	class ButtonRenderer extends JButton implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
 
 		public ButtonRenderer() {
 			setOpaque(true);
-			setFont(new Font("Arial", Font.BOLD, 14));
+			setFont(new Font("Tahoma", Font.BOLD, 12));
+			setBackground(MAU_HEADER);
+			setForeground(MAU_NAU_VIEN);
+			setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 1));
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			setText((value == null) ? "..." : value.toString());
+				int row, int col) {
+			setText("XEM");
 			return this;
 		}
 	}
 
-	// =========================================================================
-	// CLASS BẮT SỰ KIỆN KHI BẤM NÚT TRONG BẢNG
-	// =========================================================================
 	class ButtonEditor extends DefaultCellEditor {
 		private static final long serialVersionUID = 1L;
 		protected JButton button;
-		private String label;
-		private boolean isPushed;
-		private int selectedRow;
 
 		public ButtonEditor(JCheckBox checkBox) {
 			super(checkBox);
-			button = new JButton();
-			button.setOpaque(true);
-			button.setFont(new Font("Arial", Font.BOLD, 14));
-			button.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					fireEditingStopped();
-				}
-			});
+			button = new JButton("XEM");
+			button.setBackground(MAU_HEADER);
+			button.setForeground(MAU_NAU_VIEN);
+			button.setFont(new Font("Tahoma", Font.BOLD, 12));
+			button.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 1));
+			button.addActionListener(e -> fireEditingStopped());
 		}
 
 		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
-				int column) {
-			label = (value == null) ? "..." : value.toString();
-			button.setText(label);
-			isPushed = true;
-			selectedRow = row;
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int col) {
 			return button;
 		}
 
 		@Override
 		public Object getCellEditorValue() {
-			if (isPushed) {
-				String maDB = tbDatBan.getValueAt(selectedRow, 1) != null
-						? tbDatBan.getValueAt(selectedRow, 1).toString()
-						: "";
-				String tenKhach = tbDatBan.getValueAt(selectedRow, 2) != null
-						? tbDatBan.getValueAt(selectedRow, 2).toString()
-						: "";
-				String trangThai = tbDatBan.getValueAt(selectedRow, 5) != null
-						? tbDatBan.getValueAt(selectedRow, 5).toString()
-						: "";
-
-				new DlgChiTietDatBan(DlgDatBan.this, maDB, tenKhach, trangThai).setVisible(true);
-			}
-			isPushed = false;
-			return label;
+			return "XEM";
 		}
-
-		@Override
-		public boolean stopCellEditing() {
-			isPushed = false;
-			return super.stopCellEditing();
-		}
-	}
-
-	// =========================================================================
-	// DIALOG CHI TIẾT (ĐÃ CHUYỂN SANG CHIỀU DỌC)
-	// =========================================================================
-	class DlgChiTietDatBan extends JDialog {
-		private static final long serialVersionUID = 1L;
-
-		public DlgChiTietDatBan(Dialog parent, String maDB, String tenKhach, String trangThai) {
-			super(parent, "CHI TIẾT ĐẶT BÀN", true);
-			this.setSize(400, 250);
-			this.setLocationRelativeTo(parent);
-
-			JPanel pnNoiDung = new JPanel();
-			pnNoiDung.setLayout(new BoxLayout(pnNoiDung, BoxLayout.Y_AXIS));
-			pnNoiDung.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-
-			Font fLabel = new Font("Arial", Font.BOLD, 14);
-			Font fValue = new Font("Arial", Font.PLAIN, 14);
-
-			pnNoiDung.add(createDetailBox("Mã Đặt Bàn:", maDB, fLabel, fValue));
-			pnNoiDung.add(Box.createVerticalStrut(15));
-			pnNoiDung.add(createDetailBox("Khách Hàng:", tenKhach, fLabel, fValue));
-			pnNoiDung.add(Box.createVerticalStrut(15));
-			pnNoiDung.add(createDetailBox("Trạng Thái:", trangThai, fLabel, fValue));
-
-			this.add(pnNoiDung);
-		}
-
-		private JPanel createDetailBox(String title, String value, Font fTitle, Font fVal) {
-			JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-			p.setMaximumSize(new Dimension(400, 30));
-
-			JLabel lblTitle = new JLabel(title);
-			lblTitle.setFont(fTitle);
-			lblTitle.setPreferredSize(new Dimension(100, 25));
-
-			JLabel lblValue = new JLabel(value);
-			lblValue.setFont(fVal);
-			lblValue.setForeground(Color.BLUE);
-
-			p.add(lblTitle);
-			p.add(lblValue);
-			return p;
-		}
-	}
-
-	public static void main(String[] args) {
-		try {
-			javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println("Lỗi: " + ex.getMessage());
-		}
-		DlgDatBan dialog = new DlgDatBan(null);
-		new controller.DatBanController(dialog);
-		dialog.setVisible(true);
 	}
 
 	public JTextField getTfTenKhach() {
@@ -376,16 +400,20 @@ public class DlgDatBan extends JDialog {
 		return tfSoDienThoai;
 	}
 
-	public JTextField getTfThoiGianDat() {
-		return tfThoiGian;
+	public JComboBox<String> getCbMaKhuVuc() {
+		return cbMaKhuVuc;
+	}
+
+	public JComboBox<String> getCbMaBan() {
+		return cbMaBan;
+	}
+
+	public JSpinner getSpThoiGianNhan() {
+		return spThoiGianNhan;
 	}
 
 	public JComboBox<String> getCbTrangThai() {
 		return cbTrangThai;
-	}
-
-	public JTextField getTfTimKiem() {
-		return tfTimKiem;
 	}
 
 	public JTable getTbDatBan() {
@@ -412,11 +440,59 @@ public class DlgDatBan extends JDialog {
 		btnXoaTrang.addActionListener(l);
 	}
 
-	public void addBtnTimListener(ActionListener l) {
-		btnTim.addActionListener(l);
-	}
-
 	public void addBtnLuuListener(ActionListener l) {
 		btnLuu.addActionListener(l);
+	}
+
+	public void hienThiDialogChiTiet(String maDB, String khuVuc, String ban, String tenKhach, String sdt,
+			String thoiGian, String trangThai) {
+		new DlgChiTietDatBan(this, maDB, khuVuc, ban, tenKhach, sdt, thoiGian, trangThai).setVisible(true);
+	}
+
+	class DlgChiTietDatBan extends JDialog {
+		private static final long serialVersionUID = 1L;
+
+		public DlgChiTietDatBan(Dialog parent, String maDB, String khuVuc, String ban, String tenKhach, String sdt,
+				String thoiGian, String trangThai) {
+			super(parent, "CHI TIẾT ĐẶT BÀN", true);
+			this.setSize(450, 400);
+			this.setLocationRelativeTo(parent);
+			JPanel p = new JPanel();
+			p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+			p.setBackground(MAU_NEN_CHINH);
+			p.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4),
+					BorderFactory.createEmptyBorder(20, 30, 20, 30)));
+
+			p.add(createRow("MÃ ĐẶT BÀN :", maDB));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("KHU VỰC: ", khuVuc));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("BÀN: ", ban));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("KHÁCH HÀNG :", tenKhach));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("SỐ ĐIỆN THOẠI :", sdt));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("THỜI GIAN :", thoiGian.isEmpty() ? "N/A" : thoiGian));
+			p.add(Box.createVerticalStrut(10));
+			p.add(createRow("TRẠNG THÁI: ", trangThai));
+
+			this.setContentPane(p);
+		}
+
+		private JPanel createRow(String t, String v) {
+			JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+			row.setOpaque(false);
+			JLabel l1 = new JLabel(t);
+			l1.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
+			l1.setForeground(MAU_NAU_VIEN);
+			l1.setPreferredSize(new Dimension(170, 25));
+			JLabel l2 = new JLabel(v);
+			l2.setFont(new Font("Tahoma", Font.BOLD, 15));
+			l2.setForeground(new Color(193, 71, 71));
+			row.add(l1);
+			row.add(l2);
+			return row;
+		}
 	}
 }

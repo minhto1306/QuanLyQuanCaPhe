@@ -6,9 +6,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.InputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -30,12 +31,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-
-import com.formdev.flatlaf.FlatLightLaf;
 
 public class DlgCaLamViec extends JDialog {
 
@@ -49,12 +47,17 @@ public class DlgCaLamViec extends JDialog {
 
 	private LocalDate ngayBatDauTuan;
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
 	private List<String> danhSachNhanVien = new ArrayList<>();
+
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_NAU_NUT = new Color(110, 75, 59);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
+	private Font fontBungeeBase;
 
 	public DlgCaLamViec(JFrame parent) {
 		super(parent, "QUẢN LÝ LỊCH LÀM VIỆC", true);
-		this.setSize(1300, 700);
+		this.setSize(1450, 700);
 		this.setLocationRelativeTo(parent);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -64,46 +67,64 @@ public class DlgCaLamViec extends JDialog {
 		}
 
 		ngayBatDauTuan = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-
+		loadCustomFont();
 		khoiTaoGiaoDien();
 		capNhatDuLieuTuan();
 	}
 
+	private void loadCustomFont() {
+		try {
+			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
+			if (is != null) {
+				fontBungeeBase = Font.createFont(Font.TRUETYPE_FONT, is);
+			} else {
+				fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+			}
+		} catch (Exception e) {
+			fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+		}
+	}
+
+	private void setupRetroButton(JButton btn) {
+		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 18f));
+		btn.setBackground(MAU_NAU_NUT);
+		btn.setForeground(Color.WHITE);
+		btn.setFocusPainted(false);
+		btn.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3));
+		btn.setPreferredSize(new Dimension(140, 40));
+	}
+
 	private void khoiTaoGiaoDien() {
+		// Viền ngoài cùng của ứng dụng
 		pnMain = new JPanel(new BorderLayout(5, 5));
+		pnMain.setBackground(MAU_NAU_VIEN);
 		pnMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		JPanel pnNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-		pnNorth.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		pnNorth.setBackground(MAU_HEADER);
+		pnNorth.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4));
 
-		Font fontBtn = new Font("Arial", Font.BOLD, 14);
-
-		btnHienTai = new JButton("Hiện tại");
-		btnHienTai.setFont(fontBtn);
-
-		btnTroVe = new JButton("< Trở về");
-		btnTroVe.setFont(fontBtn);
-
-		btnTiep = new JButton("Tiếp >");
-		btnTiep.setFont(fontBtn);
+		btnHienTai = new JButton("HIỆN TẠI");
+		setupRetroButton(btnHienTai);
+		btnTroVe = new JButton("< TRỞ VỀ");
+		setupRetroButton(btnTroVe);
+		btnTiep = new JButton("TIẾP >");
+		setupRetroButton(btnTiep);
 
 		lbTuanHienTai = new JLabel();
-		lbTuanHienTai.setFont(new Font("Arial", Font.BOLD, 16));
-		lbTuanHienTai.setForeground(Color.BLUE);
-		lbTuanHienTai.setPreferredSize(new Dimension(300, 30));
+		lbTuanHienTai.setFont(new Font("Tahoma", Font.BOLD, 20));
+		lbTuanHienTai.setForeground(MAU_NAU_VIEN);
+		lbTuanHienTai.setPreferredSize(new Dimension(350, 30));
 		lbTuanHienTai.setHorizontalAlignment(SwingConstants.CENTER);
 
 		pnNorth.add(btnHienTai);
 		pnNorth.add(btnTroVe);
 		pnNorth.add(lbTuanHienTai);
 		pnNorth.add(btnTiep);
-
 		pnMain.add(pnNorth, BorderLayout.NORTH);
 
 		String[] colNames = { "Ca làm việc", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật" };
 		tmCaLamViec = new DefaultTableModel(colNames, 0) {
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
@@ -112,32 +133,34 @@ public class DlgCaLamViec extends JDialog {
 
 		tbCaLamViec = new JTable(tmCaLamViec);
 		tbCaLamViec.setRowHeight(150);
-		tbCaLamViec.setFont(new Font("Arial", Font.PLAIN, 14));
-		tbCaLamViec.setGridColor(Color.LIGHT_GRAY);
+		tbCaLamViec.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tbCaLamViec.setBackground(MAU_NEN_CHINH);
+		tbCaLamViec.setGridColor(MAU_NAU_VIEN);
 		tbCaLamViec.setShowGrid(true);
-
 		tbCaLamViec.setCellSelectionEnabled(true);
 		tbCaLamViec.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JTableHeader header = tbCaLamViec.getTableHeader();
-		header.setFont(new Font("Arial", Font.BOLD, 14));
-		header.setPreferredSize(new Dimension(header.getWidth(), 40));
+		header.setFont(new Font("Tahoma", Font.BOLD, 15));
+		header.setBackground(MAU_HEADER);
+		header.setForeground(MAU_NAU_VIEN);
+		header.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+		header.setPreferredSize(new Dimension(header.getWidth(), 50));
 
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					boolean hasFocus, int row, int column) {
 				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-				c.setFont(new Font("Arial", Font.BOLD, 14));
+				c.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 14f));
+				c.setForeground(MAU_NAU_VIEN);
 				return c;
 			}
 		};
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
 		tbCaLamViec.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
-		tbCaLamViec.getColumnModel().getColumn(0).setPreferredWidth(150);
+		tbCaLamViec.getColumnModel().getColumn(0).setPreferredWidth(160);
 		tbCaLamViec.getColumnModel().getColumn(0).setMaxWidth(200);
 
 		MultiLineCellRenderer multiRenderer = new MultiLineCellRenderer();
@@ -158,7 +181,6 @@ public class DlgCaLamViec extends JDialog {
 					JPopupMenu popup = taoMenuChonNhanVien(row, col);
 					if (popup != null)
 						popup.show(tbCaLamViec, e.getX(), e.getY());
-
 				} else if (e.getClickCount() == 2) {
 					Object val = tmCaLamViec.getValueAt(row, col);
 					String text = (val == null || val.toString().trim().isEmpty()) ? "Trống!" : val.toString();
@@ -172,29 +194,33 @@ public class DlgCaLamViec extends JDialog {
 		tbCaLamViec.getTableHeader().setReorderingAllowed(false);
 
 		JScrollPane scrollPane = new JScrollPane(tbCaLamViec);
-		scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		scrollPane.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4));
 		pnMain.add(scrollPane, BorderLayout.CENTER);
 
+		// CHIÊU THỨC: Đổi màu nền vùng Nút bấm cho tiệp màu với Bảng, thêm viền cho
+		// ngầu
 		JPanel pnSouth = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		pnSouth.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		pnSouth.setBackground(MAU_NEN_CHINH); // <-- Màu trùng với màu bảng
+		pnSouth.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4)); // <-- Thêm viền nâu
 
-		btnLuu = new JButton("Lưu Phân Công");
-		btnLuu.setFont(fontBtn);
-		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
-		if (iconLuu != null)
-			btnLuu.setIcon(iconLuu);
+		btnLuu = new JButton("LƯU PHÂN CÔNG");
+		btnLuu.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 20f));
+		btnLuu.setBackground(new Color(56, 163, 42));
+		btnLuu.setForeground(Color.WHITE);
+		btnLuu.setFocusPainted(false);
+		btnLuu.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3)); // Viền nâu cho đồng bộ
+		btnLuu.setPreferredSize(new Dimension(250, 50));
 
 		pnSouth.add(btnLuu);
 		pnMain.add(pnSouth, BorderLayout.SOUTH);
 
-		this.add(pnMain);
+		this.setContentPane(pnMain);
 	}
 
 	private JPopupMenu taoMenuChonNhanVien(int row, int col) {
 		if (danhSachNhanVien == null || danhSachNhanVien.isEmpty())
 			return null;
 		JPopupMenu popup = new JPopupMenu();
-
 		JMenuItem itemXoa = new JMenuItem("❌ Xóa trống ô này");
 		itemXoa.setForeground(Color.RED);
 		itemXoa.addActionListener(e -> tmCaLamViec.setValueAt("", row, col));
@@ -231,39 +257,18 @@ public class DlgCaLamViec extends JDialog {
 					"<html><center>" + daysOfWeek[i] + "<br>" + currentDay.format(formatter) + "</center></html>");
 		}
 		header.repaint();
-
 		tmCaLamViec.setRowCount(0);
 
-		Object[] caSang = { "Sáng (06:00 - 12:00)", "", "", "", "", "", "", "" };
-		Object[] caChieu = { "Chiều (12:00 - 18:00)", "", "", "", "", "", "", "" };
-		Object[] caToi = { "Tối (18:00 - 00:00)", "", "", "", "", "", "", "" };
+		Object[] caSang = { "SÁNG (06:00 - 12:00)", "", "", "", "", "", "", "" };
+		Object[] caChieu = { "CHIỀU (12:00 - 18:00)", "", "", "", "", "", "", "" };
+		Object[] caToi = { "TỐI (18:00 - 00:00)", "", "", "", "", "", "", "" };
 
 		tmCaLamViec.addRow(caSang);
 		tmCaLamViec.addRow(caChieu);
 		tmCaLamViec.addRow(caToi);
 	}
 
-	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
-		java.net.URL url = getClass().getResource(duongDan);
-		if (url == null) {
-			return null;
-		}
-		ImageIcon iconGoc = new ImageIcon(url);
-		Image imgGoc = iconGoc.getImage();
-		Image imgThuNho = imgGoc.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-		return new ImageIcon(imgThuNho);
-	}
-
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(new FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println("Failed to initialize LaF");
-		}
-
-		new DlgCaLamViec(null).setVisible(true);
-	}
-
+	// Giữ nguyên các hàm Getter/Setter/Listeners
 	public void setDanhSachNhanVien(List<String> ds) {
 		this.danhSachNhanVien = ds;
 	}
@@ -301,43 +306,29 @@ public class DlgCaLamViec extends JDialog {
 	}
 
 	class MultiLineCellRenderer extends DefaultTableCellRenderer {
+		/**
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
-
-		// Khoảng cách đệm (Trên, Trái, Dưới, Phải) để chữ không bị dính sát vô vách ô
-		private final java.awt.Insets PADDING = new java.awt.Insets(10, 10, 10, 10);
-		private Font smallFont;
+		private final Insets PADDING = new Insets(10, 10, 10, 10);
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-			// Chỉnh font nhỏ lại xí cho mi nhon
-			if (smallFont == null) {
-				smallFont = table.getFont().deriveFont(table.getFont().getSize() - 1.0f);
-			}
-			setFont(smallFont);
-
+			setFont(new Font("Tahoma", Font.BOLD, 13));
 			if (value != null && !value.toString().trim().isEmpty()) {
-				// Cắt dữ liệu ra nếu có nhiều nhân viên trong cùng 1 ca
 				String[] nhanViens = value.toString().split("\n");
-
-				// Dùng HTML dàn layout, line-height 1.8 cho khoảng cách trên dưới giãn đều ra
 				StringBuilder html = new StringBuilder("<html><div style='text-align: center; line-height: 1.8;'>");
-
 				for (String nv : nhanViens) {
-					// In đậm từng dòng tên nhân viên
-					html.append("<b>").append(nv.trim()).append("</b><br>");
+					html.append("<span style='color: #593a2f;'>").append(nv.trim()).append("</span><br>");
 				}
 				html.append("</div></html>");
-
 				setText(html.toString());
 			} else {
 				setText("");
 			}
-
 			setHorizontalAlignment(SwingConstants.CENTER);
-			// Set padding cho ô nó rộng rãi
 			setBorder(BorderFactory.createEmptyBorder(PADDING.top, PADDING.left, PADDING.bottom, PADDING.right));
 			return this;
 		}

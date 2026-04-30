@@ -202,6 +202,13 @@ public class HangHoaController {
 					return;
 				}
 
+				if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+					JOptionPane.showMessageDialog(view,
+							"Mã sản phẩm không hợp lệ! Chỉ dùng chữ cái, số và dấu gạch dưới (_).", "Lỗi mã",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+
 				String maDM = view.getCbDanhMuc().getSelectedItem().toString();
 				double gia = Double.parseDouble(view.getTfGiaBan().getText().trim());
 				boolean trangThai = view.getCbTrangThai().getSelectedIndex() == 0;
@@ -247,6 +254,14 @@ public class HangHoaController {
 			try {
 				String ma = view.getTfMaSanPham().getText().trim();
 				String ten = view.getTfTenSanPham().getText().trim();
+
+				if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+					JOptionPane.showMessageDialog(view,
+							"Mã sản phẩm không hợp lệ! Chỉ dùng chữ cái, số và dấu gạch dưới (_).", "Lỗi mã",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+
 				String maDM = view.getCbDanhMuc().getSelectedItem().toString();
 				double gia = Double.parseDouble(view.getTfGiaBan().getText().trim());
 				boolean trangThai = view.getCbTrangThai().getSelectedIndex() == 0;
@@ -304,6 +319,13 @@ public class HangHoaController {
 
 			if (ma.isEmpty() || ten.isEmpty()) {
 				JOptionPane.showMessageDialog(view, "Vui lòng nhập đầy đủ mã và tên danh mục!");
+				return;
+			}
+
+			if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+				JOptionPane.showMessageDialog(view,
+						"Mã danh mục không hợp lệ! Chỉ dùng chữ cái, số và dấu gạch dưới (_).", "Lỗi mã",
+						JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 

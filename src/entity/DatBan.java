@@ -10,13 +10,13 @@ public class DatBan {
 	private LocalDateTime thoiGianDat;
 	private LocalDateTime thoiGianNhanBan;
 	private boolean trangThai;
+	private String maKhuVuc;
 
 	public DatBan() {
-
 	}
 
 	public DatBan(String maDatBan, String maBan, String tenKhachHang, String soDienThoai, LocalDateTime thoiGianDat,
-			LocalDateTime thoiGianNhanBan, boolean trangThai) {
+			LocalDateTime thoiGianNhanBan, boolean trangThai, String maKhuVuc) {
 		this.maDatBan = maDatBan;
 		this.maBan = maBan;
 		this.tenKhachHang = tenKhachHang;
@@ -24,6 +24,7 @@ public class DatBan {
 		this.thoiGianDat = thoiGianDat;
 		this.thoiGianNhanBan = thoiGianNhanBan;
 		this.trangThai = trangThai;
+		this.maKhuVuc = maKhuVuc;
 	}
 
 	public String getMaDatBan() {
@@ -82,4 +83,11 @@ public class DatBan {
 		this.trangThai = trangThai;
 	}
 
+	public String getMaKhuVuc() {
+		return maKhuVuc;
+	}
+
+	public void setMaKhuVuc(String maKhuVuc) {
+		this.maKhuVuc = maKhuVuc;
+	}
 }

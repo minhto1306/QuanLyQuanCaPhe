@@ -21,11 +21,18 @@ public class ThemDanhMucController {
 		view.addDongListener(e -> view.dispose());
 
 		view.addLuuThemMoiListener(e -> {
-			String ma = view.getMaDanhMuc();
-			String ten = view.getTenDanhMuc();
+			String ma = view.getMaDanhMuc().trim();
+			String ten = view.getTenDanhMuc().trim();
 
 			if (ma.isEmpty() || ten.isEmpty()) {
 				JOptionPane.showMessageDialog(view, "Không được để trống thông tin!");
+				return;
+			}
+
+			if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+				JOptionPane.showMessageDialog(view,
+						"Mã danh mục không hợp lệ! Chỉ dùng chữ cái, số và dấu gạch dưới (_).", "Lỗi mã",
+						JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 

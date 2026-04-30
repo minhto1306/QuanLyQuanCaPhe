@@ -2,12 +2,14 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.io.InputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -24,9 +26,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class DlgKhuVucBan extends JDialog {
 
@@ -68,24 +73,56 @@ public class DlgKhuVucBan extends JDialog {
 	private JTable tbKhuVuc;
 	private DefaultTableModel tmKhuVuc;
 
+	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
+	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private Font fontBungeeBase;
+
 	public DlgKhuVucBan(JFrame parent) {
 		super(parent, "SƠ ĐỒ KHU VỰC - BÀN/PHÒNG", true);
-		this.setSize(1000, 650);
+		this.setSize(1100, 750);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+		java.net.URL urllogo = getClass().getResource("/images/logo.png");
+		if (urllogo != null) {
+			this.setIconImage(new ImageIcon(urllogo).getImage());
+		}
+
+		loadCustomFont();
+
 		tabbedPane = new JTabbedPane();
+		tabbedPane.setFont(new Font("Arial", Font.BOLD, 14));
 		tabSoDoBan = khoiTaoTabSoDoBan();
 		tabKhuVuc = khoiTaoTabKhuVuc();
 
 		ImageIcon iconSoDo = taoIconThuNho("/images/floor-plan.png", 24, 24);
 		ImageIcon iconKhuVuc = taoIconThuNho("/images/zone.png", 24, 24);
 
-		tabbedPane.addTab("Sơ đồ bàn/phòng", iconSoDo, tabSoDoBan);
-		tabbedPane.addTab("Khu vực", iconKhuVuc, tabKhuVuc);
+		tabbedPane.addTab("SƠ ĐỒ BÀN/PHÒNG", iconSoDo, tabSoDoBan);
+		tabbedPane.addTab("KHU VỰC", iconKhuVuc, tabKhuVuc);
 
-		this.add(tabbedPane);
+		// Nền tổng thể Nâu Đậm, lót thêm một lớp panel để tạo viền padding
+		JPanel container = new JPanel(new BorderLayout());
+		container.setBackground(MAU_NAU_VIEN);
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+		container.add(tabbedPane, BorderLayout.CENTER);
+		this.setContentPane(container);
+	}
+
+	private void loadCustomFont() {
+		try {
+			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
+			if (is != null) {
+				fontBungeeBase = Font.createFont(Font.TRUETYPE_FONT, is);
+			} else {
+				fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+			}
+		} catch (Exception e) {
+			fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
+		}
 	}
 
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
@@ -99,163 +136,187 @@ public class DlgKhuVucBan extends JDialog {
 		return new ImageIcon(imgThuNho);
 	}
 
+	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	private void setupRetroInput(Component comp) {
+		if (comp instanceof JTextField) {
+			JTextField tf = (JTextField) comp;
+			tf.setFont(new Font("Arial", Font.BOLD, 15));
+			tf.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2),
+					BorderFactory.createEmptyBorder(2, 5, 2, 5)));
+		} else if (comp instanceof JComboBox) {
+			JComboBox<?> cb = (JComboBox<?>) comp;
+			cb.setFont(new Font("Arial", Font.BOLD, 15));
+			cb.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+		}
+	}
+
+	// CHIÊU THỨC: Trang trí Nút Bấm Retro chuẩn bài
+	private void setupRetroButton(JButton btn) {
+		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
+		btn.setBackground(MAU_NEN_CHINH);
+		btn.setForeground(MAU_NAU_VIEN);
+		btn.setFocusPainted(false);
+		btn.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2),
+				BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+	}
+
 	private JPanel khoiTaoTabSoDoBan() {
 		JPanel pnSoDo = new JPanel(new BorderLayout());
+		pnSoDo.setBackground(MAU_NEN_CHINH);
 		pnSoDo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		JPanel pnTopWrapper = new JPanel(new BorderLayout());
+		JPanel pnTopWrapper = new JPanel(new BorderLayout(10, 0));
+		pnTopWrapper.setBackground(MAU_NEN_CHINH);
 
 		JPanel pnLeft = new JPanel(new BorderLayout());
-		pnLeft.setPreferredSize(new Dimension(300, 0));
+		pnLeft.setPreferredSize(new Dimension(380, 0));
+		pnLeft.setBackground(MAU_NEN_CHINH);
 
-		Border marginBorder = BorderFactory.createEmptyBorder(0, 0, 0, 10);
-		Border lineBorder = BorderFactory.createLineBorder(Color.GRAY);
-		Border paddingBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-		pnLeft.setBorder(BorderFactory.createCompoundBorder(marginBorder,
-				BorderFactory.createCompoundBorder(lineBorder, paddingBorder)));
+		Border lineBorder = BorderFactory.createLineBorder(MAU_NAU_VIEN, 4);
+		Border paddingBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
+		pnLeft.setBorder(BorderFactory.createCompoundBorder(lineBorder, paddingBorder));
 
 		JPanel pnLeftInner = new JPanel();
 		pnLeftInner.setLayout(new BoxLayout(pnLeftInner, BoxLayout.Y_AXIS));
+		pnLeftInner.setBackground(MAU_NEN_CHINH);
 
-		Dimension dLabel = new Dimension(110, 25);
-		Dimension dInput = new Dimension(150, 25);
-		Font fontLabel = new Font("Arial", Font.BOLD, 15);
-
-		Box boxSDB_Tim = Box.createHorizontalBox();
+		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 16f);
+		Dimension dLabel = new Dimension(130, 25);
 
 		Box boxKhuVuc = Box.createHorizontalBox();
-		JLabel lbKhuVuc = new JLabel("Khu vực");
+		JLabel lbKhuVuc = new JLabel("KHU VỰC:");
 		lbKhuVuc.setPreferredSize(dLabel);
-		lbKhuVuc.setFont(fontLabel);
+		lbKhuVuc.setFont(fontLabelRetro);
+		lbKhuVuc.setForeground(MAU_NAU_VIEN);
+		
 		cbKhuVuc = new JComboBox<String>();
-		cbKhuVuc.setPreferredSize(new Dimension(110, 25));
-		cbKhuVuc.setMaximumSize(new Dimension(110, 25));
+		cbKhuVuc.setPreferredSize(new Dimension(130, 30));
+		cbKhuVuc.setMaximumSize(new Dimension(130, 30));
+		setupRetroInput(cbKhuVuc);
 
 		btnThemKhuVucNhanh = new JButton();
-		btnThemKhuVucNhanh.setPreferredSize(new Dimension(35, 35));
-		btnThemKhuVucNhanh.setMaximumSize(new Dimension(40, 40));
-		btnThemKhuVucNhanh.setBorderPainted(false);
-		btnThemKhuVucNhanh.setContentAreaFilled(false);
+		btnThemKhuVucNhanh.setPreferredSize(new Dimension(35, 30));
+		btnThemKhuVucNhanh.setMaximumSize(new Dimension(35, 30));
+		btnThemKhuVucNhanh.setBackground(MAU_NEN_CHINH);
+		btnThemKhuVucNhanh.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 		btnThemKhuVucNhanh.setFocusPainted(false);
 		btnThemKhuVucNhanh.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		ImageIcon iconThem = taoIconThuNho("/images/plus.png", 32, 32);
-		if (iconThem != null) {
-			btnThemKhuVucNhanh.setIcon(iconThem);
-		} else {
-			btnThemKhuVucNhanh.setText("+");
-			btnThemKhuVucNhanh.setBorderPainted(true);
-			btnThemKhuVucNhanh.setContentAreaFilled(true);
-		}
+		ImageIcon iconThem = taoIconThuNho("/images/plus.png", 20, 20);
+		if (iconThem != null) btnThemKhuVucNhanh.setIcon(iconThem);
 
 		boxKhuVuc.add(lbKhuVuc);
+		boxKhuVuc.add(Box.createHorizontalStrut(15));
 		boxKhuVuc.add(cbKhuVuc);
 		boxKhuVuc.add(Box.createHorizontalStrut(5));
 		boxKhuVuc.add(btnThemKhuVucNhanh);
 		boxKhuVuc.add(Box.createHorizontalGlue());
 
 		Box boxKyHieu = Box.createHorizontalBox();
-		JLabel lbKyHieu = new JLabel("Ký hiệu");
+		JLabel lbKyHieu = new JLabel("KÝ HIỆU:");
 		lbKyHieu.setPreferredSize(dLabel);
-		lbKyHieu.setFont(fontLabel);
+		lbKyHieu.setFont(fontLabelRetro);
+		lbKyHieu.setForeground(MAU_NAU_VIEN);
 		tfKyHieu = new JTextField();
-		tfKyHieu.setPreferredSize(dInput);
-		tfKyHieu.setMaximumSize(dInput);
+		tfKyHieu.setPreferredSize(new Dimension(170, 30));
+		tfKyHieu.setMaximumSize(new Dimension(170, 30));
+		setupRetroInput(tfKyHieu);
 		boxKyHieu.add(lbKyHieu);
+		boxKyHieu.add(Box.createHorizontalStrut(15));
 		boxKyHieu.add(tfKyHieu);
 		boxKyHieu.add(Box.createHorizontalGlue());
 
 		Box boxChieuDaiSo = Box.createHorizontalBox();
-		JLabel lbChieuDaiSo = new JLabel("Chiều dài số");
+		JLabel lbChieuDaiSo = new JLabel("CHIỀU DÀI SỐ:");
 		lbChieuDaiSo.setPreferredSize(dLabel);
-		lbChieuDaiSo.setFont(fontLabel);
+		lbChieuDaiSo.setFont(fontLabelRetro);
+		lbChieuDaiSo.setForeground(MAU_NAU_VIEN);
 		tfChieuDaiSo = new JTextField("2");
-		tfChieuDaiSo.setPreferredSize(dInput);
-		tfChieuDaiSo.setMaximumSize(dInput);
+		tfChieuDaiSo.setPreferredSize(new Dimension(170, 30));
+		tfChieuDaiSo.setMaximumSize(new Dimension(170, 30));
+		setupRetroInput(tfChieuDaiSo);
 		boxChieuDaiSo.add(lbChieuDaiSo);
+		boxChieuDaiSo.add(Box.createHorizontalStrut(15));
 		boxChieuDaiSo.add(tfChieuDaiSo);
 		boxChieuDaiSo.add(Box.createHorizontalGlue());
 
 		Box boxTuSo = Box.createHorizontalBox();
-		JLabel lbTuSo = new JLabel("Từ số");
+		JLabel lbTuSo = new JLabel("TỪ SỐ:");
 		lbTuSo.setPreferredSize(dLabel);
-		lbTuSo.setFont(fontLabel);
+		lbTuSo.setFont(fontLabelRetro);
+		lbTuSo.setForeground(MAU_NAU_VIEN);
 		tfTuSo = new JTextField("1");
-		tfTuSo.setPreferredSize(new Dimension(60, 25));
-		tfTuSo.setMaximumSize(new Dimension(60, 25));
+		tfTuSo.setPreferredSize(new Dimension(65, 30));
+		tfTuSo.setMaximumSize(new Dimension(65, 30));
+		setupRetroInput(tfTuSo);
+		
 		JLabel lbTilde = new JLabel(" ~ ");
-		lbTilde.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 6));
+		lbTilde.setFont(fontLabelRetro);
+		lbTilde.setForeground(MAU_NAU_VIEN);
+		lbTilde.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		
 		tfDenSo = new JTextField("20");
-		tfDenSo.setPreferredSize(new Dimension(60, 25));
-		tfDenSo.setMaximumSize(new Dimension(60, 25));
+		tfDenSo.setPreferredSize(new Dimension(65, 30));
+		tfDenSo.setMaximumSize(new Dimension(65, 30));
+		setupRetroInput(tfDenSo);
+		
 		boxTuSo.add(lbTuSo);
+		boxTuSo.add(Box.createHorizontalStrut(15));
 		boxTuSo.add(tfTuSo);
 		boxTuSo.add(lbTilde);
 		boxTuSo.add(tfDenSo);
 		boxTuSo.add(Box.createHorizontalGlue());
 
 		Box boxButtons = Box.createHorizontalBox();
-
-		Font fontBtn = new Font("Arial", Font.BOLD, 14);
-		btnXoa = new JButton("Xóa");
-		btnXoa.setFont(fontBtn);
-		ImageIcon iconXoa = taoIconThuNho("/images/delete.png", 20, 20);
-		if (iconXoa != null)
-			btnXoa.setIcon(iconXoa);
-
-		btnTaoTuDong = new JButton("Tạo tự động");
-		btnTaoTuDong.setFont(fontBtn);
-		ImageIcon iconTao = taoIconThuNho("/images/gear.png", 20, 20);
-		if (iconTao != null)
-			btnTaoTuDong.setIcon(iconTao);
+		btnXoa = new JButton(" XÓA", taoIconThuNho("/images/delete.png", 20, 20));
+		setupRetroButton(btnXoa);
+		
+		btnTaoTuDong = new JButton(" TẠO TỰ ĐỘNG", taoIconThuNho("/images/gear.png", 20, 20));
+		setupRetroButton(btnTaoTuDong);
 
 		boxButtons.add(btnXoa);
-		boxButtons.add(Box.createHorizontalStrut(10));
+		boxButtons.add(Box.createHorizontalStrut(15));
 		boxButtons.add(btnTaoTuDong);
 		boxButtons.add(Box.createHorizontalGlue());
 
-		pnLeftInner.add(boxSDB_Tim);
-		pnLeftInner.add(Box.createVerticalStrut(12));
 		pnLeftInner.add(boxKhuVuc);
-		pnLeftInner.add(Box.createVerticalStrut(12));
-		pnLeftInner.add(boxKyHieu);
-		pnLeftInner.add(Box.createVerticalStrut(12));
-		pnLeftInner.add(boxChieuDaiSo);
-		pnLeftInner.add(Box.createVerticalStrut(12));
-		pnLeftInner.add(boxTuSo);
 		pnLeftInner.add(Box.createVerticalStrut(20));
+		pnLeftInner.add(boxKyHieu);
+		pnLeftInner.add(Box.createVerticalStrut(20));
+		pnLeftInner.add(boxChieuDaiSo);
+		pnLeftInner.add(Box.createVerticalStrut(20));
+		pnLeftInner.add(boxTuSo);
+		pnLeftInner.add(Box.createVerticalStrut(30));
 		pnLeftInner.add(boxButtons);
 
 		pnLeft.add(pnLeftInner, BorderLayout.NORTH);
 
 		pnSoDoBanRight = new JPanel();
 		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
-		pnSoDoBanRight.setBackground(Color.WHITE);
+		pnSoDoBanRight.setBackground(MAU_NEN_CHINH); // Nhuộm màu nền
 
 		JScrollPane scrollPane = new JScrollPane(pnSoDoBanRight);
-		scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Sơ đồ",
-				TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 14)));
+		scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4), "SƠ ĐỒ TRỰC QUAN",
+				TitledBorder.LEFT, TitledBorder.TOP, fontBungeeBase.deriveFont(Font.PLAIN, 16f), MAU_NAU_VIEN));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+		scrollPane.setBackground(MAU_NEN_CHINH);
+		scrollPane.getViewport().setBackground(MAU_NEN_CHINH);
 
 		pnTopWrapper.add(pnLeft, BorderLayout.WEST);
 		pnTopWrapper.add(scrollPane, BorderLayout.CENTER);
 
 		pnSoDo.add(pnTopWrapper, BorderLayout.CENTER);
 
-		JPanel pnBottomSoDo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+		JPanel pnBottomSoDo = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+		pnBottomSoDo.setBackground(MAU_NEN_CHINH);
 		pnBottomSoDo.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0),
-				BorderFactory.createLineBorder(Color.GRAY)));
+				BorderFactory.createLineBorder(MAU_NAU_VIEN, 4)));
 
-		btnSDB_Luu = new JButton("Lưu");
-		btnSDB_Luu.setFont(fontBtn);
-		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
-		if (iconLuu != null)
-			btnSDB_Luu.setIcon(iconLuu);
+		btnSDB_Luu = new JButton(" LƯU", taoIconThuNho("/images/save.png", 20, 20));
+		setupRetroButton(btnSDB_Luu);
 
-		btnSDB_Thoat = new JButton("Đóng");
-		btnSDB_Thoat.setFont(fontBtn);
-		ImageIcon iconDong = taoIconThuNho("/images/close.png", 20, 20);
-		if (iconDong != null)
-			btnSDB_Thoat.setIcon(iconDong);
+		btnSDB_Thoat = new JButton(" ĐÓNG", taoIconThuNho("/images/close.png", 20, 20));
+		setupRetroButton(btnSDB_Thoat);
 
 		pnBottomSoDo.add(btnSDB_Luu);
 		pnBottomSoDo.add(btnSDB_Thoat);
@@ -266,148 +327,142 @@ public class DlgKhuVucBan extends JDialog {
 	}
 
 	private JPanel khoiTaoTabKhuVuc() {
-		JPanel pnDanhMuc = new JPanel();
-		pnDanhMuc.setLayout(new BorderLayout());
-		pnDanhMuc.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		JPanel pnDanhMuc = new JPanel(new BorderLayout());
+		pnDanhMuc.setBackground(MAU_NEN_CHINH);
+		pnDanhMuc.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		boxKV_Row1 = Box.createHorizontalBox();
 		boxKV_Row2 = Box.createHorizontalBox();
 		boxKV_Tim = Box.createHorizontalBox();
 
-		lbKV_Tim = new JLabel("Tìm khu vực:");
-		lbKV_Ma = new JLabel("Mã khu vực:");
-		lbKV_Ten = new JLabel("Tên khu vực:");
-		lbKV_PhuThu = new JLabel("Phụ thu:");
+		lbKV_Tim = new JLabel("TÌM KHU VỰC:");
+		lbKV_Ma = new JLabel("MÃ KHU VỰC:");
+		lbKV_Ten = new JLabel("TÊN KHU VỰC:");
+		lbKV_PhuThu = new JLabel("PHỤ THU:");
 
-		Dimension dLabel = new Dimension(120, 25);
-		lbKV_Ma.setPreferredSize(dLabel);
-		lbKV_Ten.setPreferredSize(dLabel);
-		lbKV_PhuThu.setPreferredSize(dLabel);
-		lbKV_Tim.setPreferredSize(dLabel);
+		Dimension dLabel = new Dimension(160, 25);
+		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
 
-		Font fontLablel = new Font("Arial", Font.BOLD, 15);
-		lbKV_Tim.setFont(fontLablel);
-		lbKV_Ma.setFont(fontLablel);
-		lbKV_Ten.setFont(fontLablel);
-		lbKV_PhuThu.setFont(fontLablel);
+		JLabel[] labels = { lbKV_Ma, lbKV_Ten, lbKV_PhuThu, lbKV_Tim };
+		for(JLabel lbl : labels) {
+			lbl.setPreferredSize(dLabel);
+			lbl.setFont(fontLabelRetro);
+			lbl.setForeground(MAU_NAU_VIEN);
+		}
 
 		tfKV_Tim = new JTextField();
-		tfKV_Tim.setPreferredSize(new Dimension(300, 25));
+		tfKV_Tim.setPreferredSize(new Dimension(350, 30));
+		setupRetroInput(tfKV_Tim);
 
 		tfKV_Ma = new JTextField();
 		tfKV_Ten = new JTextField();
 		tfKV_PhuThu = new JTextField();
 
-		Dimension dInput = new Dimension(250, 25);
-		tfKV_Ma.setPreferredSize(dInput);
-		tfKV_Ma.setMaximumSize(dInput);
-		tfKV_Ten.setPreferredSize(dInput);
-		tfKV_Ten.setMaximumSize(dInput);
-		tfKV_PhuThu.setPreferredSize(dInput);
-		tfKV_PhuThu.setMaximumSize(dInput);
-
-		btnKV_Tim = new JButton();
-		btnKV_Tim.setPreferredSize(new Dimension(40, 25));
-		ImageIcon iconTim = taoIconThuNho("/images/search.png", 16, 16);
-		if (iconTim != null) {
-			btnKV_Tim.setIcon(iconTim);
-		} else {
-			btnKV_Tim.setText("Tìm");
+		Dimension dInput = new Dimension(280, 30);
+		JTextField[] tfs = { tfKV_Ma, tfKV_Ten, tfKV_PhuThu };
+		for(JTextField tf : tfs) {
+			tf.setPreferredSize(dInput);
+			tf.setMaximumSize(dInput);
+			setupRetroInput(tf);
 		}
 
+		btnKV_Tim = new JButton(taoIconThuNho("/images/search.png", 20, 20));
+		btnKV_Tim.setPreferredSize(new Dimension(40, 30));
+		btnKV_Tim.setBackground(MAU_NEN_CHINH);
+		btnKV_Tim.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+
 		JPanel pnNhapThongTin = new JPanel();
-		pnDanhMuc.add(pnNhapThongTin, BorderLayout.NORTH);
 		pnNhapThongTin.setLayout(new BoxLayout(pnNhapThongTin, BoxLayout.Y_AXIS));
-
-		Border brdVienDen = BorderFactory.createLineBorder(Color.black);
-		Border brdThutVao = BorderFactory.createEmptyBorder(15, 10, 15, 10);
+		pnNhapThongTin.setBackground(MAU_NEN_CHINH);
+		Border brdVienDen = BorderFactory.createLineBorder(MAU_NAU_VIEN, 4);
+		Border brdThutVao = BorderFactory.createEmptyBorder(20, 20, 20, 20);
 		pnNhapThongTin.setBorder(BorderFactory.createCompoundBorder(brdVienDen, brdThutVao));
+		pnDanhMuc.add(pnNhapThongTin, BorderLayout.NORTH);
 
+		// Thêm chân khí khoảng cách
 		boxKV_Row1.add(lbKV_Ma);
+		boxKV_Row1.add(Box.createHorizontalStrut(15));
 		boxKV_Row1.add(tfKV_Ma);
-		boxKV_Row1.add(Box.createHorizontalStrut(80));
+		boxKV_Row1.add(Box.createHorizontalStrut(50));
 		boxKV_Row1.add(lbKV_Ten);
+		boxKV_Row1.add(Box.createHorizontalStrut(15));
 		boxKV_Row1.add(tfKV_Ten);
 		boxKV_Row1.add(Box.createHorizontalGlue());
 		pnNhapThongTin.add(boxKV_Row1);
 
-		pnNhapThongTin.add(Box.createVerticalStrut(15));
+		pnNhapThongTin.add(Box.createVerticalStrut(20));
 
 		boxKV_Row2.add(lbKV_PhuThu);
+		boxKV_Row2.add(Box.createHorizontalStrut(15));
 		boxKV_Row2.add(tfKV_PhuThu);
 		boxKV_Row2.add(Box.createHorizontalGlue());
 		pnNhapThongTin.add(boxKV_Row2);
 
-		JPanel pnBangDuLieu = new JPanel();
-		pnBangDuLieu.setLayout(new BorderLayout());
+		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
+		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
+		pnBangDuLieu.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0), brdVienDen));
 		pnDanhMuc.add(pnBangDuLieu, BorderLayout.CENTER);
-		pnBangDuLieu
-				.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), brdVienDen));
 
-		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+		pnTimKiem.setBackground(MAU_HEADER);
+		pnTimKiem.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 0, MAU_NAU_VIEN));
 		boxKV_Tim.add(lbKV_Tim);
+		boxKV_Tim.add(Box.createHorizontalStrut(15));
 		boxKV_Tim.add(tfKV_Tim);
-		boxKV_Tim.add(Box.createHorizontalStrut(5));
+		boxKV_Tim.add(Box.createHorizontalStrut(15));
 		boxKV_Tim.add(btnKV_Tim);
 		pnTimKiem.add(boxKV_Tim);
-
 		pnBangDuLieu.add(pnTimKiem, BorderLayout.NORTH);
 
 		String[] colNames = { "#", "Mã khu vực", "Tên khu vực", "Phụ thu" };
-		tmKhuVuc = new DefaultTableModel(colNames, 0);
+		tmKhuVuc = new DefaultTableModel(colNames, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 		tbKhuVuc = new JTable(tmKhuVuc);
-		tbKhuVuc.getTableHeader().setFont(fontLablel);
-		tbKhuVuc.setFont(new Font("Arial", Font.PLAIN, 14));
-		tbKhuVuc.setRowHeight(25);
+		
+		JTableHeader header = tbKhuVuc.getTableHeader();
+		header.setFont(new Font("Tahoma", Font.BOLD, 16));
+		header.setBackground(MAU_HEADER);
+		header.setForeground(MAU_NAU_VIEN);
+		header.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+
+		tbKhuVuc.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tbKhuVuc.setRowHeight(35);
+		tbKhuVuc.setBackground(MAU_NEN_CHINH);
+		tbKhuVuc.setGridColor(MAU_NAU_VIEN);
+		tbKhuVuc.setShowGrid(true);
 
 		tbKhuVuc.getColumnModel().getColumn(0).setMaxWidth(40);
 		tbKhuVuc.getColumnModel().getColumn(1).setPreferredWidth(150);
+		
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+		tbKhuVuc.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
 		JScrollPane scrollPane = new JScrollPane(tbKhuVuc);
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 
-		JPanel pnNutChucNang = new JPanel();
-		pnDanhMuc.add(pnNutChucNang, BorderLayout.SOUTH);
+		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+		pnNutChucNang.setBackground(MAU_NEN_CHINH);
 		pnNutChucNang.setBorder(brdVienDen);
-		pnNutChucNang.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+		pnDanhMuc.add(pnNutChucNang, BorderLayout.SOUTH);
 
-		Font fontBtn = new Font("Arial", Font.BOLD, 14);
+		btnKV_Them = new JButton(" THÊM", taoIconThuNho("/images/add.png", 20, 20));
+		btnKV_Xoa = new JButton(" XÓA", taoIconThuNho("/images/delete.png", 20, 20));
+		btnKV_XoaTrang = new JButton(" XÓA TRẮNG", taoIconThuNho("/images/clear.png", 20, 20));
+		btnKV_Sua = new JButton(" SỬA", taoIconThuNho("/images/edit.png", 20, 20));
+		btnKV_Luu = new JButton(" LƯU", taoIconThuNho("/images/save.png", 20, 20));
+		btnKV_Luu.setEnabled(false);
 
-		btnKV_Them = new JButton("Thêm");
-		btnKV_Them.setFont(fontBtn);
-		ImageIcon iconThem = taoIconThuNho("/images/add.png", 20, 20);
-		if (iconThem != null)
-			btnKV_Them.setIcon(iconThem);
-
-		btnKV_Xoa = new JButton("Xóa");
-		btnKV_Xoa.setFont(fontBtn);
-		ImageIcon iconXoa = taoIconThuNho("/images/delete.png", 20, 20);
-		if (iconXoa != null)
-			btnKV_Xoa.setIcon(iconXoa);
-
-		btnKV_XoaTrang = new JButton("Xóa trắng");
-		btnKV_XoaTrang.setFont(fontBtn);
-		ImageIcon iconXoaTrang = taoIconThuNho("/images/clear.png", 20, 20);
-		if (iconXoaTrang != null)
-			btnKV_XoaTrang.setIcon(iconXoaTrang);
-
-		btnKV_Sua = new JButton("Sửa");
-		btnKV_Sua.setFont(fontBtn);
-		ImageIcon iconSua = taoIconThuNho("/images/edit.png", 20, 20);
-		if (iconSua != null)
-			btnKV_Sua.setIcon(iconSua);
-
-		btnKV_Luu = new JButton("Lưu");
-		btnKV_Luu.setFont(fontBtn);
-		ImageIcon iconLuu = taoIconThuNho("/images/save.png", 20, 20);
-		if (iconLuu != null)
-			btnKV_Luu.setIcon(iconLuu);
-
-		pnNutChucNang.add(btnKV_Them);
-		pnNutChucNang.add(btnKV_Xoa);
-		pnNutChucNang.add(btnKV_XoaTrang);
-		pnNutChucNang.add(btnKV_Sua);
-		pnNutChucNang.add(btnKV_Luu);
+		JButton[] btnsKV = { btnKV_Them, btnKV_Xoa, btnKV_XoaTrang, btnKV_Sua, btnKV_Luu };
+		for (JButton b : btnsKV) {
+			setupRetroButton(b);
+			pnNutChucNang.add(b);
+		}
 
 		tbKhuVuc.getTableHeader().setResizingAllowed(false);
 		tbKhuVuc.getTableHeader().setReorderingAllowed(false);
@@ -418,24 +473,24 @@ public class DlgKhuVucBan extends JDialog {
 	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
 		pnSoDoBanRight.removeAll();
 		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
-		pnSoDoBanRight.setBackground(Color.WHITE);
+		pnSoDoBanRight.setBackground(MAU_NEN_CHINH); // Cập nhật nền Retro
 
 		for (java.util.Map.Entry<String, java.util.List<entity.Ban>> entry : mapKhuVucBan.entrySet()) {
 			String tenKhuVuc = entry.getKey();
 			java.util.List<entity.Ban> danhSachBan = entry.getValue();
 
 			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			pnTitle.setBackground(Color.WHITE);
+			pnTitle.setBackground(MAU_NEN_CHINH);
 			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 			pnTitle.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
 			JLabel lblKhuVuc = new JLabel(tenKhuVuc);
-			lblKhuVuc.setFont(new Font("Arial", Font.BOLD, 22));
-			lblKhuVuc.setForeground(new Color(220, 53, 69));
+			lblKhuVuc.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 22f));
+			lblKhuVuc.setForeground(MAU_NAU_VIEN); // Cập nhật màu Retro
 			pnTitle.add(lblKhuVuc);
 
 			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
-			pnTables.setBackground(Color.WHITE);
+			pnTables.setBackground(MAU_NEN_CHINH);
 			pnTables.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
 			for (entity.Ban ban : danhSachBan) {
@@ -444,18 +499,21 @@ public class DlgKhuVucBan extends JDialog {
 						"<html><div style='text-align: center; width: 80px;'>" + ban.getTenBan() + "</div></html>");
 
 				btnBan.setActionCommand(ban.getMaBan());
-
 				btnBan.setPreferredSize(new Dimension(100, 100));
-				btnBan.setFont(new Font("Arial", Font.BOLD, 15));
+				btnBan.setFont(new Font("Arial", Font.BOLD, 16));
 				btnBan.setFocusPainted(false);
 				btnBan.setMargin(new java.awt.Insets(2, 2, 2, 2));
+				
+				// Nhuộm chân khí cho bàn
+				btnBan.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3), 
+						BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-				if (ban.isTrangThai()) {
-					btnBan.setBackground(Color.RED);
+				if (ban.getTrangThai() != null && ban.getTrangThai().equalsIgnoreCase("Có khách")) {
+					btnBan.setBackground(new Color(193, 71, 71)); // Đỏ mộc mạc Retro
 					btnBan.setForeground(Color.WHITE);
 				} else {
-					btnBan.setBackground(new Color(240, 240, 240));
-					btnBan.setForeground(Color.BLACK);
+					btnBan.setBackground(MAU_HEADER); // Màu Bạc xỉu chờ khách
+					btnBan.setForeground(MAU_NAU_VIEN);
 				}
 				pnTables.add(btnBan);
 			}

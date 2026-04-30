@@ -7,12 +7,12 @@ import entity.TaiKhoan;
 import ui.FrmDangNhap;
 import util.DataBaseConnection;
 
-public class AuthenticationController {
+public class DangNhapController {
 	private FrmDangNhap loginView;
-	private MainDashboardController mainController;
+	private ManHinhChinhController mainController;
 	private TaiKhoanDAO tkDAO;
 
-	public AuthenticationController(FrmDangNhap loginView, MainDashboardController mainController) {
+	public DangNhapController(FrmDangNhap loginView, ManHinhChinhController mainController) {
 		this.loginView = loginView;
 		this.mainController = mainController;
 		this.tkDAO = new TaiKhoanDAO();

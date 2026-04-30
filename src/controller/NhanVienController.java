@@ -97,11 +97,32 @@ public class NhanVienController {
 	}
 
 	private void xuLyThemNV() {
-		String ma = view.getMaNVInput();
-		String tenDN = view.getTenDangNhapNVInput();
+		String ma = view.getMaNVInput().trim();
+		String tenDN = view.getTenDangNhapNVInput().trim();
+		String hoTen = view.getHoTenNVInput().trim();
+		String cccd = view.getCCCDInput().trim();
+		String sdt = view.getSDTInput().trim();
 
 		if (ma.isEmpty() || tenDN.isEmpty()) {
 			JOptionPane.showMessageDialog(view, "Mã nhân viên và Tên đăng nhập không được để trống!");
+			return;
+		}
+
+		if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+			JOptionPane.showMessageDialog(view,
+					"Mã nhân viên không hợp lệ! Không chứa khoảng trắng hay ký tự đặc biệt.");
+			return;
+		}
+		if (!hoTen.matches("^[\\p{L}\\s]+$")) {
+			JOptionPane.showMessageDialog(view, "Họ tên không hợp lệ! Chỉ được chứa chữ cái và khoảng trắng.");
+			return;
+		}
+		if (!sdt.matches("^0\\d{9}$")) {
+			JOptionPane.showMessageDialog(view, "Số điện thoại không hợp lệ! Phải gồm 10 chữ số và bắt đầu bằng số 0.");
+			return;
+		}
+		if (!cccd.matches("^\\d{12}$")) {
+			JOptionPane.showMessageDialog(view, "Căn cước công dân không hợp lệ! Phải chứa đúng 12 chữ số.");
 			return;
 		}
 
@@ -143,9 +164,26 @@ public class NhanVienController {
 	}
 
 	private void xuLySuaNV() {
-		String ma = view.getMaNVInput();
+		String ma = view.getMaNVInput().trim();
 		if (ma.isEmpty()) {
 			JOptionPane.showMessageDialog(view, "Chưa chọn nhân viên cần sửa!");
+			return;
+		}
+
+		String hoTen = view.getHoTenNVInput().trim();
+		String cccd = view.getCCCDInput().trim();
+		String sdt = view.getSDTInput().trim();
+
+		if (!hoTen.matches("^[\\p{L}\\s]+$")) {
+			JOptionPane.showMessageDialog(view, "Họ tên không hợp lệ! Chỉ được chứa chữ cái và khoảng trắng.");
+			return;
+		}
+		if (!sdt.matches("^0\\d{9}$")) {
+			JOptionPane.showMessageDialog(view, "Số điện thoại không hợp lệ! Phải gồm 10 chữ số và bắt đầu bằng số 0.");
+			return;
+		}
+		if (!cccd.matches("^\\d{12}$")) {
+			JOptionPane.showMessageDialog(view, "Căn cước công dân không hợp lệ! Phải chứa đúng 12 chữ số.");
 			return;
 		}
 

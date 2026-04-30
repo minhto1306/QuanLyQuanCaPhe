@@ -7,21 +7,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import entity.ChiTietHoaDon;
+import entity.ChiTietDatBan;
 import util.DataBaseConnection;
 
-public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
+public class ChiTietDatBanDAO implements BaseDAO<ChiTietDatBan, String> {
 
 	@Override
-	public boolean insert(ChiTietHoaDon cthd) {
-		String sql = "INSERT INTO ChiTietHoaDon (maHoaDon, maSanPham, soLuong, giaBan, ghiChu) VALUES (?, ?, ?, ?, ?)";
+	public boolean insert(ChiTietDatBan ct) {
+		String sql = "INSERT INTO ChiTietDatBan (maDatBan, maSanPham, soLuong, ghiChu) VALUES (?, ?, ?, ?)";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-			pstmt.setString(1, cthd.getMaHoaDon());
-			pstmt.setString(2, cthd.getMaSanPham());
-			pstmt.setInt(3, cthd.getSoLuong());
-			pstmt.setDouble(4, cthd.getGiaBan());
-			pstmt.setString(5, cthd.getGhiChu());
+			pstmt.setString(1, ct.getMaDatBan());
+			pstmt.setString(2, ct.getMaSanPham());
+			pstmt.setInt(3, ct.getSoLuong());
+			pstmt.setString(4, ct.getGhiChu());
 			return pstmt.executeUpdate() > 0;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -30,15 +29,14 @@ public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
 	}
 
 	@Override
-	public boolean update(ChiTietHoaDon cthd) {
-		String sql = "UPDATE ChiTietHoaDon SET soLuong = ?, giaBan = ?, ghiChu = ? WHERE maHoaDon = ? AND maSanPham = ?";
+	public boolean update(ChiTietDatBan ct) {
+		String sql = "UPDATE ChiTietDatBan SET soLuong = ?, ghiChu = ? WHERE maDatBan = ? AND maSanPham = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
-			pstmt.setInt(1, cthd.getSoLuong());
-			pstmt.setDouble(2, cthd.getGiaBan());
-			pstmt.setString(3, cthd.getGhiChu());
-			pstmt.setString(4, cthd.getMaHoaDon());
-			pstmt.setString(5, cthd.getMaSanPham());
+			pstmt.setInt(1, ct.getSoLuong());
+			pstmt.setString(2, ct.getGhiChu());
+			pstmt.setString(3, ct.getMaDatBan());
+			pstmt.setString(4, ct.getMaSanPham());
 			return pstmt.executeUpdate() > 0;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -48,7 +46,7 @@ public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
 
 	@Override
 	public boolean delete(String id) {
-		String sql = "DELETE FROM ChiTietHoaDon WHERE maHoaDon = ?";
+		String sql = "DELETE FROM ChiTietDatBan WHERE maDatBan = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
@@ -60,15 +58,15 @@ public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
 	}
 
 	@Override
-	public ChiTietHoaDon findById(String id) {
-		String sql = "SELECT * FROM ChiTietHoaDon WHERE maHoaDon = ?";
+	public ChiTietDatBan findById(String id) {
+		String sql = "SELECT * FROM ChiTietDatBan WHERE maDatBan = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, id);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
-					return new ChiTietHoaDon(rs.getString("maHoaDon"), rs.getString("maSanPham"), rs.getInt("soLuong"),
-							rs.getDouble("giaBan"), rs.getString("ghiChu"));
+					return new ChiTietDatBan(rs.getString("maDatBan"), rs.getString("maSanPham"), rs.getInt("soLuong"),
+							rs.getString("ghiChu"));
 				}
 			}
 		} catch (SQLException e) {
@@ -78,18 +76,18 @@ public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
 	}
 
 	@Override
-	public List<ChiTietHoaDon> findAll() {
-		List<ChiTietHoaDon> danhSach = new ArrayList<ChiTietHoaDon>();
-		String sql = "SELECT * FROM ChiTietHoaDon";
+	public List<ChiTietDatBan> findAll() {
+		List<ChiTietDatBan> ds = new ArrayList<>();
+		String sql = "SELECT * FROM ChiTietDatBan";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				danhSach.add(new ChiTietHoaDon(rs.getString("maHoaDon"), rs.getString("maSanPham"),
-						rs.getInt("soLuong"), rs.getDouble("giaBan"), rs.getString("ghiChu")));
+				ds.add(new ChiTietDatBan(rs.getString("maDatBan"), rs.getString("maSanPham"), rs.getInt("soLuong"),
+						rs.getString("ghiChu")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return danhSach;
+		return ds;
 	}
 }

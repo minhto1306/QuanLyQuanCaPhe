@@ -4,8 +4,8 @@ import javax.swing.UIManager;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
-import controller.AuthenticationController;
-import controller.MainDashboardController;
+import controller.DangNhapController;
+import controller.ManHinhChinhController;
 import ui.FrmDangNhap;
 import ui.FrmManHinhChinh;
 
@@ -17,11 +17,11 @@ public class MainApp {
 			System.err.println("Khởi tạo FlatLaf thất bại!");
 		}
 
-		FrmManHinhChinh mainView = new FrmManHinhChinh();
+		FrmManHinhChinh mainView = new FrmManHinhChinh("Admin");
 		FrmDangNhap loginView = new FrmDangNhap(mainView);
 
-		MainDashboardController dashboardController = new MainDashboardController(mainView);
-		AuthenticationController authController = new AuthenticationController(loginView, dashboardController);
+		ManHinhChinhController dashboardController = new ManHinhChinhController(mainView);
+		DangNhapController authController = new DangNhapController(loginView, dashboardController);
 
 		authController.batDau();
 	}

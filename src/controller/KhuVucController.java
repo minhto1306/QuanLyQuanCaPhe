@@ -181,10 +181,18 @@ public class KhuVucController {
 					JOptionPane.WARNING_MESSAGE);
 			return null;
 		}
+		if (!ma.matches("^[a-zA-Z0-9_]+$")) {
+			JOptionPane.showMessageDialog(parentView, "Mã khu vực không được chứa khoảng trắng hoặc ký tự đặc biệt!",
+					"Cảnh báo", JOptionPane.WARNING_MESSAGE);
+			return null;
+		}
 		try {
 			double pt = phuThuStr.isEmpty() ? 0 : Double.parseDouble(phuThuStr);
-			if (pt < 0)
-				throw new NumberFormatException();
+			if (pt < 0) {
+				JOptionPane.showMessageDialog(parentView, "Phụ thu không được nhập số âm!", "Lỗi",
+						JOptionPane.ERROR_MESSAGE);
+				return null;
+			}
 			return new KhuVuc(ma, ten, pt);
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(parentView, "Phụ thu phải là số hợp lệ (>= 0)!", "Lỗi",
@@ -303,7 +311,8 @@ public class KhuVucController {
 
 					if (!daTonTai) {
 						String tenBan = "Bàn " + i;
-						Ban banMoi = new Ban(maBan, maKhuVuc, tenBan, false);
+						// ĐÃ VÁ LỖI TẠI ĐÂY: Dùng "Trống" thay vì false
+						Ban banMoi = new Ban(maBan, maKhuVuc, tenBan, "Trống");
 						if (banDAO.insert(banMoi)) {
 							soBanTaoMoi++;
 						}
