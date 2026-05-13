@@ -51,12 +51,12 @@ public class DlgDatBan extends JDialog {
 	private JTable tbDatBan;
 	private DefaultTableModel tmDatBan;
 
-	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO
-	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
-	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
-	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo hộp thoại quản lý quá trình đặt bàn.
 	public DlgDatBan(JFrame parent) {
 		super(parent, "QUẢN LÝ ĐẶT BÀN", true);
 		this.setSize(1400, 700);
@@ -71,10 +71,9 @@ public class DlgDatBan extends JDialog {
 
 		loadCustomFont();
 
-		// Bọc lại y hệt DlgHangHoa để tạo viền ngoài
 		JPanel container = new JPanel(new BorderLayout());
 		container.setBackground(MAU_NAU_VIEN);
-		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		pnMain = khoiTaoGiaoDien();
 		container.add(pnMain, BorderLayout.CENTER);
@@ -82,6 +81,7 @@ public class DlgDatBan extends JDialog {
 		this.setContentPane(container);
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -95,6 +95,7 @@ public class DlgDatBan extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thay đổi kích thước của hình ảnh.
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null)
@@ -102,7 +103,7 @@ public class DlgDatBan extends JDialog {
 		return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
 
-	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các ô nhập liệu.
 	private void setupRetroInput(Component comp) {
 		if (comp instanceof JTextField) {
 			JTextField tf = (JTextField) comp;
@@ -116,7 +117,7 @@ public class DlgDatBan extends JDialog {
 		}
 	}
 
-	// CHIÊU THỨC: Trang trí Nút Bấm Retro chuẩn bài
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các nút tương tác.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
 		btn.setBackground(MAU_NEN_CHINH);
@@ -127,6 +128,7 @@ public class DlgDatBan extends JDialog {
 		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập các thành phần giao diện.
 	private JPanel khoiTaoGiaoDien() {
 		JPanel pnDatBan = new JPanel(new BorderLayout());
 		pnDatBan.setBackground(MAU_NEN_CHINH);
@@ -147,7 +149,6 @@ public class DlgDatBan extends JDialog {
 		lbTrangThai = new JLabel("TRẠNG THÁI:");
 		lbTimKiem = new JLabel("TÌM KIẾM:");
 
-		// Nới rộng đan điền của Nhãn lên 180
 		Dimension dLabel = new Dimension(180, 25);
 		JLabel[] labels = { lbTenKhach, lbSoDienThoai, lbMaKhuVuc, lbMaBan, lbThoiGianNhan, lbTrangThai, lbTimKiem };
 		for (JLabel lb : labels) {
@@ -170,7 +171,6 @@ public class DlgDatBan extends JDialog {
 		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spThoiGianNhan, "dd/MM/yyyy HH:mm");
 		spThoiGianNhan.setEditor(timeEditor);
 
-		// Trang trí cho JSpinner
 		spThoiGianNhan.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 		JTextField tfSpinner = ((JSpinner.DefaultEditor) spThoiGianNhan.getEditor()).getTextField();
 		tfSpinner.setFont(new Font("Arial", Font.BOLD, 15));
@@ -201,7 +201,6 @@ public class DlgDatBan extends JDialog {
 		Border brdThutVao = BorderFactory.createEmptyBorder(20, 20, 20, 20);
 		pnNhap.setBorder(BorderFactory.createCompoundBorder(brdVienDen, brdThutVao));
 
-		// Bơm chân khí tạo khoảng cách
 		boxRow1.add(lbTenKhach);
 		boxRow1.add(Box.createHorizontalStrut(15));
 		boxRow1.add(tfTenKhach);
@@ -236,7 +235,6 @@ public class DlgDatBan extends JDialog {
 		pnNhap.add(boxRow3);
 		pnDatBan.add(pnNhap, BorderLayout.NORTH);
 
-		// VÙNG BẢNG DỮ LIỆU
 		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
 		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
 		pnBangDuLieu.setBorder(
@@ -245,8 +243,7 @@ public class DlgDatBan extends JDialog {
 		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
 		pnTimKiem.setBackground(MAU_HEADER);
 		pnTimKiem.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 0, MAU_NAU_VIEN));
-		
-		// Bơm nốt chân khí vào ô tìm kiếm
+
 		boxTimKiem.add(lbTimKiem);
 		boxTimKiem.add(Box.createHorizontalStrut(15));
 		tfTimKiem.setPreferredSize(new Dimension(300, 30));
@@ -268,7 +265,6 @@ public class DlgDatBan extends JDialog {
 		};
 		tbDatBan = new JTable(tmDatBan);
 
-		// Style bảng Retro
 		JTableHeader header = tbDatBan.getTableHeader();
 		header.setFont(new Font("Tahoma", Font.BOLD, 16));
 		header.setBackground(MAU_HEADER);
@@ -285,7 +281,6 @@ public class DlgDatBan extends JDialog {
 		tbDatBan.getColumnModel().getColumn(8).setCellRenderer(new ButtonRenderer());
 		tbDatBan.getColumnModel().getColumn(8).setCellEditor(new ButtonEditor(new JCheckBox()));
 
-		// Render căn lề và đổ màu trạng thái
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		for (int i = 0; i <= 3; i++)
@@ -323,7 +318,6 @@ public class DlgDatBan extends JDialog {
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 		pnDatBan.add(pnBangDuLieu, BorderLayout.CENTER);
 
-		// VÙNG NÚT CHỨC NĂNG
 		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
 		pnNutChucNang.setBackground(MAU_NEN_CHINH);
 		pnNutChucNang.setBorder(brdVienDen);
@@ -348,6 +342,7 @@ public class DlgDatBan extends JDialog {
 		return pnDatBan;
 	}
 
+	// Lớp phụ trợ phục vụ hiển thị nút bấm trong bảng
 	class ButtonRenderer extends JButton implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
 
@@ -367,6 +362,7 @@ public class DlgDatBan extends JDialog {
 		}
 	}
 
+	// Lớp phụ trợ phục vụ thao tác của nút bấm trong bảng
 	class ButtonEditor extends DefaultCellEditor {
 		private static final long serialVersionUID = 1L;
 		protected JButton button;
@@ -398,6 +394,10 @@ public class DlgDatBan extends JDialog {
 
 	public JTextField getTfSoDienThoai() {
 		return tfSoDienThoai;
+	}
+
+	public JTextField getTfTimKiem() {
+		return tfTimKiem;
 	}
 
 	public JComboBox<String> getCbMaKhuVuc() {
@@ -444,18 +444,29 @@ public class DlgDatBan extends JDialog {
 		btnLuu.addActionListener(l);
 	}
 
+	public void addBtnTimListener(ActionListener l) {
+		btnTim.addActionListener(l);
+	}
+
+	public void addTfTimKiemListener(ActionListener l) {
+		tfTimKiem.addActionListener(l);
+	}
+
+	// CHỨC NĂNG: Khởi tạo và hiển thị hộp thoại chi tiết cho thông tin đặt bàn đã
+	// được chọn.
 	public void hienThiDialogChiTiet(String maDB, String khuVuc, String ban, String tenKhach, String sdt,
 			String thoiGian, String trangThai) {
 		new DlgChiTietDatBan(this, maDB, khuVuc, ban, tenKhach, sdt, thoiGian, trangThai).setVisible(true);
 	}
 
+	// Lớp phụ trợ phục vụ hiển thị chi tiết thông tin đặt bàn
 	class DlgChiTietDatBan extends JDialog {
 		private static final long serialVersionUID = 1L;
 
 		public DlgChiTietDatBan(Dialog parent, String maDB, String khuVuc, String ban, String tenKhach, String sdt,
 				String thoiGian, String trangThai) {
 			super(parent, "CHI TIẾT ĐẶT BÀN", true);
-			this.setSize(450, 400);
+			this.setSize(450, 450);
 			this.setLocationRelativeTo(parent);
 			JPanel p = new JPanel();
 			p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -469,6 +480,19 @@ public class DlgDatBan extends JDialog {
 			p.add(Box.createVerticalStrut(10));
 			p.add(createRow("BÀN: ", ban));
 			p.add(Box.createVerticalStrut(10));
+
+			String tienPhuThu = "0";
+			dao.KhuVucDAO kvDAO = new dao.KhuVucDAO();
+			java.util.List<entity.KhuVuc> dsKV = kvDAO.findAll();
+			for (entity.KhuVuc kv : dsKV) {
+				if (kv.getMaKhuVuc().equals(khuVuc) || kv.getTenKhuVuc().equals(khuVuc)) {
+					tienPhuThu = String.format("%,.0f VNĐ", kv.getPhuThu());
+					break;
+				}
+			}
+			p.add(createRow("PHỤ THU: ", tienPhuThu));
+			p.add(Box.createVerticalStrut(10));
+
 			p.add(createRow("KHÁCH HÀNG :", tenKhach));
 			p.add(Box.createVerticalStrut(10));
 			p.add(createRow("SỐ ĐIỆN THOẠI :", sdt));
@@ -494,5 +518,14 @@ public class DlgDatBan extends JDialog {
 			row.add(l2);
 			return row;
 		}
+	}
+
+	// CHỨC NĂNG: Quản lý trạng thái bật/tắt các nút chức năng trong quá trình đặt
+	// bàn.
+	public void batTatNutDatBan(boolean them, boolean xoa, boolean sua, boolean luu) {
+		btnThem.setEnabled(them);
+		btnXoa.setEnabled(xoa);
+		btnSua.setEnabled(sua);
+		btnLuu.setEnabled(luu);
 	}
 }

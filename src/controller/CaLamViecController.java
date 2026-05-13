@@ -23,12 +23,12 @@ public class CaLamViecController {
 	private NhanVienDAO nvDAO;
 	private TaiKhoanDAO tkDAO;
 
+	// CHỨC NĂNG: Khởi tạo điều khiển quản lý và phân công ca làm việc.
 	public CaLamViecController(DlgCaLamViec view) {
 		this.view = view;
 		this.pcDAO = new PhanCongCaLamDAO();
 		this.nvDAO = new NhanVienDAO();
-		this.tkDAO = new TaiKhoanDAO(); // Khởi tạo mạch máu mới
-
+		this.tkDAO = new TaiKhoanDAO();
 		caiDatDanhSachNhanVien();
 		loadLichLamViec();
 
@@ -43,19 +43,21 @@ public class CaLamViecController {
 		this.view.addBtnLuuListener(e -> luuPhanCong());
 	}
 
+	// CHỨC NĂNG: Tính toán lại các thông số thời gian theo tuần.
 	private void chuyenTuan(int days) {
 		view.setNgayBatDauTuan(view.getNgayBatDauTuan().plusDays(days));
 		view.capNhatDuLieuTuan();
 		loadLichLamViec();
 	}
 
+	// CHỨC NĂNG: Thiết lập danh sách các nhân viên có thể được lựa chọn khi phân
+	// công làm việc.
 	private void caiDatDanhSachNhanVien() {
 		List<NhanVien> dsNV = nvDAO.findAll();
 		List<String> listTenNV = new ArrayList<>();
 		if (dsNV != null) {
 			for (NhanVien nv : dsNV) {
-				// TUYỆT CHIÊU KẾT LIỄU: Kiểm tra xem tài khoản của kẻ này có đang bị khóa hay
-				// không!
+
 				TaiKhoan tk = tkDAO.findById(nv.getTenDangNhap());
 				if (tk != null && tk.isTrangThai()) {
 					listTenNV.add(nv.getMaNhanVien() + " - " + nv.getHoTenNhanVien());
@@ -65,6 +67,8 @@ public class CaLamViecController {
 		view.setDanhSachNhanVien(listTenNV);
 	}
 
+	// CHỨC NĂNG: Tải toàn bộ cấu hình lịch phân công từ cơ sở dữ liệu lên bảng
+	// trình bày.
 	private void loadLichLamViec() {
 		DefaultTableModel model = view.getTmCaLamViec();
 		LocalDate start = view.getNgayBatDauTuan();
@@ -98,6 +102,8 @@ public class CaLamViecController {
 		}
 	}
 
+	// CHỨC NĂNG: Cập nhật và lưu thay đổi các sửa đổi thiết lập phân công ca làm
+	// việc vào cơ sở dữ liệu.
 	private void luuPhanCong() {
 		LocalDate start = view.getNgayBatDauTuan();
 

@@ -12,6 +12,7 @@ public class DangNhapController {
 	private ManHinhChinhController mainController;
 	private TaiKhoanDAO tkDAO;
 
+	// CHỨC NĂNG: Khởi tạo quá trình xử lý đăng nhập cho người dùng hệ thống.
 	public DangNhapController(FrmDangNhap loginView, ManHinhChinhController mainController) {
 		this.loginView = loginView;
 		this.mainController = mainController;
@@ -19,11 +20,12 @@ public class DangNhapController {
 
 		this.loginView.addLoginListener(e -> xuLyDangNhap());
 		this.loginView.addExitListener(e -> {
-			DataBaseConnection.getInstance().disconnect(); // Ngắt kết nối như code cũ của ngươi
+			DataBaseConnection.getInstance().disconnect();
 			System.exit(0);
 		});
 	}
 
+	// CHỨC NĂNG: Xác thực các thông tin đăng nhập của người dùng.
 	private void xuLyDangNhap() {
 		String user = loginView.getUsername();
 		String pwd = loginView.getPassword();
@@ -42,12 +44,17 @@ public class DangNhapController {
 			System.out.println("Tài khoản đang đăng nhập " + tk.getTenDangNhap());
 
 			loginView.dispose();
+			mainController.setTenNhanVien(tk.getTenDangNhap());
+
+			mainController.phanQuyen(tk.getVaiTro());
+
 			mainController.hienThiDaiSanh();
 		} else {
 			loginView.showMessage("Sai tên đăng nhập, mật khẩu hoặc bị khóa!", "Thất bại", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
+	// CHỨC NĂNG: Hiển thị giao diện màn hình đăng nhập hệ thống.
 	public void batDau() {
 		loginView.setVisible(true);
 	}

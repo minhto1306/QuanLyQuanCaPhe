@@ -11,11 +11,10 @@ public class HoaDon {
 	private double thueVAT;
 	private double giamGia;
 	private double thanhTien;
-	private String phuongThucThanhToan;
 	private boolean trangThai;
 
 	public HoaDon(String maHoaDon, String maNhanVien, String maBan, LocalDateTime thoiGianLap, double tongTien,
-			double thueVAT, double giamGia, double thanhTien, String phuongThucThanhToan, boolean trangThai) {
+			double thueVAT, double giamGia, double thanhTien, boolean trangThai) {
 		this.maHoaDon = maHoaDon;
 		this.maNhanVien = maNhanVien;
 		this.maBan = maBan;
@@ -24,7 +23,6 @@ public class HoaDon {
 		this.thueVAT = thueVAT;
 		this.giamGia = giamGia;
 		this.thanhTien = thanhTien;
-		this.phuongThucThanhToan = phuongThucThanhToan;
 		this.trangThai = trangThai;
 	}
 
@@ -94,14 +92,6 @@ public class HoaDon {
 
 	public void setThanhTien(double thanhTien) {
 		this.thanhTien = thanhTien;
-	}
-
-	public String getPhuongThucThanhToan() {
-		return phuongThucThanhToan;
-	}
-
-	public void setPhuongThucThanhToan(String phuongThucThanhToan) {
-		this.phuongThucThanhToan = phuongThucThanhToan;
 	}
 
 	public boolean isTrangThai() {

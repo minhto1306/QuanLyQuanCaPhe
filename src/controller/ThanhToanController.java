@@ -1,12 +1,12 @@
 package controller;
 
-import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,14 +14,20 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 import dao.BanDAO;
 import dao.ChiTietHoaDonDAO;
 import dao.HoaDonDAO;
+import dao.KhuVucDAO;
 import dao.NhanVienDAO;
 import entity.Ban;
 import entity.ChiTietHoaDon;
 import entity.HoaDon;
+import entity.KhuVuc;
 import entity.SanPham;
 import ui.DlgInHoaDon;
 import ui.FrmManHinhChinh;
@@ -37,13 +43,19 @@ public class ThanhToanController {
 	private ChiTietHoaDonDAO cthdDAO = new ChiTietHoaDonDAO();
 	private BanDAO banDAO = new BanDAO();
 	private NhanVienDAO nvDAO = new NhanVienDAO();
+	private dao.SanPhamDAO spDAO = new dao.SanPhamDAO();
+
+	private KhuVucDAO kvDAO = new KhuVucDAO();
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+	// CHỨC NĂNG: Khởi tạo điều khiển quá trình thanh toán trên màn hình chính.
 	public ThanhToanController(FrmManHinhChinh view) {
 		this.view = view;
 		khoiTaoSuKien();
 	}
 
+	// CHỨC NĂNG: Gắn các sự kiện lắng nghe để cập nhật tính toán trên giao diện
+	// thanh toán.
 	private void khoiTaoSuKien() {
 		view.getCbBoxThue().addActionListener(e -> tinhToanLaiTien());
 		view.getTfGiamGia().addKeyListener(new KeyAdapter() {
@@ -53,9 +65,60 @@ public class ThanhToanController {
 			}
 		});
 
+		((AbstractDocument) view.getTfGiamGia().getDocument()).setDocumentFilter(new DocumentFilter() {
+			@Override
+			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+					throws BadLocationException {
+				if (string == null)
+					return;
+				if (string.matches("\\d+")) {
+					super.insertString(fb, offset, string, attr);
+				}
+			}
+
+			@Override
+			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+					throws BadLocationException {
+				if (text == null)
+					return;
+				if (text.matches("\\d+")) {
+					super.replace(fb, offset, length, text, attrs);
+				}
+			}
+		});
+
 		view.getBtnThanhToan().addActionListener(e -> xuLyThanhToan());
 	}
 
+	// CHỨC NĂNG: Tải và hiển thị danh sách các bàn theo từng khu vực lên giao diện.
+	public void lamMoiSoDoBanMain() {
+		List<KhuVuc> listKV = kvDAO.findAll();
+		List<Ban> listBan = banDAO.findAll();
+		Map<String, List<Ban>> mapKhuVucBan = new LinkedHashMap<>();
+		for (KhuVuc kv : listKV) {
+			List<Ban> banCuaKv = new ArrayList<>();
+			for (Ban b : listBan) {
+				if (b.getMaKhuVuc() != null && b.getMaKhuVuc().equals(kv.getMaKhuVuc())) {
+					banCuaKv.add(b);
+				}
+			}
+			if (!banCuaKv.isEmpty()) {
+				banCuaKv.sort((b1, b2) -> {
+					int n1 = Integer.parseInt(b1.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
+							: b1.getTenBan().replaceAll("\\D", ""));
+					int n2 = Integer.parseInt(b2.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
+							: b2.getTenBan().replaceAll("\\D", ""));
+					if (n1 == n2)
+						return b1.getTenBan().compareTo(b2.getTenBan());
+					return Integer.compare(n1, n2);
+				});
+				mapKhuVucBan.put(kv.getTenKhuVuc(), banCuaKv);
+			}
+		}
+		view.hienThiDanhSachBanToanBo(mapKhuVucBan);
+	}
+
+	// CHỨC NĂNG: Xử lý thông tin hiển thị và trạng thái khi một bàn được chọn.
 	public void xuLyChonBan(Ban ban, String tenKhuVuc) {
 		this.banHienTai = ban;
 		view.getLbValueKhuVuc().setText(tenKhuVuc + " - " + ban.getTenBan());
@@ -64,11 +127,20 @@ public class ThanhToanController {
 		if (order == null) {
 			order = new HoaDonTam();
 			order.gioVao = LocalDateTime.now();
+
+			List<KhuVuc> dsKhuVuc = kvDAO.findAll();
+			for (KhuVuc kv : dsKhuVuc) {
+				if (kv.getMaKhuVuc() != null && kv.getMaKhuVuc().equals(ban.getMaKhuVuc())) {
+					order.phuThu = kv.getPhuThu();
+					break;
+				}
+			}
+
 			danhSachOrder.put(ban.getMaBan(), order);
 
 			ban.setTrangThai("Có khách");
 			banDAO.update(ban);
-			view.loadDuLieuSoDoBanMain();
+			lamMoiSoDoBanMain();
 		}
 
 		view.getLbValueGioVao().setText(order.gioVao.format(dtf));
@@ -76,6 +148,7 @@ public class ThanhToanController {
 		view.getTabbedPane().setSelectedIndex(1);
 	}
 
+	// CHỨC NĂNG: Xử lý thêm sản phẩm vào danh sách món của bàn đang chọn.
 	public void xuLyChonMon(SanPham sp) {
 		if (banHienTai == null) {
 			JOptionPane.showMessageDialog(view, "Phải chọn Bàn bên Sơ đồ trước khi gọi món!");
@@ -102,6 +175,7 @@ public class ThanhToanController {
 		hienThiOrderLenBang(order);
 	}
 
+	// CHỨC NĂNG: Cập nhật chi tiết danh sách món và số tiền lên bảng.
 	private void hienThiOrderLenBang(HoaDonTam order) {
 		DefaultTableModel tm = view.getTableModel();
 		tm.setRowCount(0);
@@ -112,13 +186,17 @@ public class ThanhToanController {
 			double thanhTienMon = ct.getSoLuong() * ct.getGiaBan();
 			tongTienChuaThue += thanhTienMon;
 
-			tm.addRow(new Object[] { stt++, ct.getMaSanPham(), ct.getSoLuong(), ct.getGiaBan(), thanhTienMon });
+			entity.SanPham sp = spDAO.findById(ct.getMaSanPham());
+			String tenMonHienThi = (sp != null) ? sp.getTenSanPham() : ct.getMaSanPham();
+
+			tm.addRow(new Object[] { stt++, tenMonHienThi, ct.getSoLuong(), ct.getGiaBan(), thanhTienMon });
 		}
 
 		order.tongTienBanDau = tongTienChuaThue;
 		tinhToanLaiTien();
 	}
 
+	// CHỨC NĂNG: Cập nhật lại tổng số tiền cần thanh toán.
 	private void tinhToanLaiTien() {
 		if (banHienTai == null)
 			return;
@@ -136,13 +214,13 @@ public class ThanhToanController {
 		}
 
 		int ptThue = (Integer) view.getCbBoxThue().getSelectedItem();
-		double tienThue = order.tongTienBanDau * ptThue / 100.0;
+		double tienThue = (order.tongTienBanDau + order.phuThu) * ptThue / 100.0;
 
-		double tienPhaiTra = order.tongTienBanDau + tienThue - giamGia;
+		double tienPhaiTra = order.tongTienBanDau + order.phuThu + tienThue - giamGia;
 		if (tienPhaiTra < 0)
 			tienPhaiTra = 0;
 
-		view.getLbValueTienPhaiTra().setText(String.format("%,.0f VNĐ", order.tongTienBanDau));
+		view.getLbValueTienPhaiTra().setText(String.format("%,.0f VNĐ", order.phuThu));
 		view.getLbTongTien().setText(String.format("%,.0f VNĐ", tienPhaiTra));
 
 		order.tienThue = tienThue;
@@ -150,6 +228,8 @@ public class ThanhToanController {
 		order.tienPhaiTra = tienPhaiTra;
 	}
 
+	// CHỨC NĂNG: Xác nhận thao tác thanh toán, tạo hóa đơn và xử lý cập nhật trạng
+	// thái bàn.
 	private void xuLyThanhToan() {
 		if (banHienTai == null)
 			return;
@@ -157,23 +237,17 @@ public class ThanhToanController {
 		if (order == null || order.danhSachMon.isEmpty())
 			return;
 
-		// 🛠️ LẤY TÊN NHÂN VIÊN ĐANG TRỰC
-		// Giả sử Qẹoooo lưu maNhanVien trong FrmManHinhChinh sau khi Login
-		// Nếu chưa có, Qẹoooo tạo hàm public String getMaNhanVienDangNhap() bên
-		// FrmManHinhChinh nghen
-		String maNV = "NV01"; // Mặc định nếu không tìm thấy
+		String maNV = "NV01";
 		String tenNVReal = "Nhân viên trực";
 
-		// Tìm thông tin đầy đủ từ Database
 		entity.NhanVien nvEntity = nvDAO.findById(maNV);
 		if (nvEntity != null) {
 			tenNVReal = nvEntity.getHoTenNhanVien();
 		}
 
-		// 1. LƯU DATABASE
 		String maHD = "HD" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmss"));
-		HoaDon hd = new HoaDon(maHD, maNV, banHienTai.getMaBan(), LocalDateTime.now(), order.tongTienBanDau,
-				order.tienThue, order.giamGia, order.tienPhaiTra, "Tiền mặt", true);
+		HoaDon hd = new HoaDon(maHD, maNV, banHienTai.getMaBan(), LocalDateTime.now(),
+				order.tongTienBanDau + order.phuThu, order.tienThue, order.giamGia, order.tienPhaiTra, false);
 
 		if (hdDAO.insert(hd)) {
 			for (ChiTietHoaDon ct : order.danhSachMon) {
@@ -185,7 +259,6 @@ public class ThanhToanController {
 			banDAO.update(banHienTai);
 			danhSachOrder.remove(banHienTai.getMaBan());
 
-			// 2. HỎI XEM HÓA ĐƠN
 			int chon = JOptionPane.showConfirmDialog(view,
 					"Thanh toán thành công! Bạn có muốn xem lại hóa đơn vừa lưu không?", "Xác nhận",
 					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -199,7 +272,6 @@ public class ThanhToanController {
 				}
 
 				JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(view);
-				// 👇 QUĂNG tenNVReal VỪA TÌM ĐƯỢC VÔ ĐÂY NÈ QẸOOOO
 				DlgInHoaDon dlgIn = new DlgInHoaDon(parentFrame, hd, tenNVReal, banHienTai.getTenBan(), dsMon);
 				dlgIn.setVisible(true);
 			}
@@ -210,11 +282,9 @@ public class ThanhToanController {
 		}
 	}
 
+	// CHỨC NĂNG: Khôi phục lại trạng thái ban đầu sau khi hoàn tất giao dịch.
 	private void quayVeTrangChu() {
-		// Xóa trắng bảng danh sách món
 		view.getTableModel().setRowCount(0);
-
-		// Xóa các ô hiển thị tiền bạc, giờ giấc
 		view.getLbValueKhuVuc().setText("---");
 		view.getLbValueGioVao().setText("--:--");
 		view.getLbValueTienPhaiTra().setText("0 VNĐ");
@@ -222,12 +292,10 @@ public class ThanhToanController {
 		view.getTfGiamGia().setText("");
 		view.getCbBoxThue().setSelectedIndex(0);
 
-		// Thả cái bàn đang giữ ra
 		banHienTai = null;
-
-		// Nhảy về tab Sơ đồ bàn (Tab 0) và Load lại màu cho các nút Bàn
 		view.getTabbedPane().setSelectedIndex(0);
-		view.loadDuLieuSoDoBanMain();
+
+		lamMoiSoDoBanMain();
 	}
 
 	public String getGioVaoCuaBan(String maBan) {
@@ -242,6 +310,7 @@ public class ThanhToanController {
 		LocalDateTime gioVao;
 		List<ChiTietHoaDon> danhSachMon = new ArrayList<>();
 		double tongTienBanDau = 0;
+		double phuThu = 0;
 		double tienThue = 0;
 		double giamGia = 0;
 		double tienPhaiTra = 0;

@@ -92,4 +92,23 @@ public class ChiTietHoaDonDAO implements BaseDAO<ChiTietHoaDon, String> {
 		}
 		return danhSach;
 	}
+
+	// Thêm vào trong ChiTietHoaDonDAO.java
+	public List<ChiTietHoaDon> findByMaHoaDon(String maHD) {
+		List<ChiTietHoaDon> danhSach = new ArrayList<>();
+		String sql = "SELECT * FROM ChiTietHoaDon WHERE maHoaDon = ?";
+		Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+			pstmt.setString(1, maHD);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					danhSach.add(new ChiTietHoaDon(rs.getString("maHoaDon"), rs.getString("maSanPham"),
+							rs.getInt("soLuong"), rs.getDouble("giaBan"), rs.getString("ghiChu")));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return danhSach;
+	}
 }

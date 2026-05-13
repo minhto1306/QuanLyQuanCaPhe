@@ -32,14 +32,14 @@ public class DlgThemDanhMuc extends JDialog {
 	private JLabel lbMaDanhMuc;
 	private JLabel lbTenDanhMuc;
 
-	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ
 	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
 	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo giao diện hộp thoại thêm danh mục.
 	public DlgThemDanhMuc(JDialog parent) {
 		super(parent, "THÊM DANH MỤC", true);
-		this.setSize(480, 320); // Nới rộng ra một tí cho thoáng khí
+		this.setSize(480, 320);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -48,6 +48,7 @@ public class DlgThemDanhMuc extends JDialog {
 		khoiTaoGiaoDien();
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -61,6 +62,7 @@ public class DlgThemDanhMuc extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thay đổi kích thước hình ảnh.
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null) {
@@ -69,7 +71,7 @@ public class DlgThemDanhMuc extends JDialog {
 		return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
 
-	// CHIÊU THỨC: Trang trí Text Field y hệt DlgHangHoa
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các ô nhập liệu.
 	private void setupRetroInput(Component comp) {
 		if (comp instanceof JTextField) {
 			JTextField tf = (JTextField) comp;
@@ -79,7 +81,7 @@ public class DlgThemDanhMuc extends JDialog {
 		}
 	}
 
-	// CHIÊU THỨC: Trang trí Nút bấm y hệt DlgHangHoa
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các nút bấm.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
 		btn.setBackground(MAU_NEN_CHINH);
@@ -89,20 +91,18 @@ public class DlgThemDanhMuc extends JDialog {
 				BorderFactory.createEmptyBorder(5, 15, 5, 15)));
 	}
 
+	// CHỨC NĂNG: Khởi tạo và bố trí các thành phần giao diện.
 	private void khoiTaoGiaoDien() {
-		// Nền tổng thể Nâu Đậm (Padding ngoài)
 		JPanel container = new JPanel(new BorderLayout());
 		container.setBackground(MAU_NAU_VIEN);
 		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		// Bảng nội dung chính (Màu Vani)
 		JPanel pnMainLayout = new JPanel(new BorderLayout());
 		pnMainLayout.setBackground(MAU_NEN_CHINH);
 		pnMainLayout.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3));
 		container.add(pnMainLayout, BorderLayout.CENTER);
 		this.setContentPane(container);
 
-		// CHIÊU THỨC: Tiêu đề xịn xò
 		JPanel pnTieuDe = new JPanel();
 		pnTieuDe.setBackground(MAU_NEN_CHINH);
 		pnTieuDe.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 0));
@@ -128,7 +128,6 @@ public class DlgThemDanhMuc extends JDialog {
 		lbMaDanhMuc.setPreferredSize(dLabel);
 		lbTenDanhMuc.setPreferredSize(dLabel);
 
-		// Áp dụng Font Bungee cho Label
 		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
 		lbMaDanhMuc.setFont(fontLabelRetro);
 		lbMaDanhMuc.setForeground(MAU_NAU_VIEN);
@@ -144,7 +143,6 @@ public class DlgThemDanhMuc extends JDialog {
 		tfTenDanhMuc.setPreferredSize(dInput);
 		tfTenDanhMuc.setMaximumSize(dInput);
 
-		// Áp dụng trang trí ô nhập liệu
 		setupRetroInput(tfMaDanhMuc);
 		setupRetroInput(tfTenDanhMuc);
 
@@ -172,7 +170,6 @@ public class DlgThemDanhMuc extends JDialog {
 		btnLuuThemMoi = new JButton("LƯU + THÊM MỚI", taoIconThuNho("/images/save.png", 20, 20));
 		btnDong = new JButton("ĐÓNG", taoIconThuNho("/images/close.png", 20, 20));
 
-		// Áp dụng trang trí Nút bấm
 		setupRetroButton(btnLuuThemMoi);
 		setupRetroButton(btnDong);
 
@@ -182,14 +179,17 @@ public class DlgThemDanhMuc extends JDialog {
 		pnMainLayout.add(pnBottom, BorderLayout.SOUTH);
 	}
 
+	// CHỨC NĂNG: Truy xuất mã danh mục được nhập.
 	public String getMaDanhMuc() {
 		return tfMaDanhMuc.getText().trim();
 	}
 
+	// CHỨC NĂNG: Truy xuất tên danh mục được nhập.
 	public String getTenDanhMuc() {
 		return tfTenDanhMuc.getText().trim();
 	}
 
+	// CHỨC NĂNG: Làm sạch dữ liệu trên các ô nhập liệu.
 	public void xoaTrangThongTin() {
 		tfMaDanhMuc.setText("");
 		tfTenDanhMuc.setText("");

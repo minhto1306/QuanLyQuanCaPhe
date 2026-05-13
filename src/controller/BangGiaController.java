@@ -16,12 +16,15 @@ import ui.DlgBangGia;
 public class BangGiaController {
 	private DlgBangGia bangGiaView;
 
+	// CHỨC NĂNG: Khởi tạo tiến trình điều khiển để kết xuất thông tin bảng giá sản
+	// phẩm.
 	public BangGiaController(DlgBangGia view) {
 		this.bangGiaView = view;
-		// Vừa gọi Controller là nó tự động lấy dữ liệu đắp lên View luôn
 		loadDuLieuLenBang();
 	}
 
+	// CHỨC NĂNG: Tải thông tin từ cơ sở dữ liệu để hiển thị chi tiết giá cả của
+	// toàn bộ sản phẩm.
 	public void loadDuLieuLenBang() {
 		SanPhamDAO spDAO = new SanPhamDAO();
 		DanhMucDAO dmDAO = new DanhMucDAO();
@@ -36,9 +39,8 @@ public class BangGiaController {
 			}
 		}
 
-		// Lấy cái bảng từ bên View qua để nhét dữ liệu vô
 		DefaultTableModel tbModel = bangGiaView.getTbModel();
-		tbModel.setRowCount(0); // Xóa trắng trước khi thêm
+		tbModel.setRowCount(0);
 		int stt = 1;
 		DecimalFormat df = new DecimalFormat("#,### VNĐ");
 

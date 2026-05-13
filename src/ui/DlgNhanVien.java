@@ -90,12 +90,12 @@ public class DlgNhanVien extends JDialog {
 	private JTable tbTaiKhoan;
 	private DefaultTableModel tmTaiKhoan;
 
-	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO (Sao y bản chính từ DlgHangHoa)
-	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
-	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
-	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo giao diện quản lý nhân viên và tài khoản.
 	public DlgNhanVien(JFrame parent) {
 		super(parent, "NHÂN VIÊN VÀ TÀI KHOẢN", true);
 		this.setSize(950, 750);
@@ -121,15 +121,14 @@ public class DlgNhanVien extends JDialog {
 		tabbedPane.addTab("THÔNG TIN NHÂN VIÊN", iconNhanVien, tabNhanVien, "Xem thông tin nhân viên");
 		tabbedPane.addTab("THÔNG TIN TÀI KHOẢN", iconTaiKhoan, tabTaiKhoan, "Xem thông tin tài khoản");
 
-		// Nền tổng thể Nâu Đậm, lót thêm một lớp panel để tạo viền padding y hệt
-		// DlgHangHoa
 		JPanel container = new JPanel(new BorderLayout());
 		container.setBackground(MAU_NAU_VIEN);
-		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.add(tabbedPane, BorderLayout.CENTER);
 		this.setContentPane(container);
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -143,6 +142,7 @@ public class DlgNhanVien extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thu nhỏ kích thước hình ảnh.
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null)
@@ -150,7 +150,7 @@ public class DlgNhanVien extends JDialog {
 		return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
 
-	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các ô nhập liệu và hộp thoại chọn.
 	private void setupRetroInput(Component comp) {
 		if (comp instanceof JTextField) {
 			JTextField tf = (JTextField) comp;
@@ -164,7 +164,7 @@ public class DlgNhanVien extends JDialog {
 		}
 	}
 
-	// CHIÊU THỨC: Trang trí Nút Bấm
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho nút bấm.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
 		btn.setBackground(MAU_NEN_CHINH);
@@ -174,9 +174,10 @@ public class DlgNhanVien extends JDialog {
 				BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 	}
 
+	// CHỨC NĂNG: Khởi tạo giao diện tab thông tin nhân viên.
 	public JPanel khoiTaoTabNhanVien() {
 		pnNhanVien = new JPanel(new BorderLayout());
-		pnNhanVien.setBackground(MAU_NEN_CHINH); // Nhuộm màu nền
+		pnNhanVien.setBackground(MAU_NEN_CHINH);
 		pnNhanVien.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		boxRow1 = Box.createHorizontalBox();
@@ -205,7 +206,6 @@ public class DlgNhanVien extends JDialog {
 
 		lbTimNV.setPreferredSize(new Dimension(160, 25));
 
-		// Đổi Font Bungee cho Labels
 		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 16f);
 		JLabel[] labels = { lbTimNV, lbMaNhanVien, lbHoTenNhanVien, lbSoDienThoai, lbTenDangNhap, lbCCCD, lbVaiTro };
 		for (JLabel lbl : labels) {
@@ -277,7 +277,6 @@ public class DlgNhanVien extends JDialog {
 		boxRow3.add(Box.createHorizontalGlue());
 		pnNhapThongTin.add(boxRow3);
 
-		// VÙNG BẢNG DỮ LIỆU
 		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
 		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
 		pnBangDuLieu.setBorder(
@@ -303,7 +302,6 @@ public class DlgNhanVien extends JDialog {
 		};
 		tbNhanVien = new JTable(tmNhanVien);
 
-		// Style Bảng Retro
 		JTableHeader header = tbNhanVien.getTableHeader();
 		header.setFont(new Font("Tahoma", Font.BOLD, 16));
 		header.setBackground(MAU_HEADER);
@@ -330,7 +328,6 @@ public class DlgNhanVien extends JDialog {
 		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 
-		// VÙNG NÚT CHỨC NĂNG
 		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
 		pnNutChucNang.setBackground(MAU_NEN_CHINH);
 		pnNutChucNang.setBorder(brdVienDen);
@@ -355,6 +352,7 @@ public class DlgNhanVien extends JDialog {
 		return pnNhanVien;
 	}
 
+	// CHỨC NĂNG: Khởi tạo giao diện tab thông tin tài khoản.
 	public JPanel khoiTaoTabTaiKhoan() {
 		pnTaiKhoan = new JPanel(new BorderLayout());
 		pnTaiKhoan.setBackground(MAU_NEN_CHINH);
@@ -485,7 +483,6 @@ public class DlgNhanVien extends JDialog {
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		tbTaiKhoan.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
-		// Nhuộm màu trạng thái tài khoản
 		tbTaiKhoan.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
 			private static final long serialVersionUID = 1L;
 
@@ -664,6 +661,7 @@ public class DlgNhanVien extends JDialog {
 		return tabbedPane;
 	}
 
+	// CHỨC NĂNG: Hiển thị thông tin nhân viên lên các trường nhập liệu.
 	public void dienThongTinNhanVienLenForm(String ma, String hoTen, String tenDN, String sdt, String cccd,
 			String vaiTro) {
 		tfMaNhanVien.setText(ma);
@@ -676,6 +674,7 @@ public class DlgNhanVien extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Hiển thị thông tin tài khoản lên các trường nhập liệu.
 	public void dienThongTinTaiKhoanLenForm(String tenDN, String matKhau, String vaiTro, String trangThai) {
 		cbTK_TenDangNhap.setSelectedItem(tenDN);
 		tfTK_MatKhau.setText(matKhau);
@@ -683,6 +682,7 @@ public class DlgNhanVien extends JDialog {
 		cbTK_TrangThai.setSelectedItem(trangThai);
 	}
 
+	// CHỨC NĂNG: Làm sạch dữ liệu trên form thông tin nhân viên.
 	public void xoaTrangFormNhanVien() {
 		tfMaNhanVien.setText("");
 		tfHoTenNhanVien.setText("");
@@ -693,12 +693,33 @@ public class DlgNhanVien extends JDialog {
 		tfMaNhanVien.requestFocus();
 	}
 
+	// CHỨC NĂNG: Làm sạch dữ liệu trên form thông tin tài khoản.
 	public void xoaTrangFormTaiKhoan() {
 		if (cbTK_TenDangNhap.getItemCount() > 0)
 			cbTK_TenDangNhap.setSelectedIndex(0);
 		tfTK_MatKhau.setText("");
 		cbTK_VaiTro.setSelectedIndex(0);
 		cbTK_TrangThai.setSelectedIndex(0);
+	}
+
+	// CHỨC NĂNG: Điều khiển trạng thái bật/tắt của các nút chức năng trong form
+	// nhân viên.
+	public void batTatNutNhanVien(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
+		btnThem.setEnabled(them);
+		btnXoa.setEnabled(xoa);
+		btnSua.setEnabled(sua);
+		btnLuu.setEnabled(luu);
+		tfMaNhanVien.setEditable(tfMaState);
+	}
+
+	// CHỨC NĂNG: Điều khiển trạng thái bật/tắt của các nút chức năng trong form tài
+	// khoản.
+	public void batTatNutTaiKhoan(boolean them, boolean xoa, boolean sua, boolean luu, boolean cbMaState) {
+		btnTK_Them.setEnabled(them);
+		btnTK_Xoa.setEnabled(xoa);
+		btnTK_Sua.setEnabled(sua);
+		btnTK_Luu.setEnabled(luu);
+		cbTK_TenDangNhap.setEnabled(cbMaState);
 	}
 
 	public String getVaiTroNVSelected() {

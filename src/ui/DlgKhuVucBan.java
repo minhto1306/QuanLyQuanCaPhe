@@ -48,8 +48,6 @@ public class DlgKhuVucBan extends JDialog {
 	private JButton btnTaoTuDong;
 	private JButton btnSDB_Luu;
 	private JButton btnSDB_Thoat;
-	private JTextField tfKyHieu;
-	private JTextField tfChieuDaiSo;
 	private JTextField tfTuSo;
 	private JTextField tfDenSo;
 
@@ -73,12 +71,12 @@ public class DlgKhuVucBan extends JDialog {
 	private JTable tbKhuVuc;
 	private DefaultTableModel tmKhuVuc;
 
-	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO
-	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
-	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
-	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo hộp thoại quản lý sơ đồ khu vực và bàn/phòng.
 	public DlgKhuVucBan(JFrame parent) {
 		super(parent, "SƠ ĐỒ KHU VỰC - BÀN/PHÒNG", true);
 		this.setSize(1100, 750);
@@ -104,14 +102,14 @@ public class DlgKhuVucBan extends JDialog {
 		tabbedPane.addTab("SƠ ĐỒ BÀN/PHÒNG", iconSoDo, tabSoDoBan);
 		tabbedPane.addTab("KHU VỰC", iconKhuVuc, tabKhuVuc);
 
-		// Nền tổng thể Nâu Đậm, lót thêm một lớp panel để tạo viền padding
 		JPanel container = new JPanel(new BorderLayout());
 		container.setBackground(MAU_NAU_VIEN);
-		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.add(tabbedPane, BorderLayout.CENTER);
 		this.setContentPane(container);
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh từ tài nguyên hệ thống.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -125,6 +123,7 @@ public class DlgKhuVucBan extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Điều chỉnh kích thước hiển thị của icon theo yêu cầu.
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null) {
@@ -136,7 +135,8 @@ public class DlgKhuVucBan extends JDialog {
 		return new ImageIcon(imgThuNho);
 	}
 
-	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	// CHỨC NĂNG: Áp dụng định dạng hiển thị tiêu chuẩn cho các thành phần nhập
+	// liệu.
 	private void setupRetroInput(Component comp) {
 		if (comp instanceof JTextField) {
 			JTextField tf = (JTextField) comp;
@@ -150,7 +150,7 @@ public class DlgKhuVucBan extends JDialog {
 		}
 	}
 
-	// CHIÊU THỨC: Trang trí Nút Bấm Retro chuẩn bài
+	// CHỨC NĂNG: Áp dụng định dạng hiển thị tiêu chuẩn cho các nút tương tác.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
 		btn.setBackground(MAU_NEN_CHINH);
@@ -161,6 +161,7 @@ public class DlgKhuVucBan extends JDialog {
 		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập giao diện cho tab Sơ đồ bàn.
 	private JPanel khoiTaoTabSoDoBan() {
 		JPanel pnSoDo = new JPanel(new BorderLayout());
 		pnSoDo.setBackground(MAU_NEN_CHINH);
@@ -189,7 +190,7 @@ public class DlgKhuVucBan extends JDialog {
 		lbKhuVuc.setPreferredSize(dLabel);
 		lbKhuVuc.setFont(fontLabelRetro);
 		lbKhuVuc.setForeground(MAU_NAU_VIEN);
-		
+
 		cbKhuVuc = new JComboBox<String>();
 		cbKhuVuc.setPreferredSize(new Dimension(130, 30));
 		cbKhuVuc.setMaximumSize(new Dimension(130, 30));
@@ -203,7 +204,8 @@ public class DlgKhuVucBan extends JDialog {
 		btnThemKhuVucNhanh.setFocusPainted(false);
 		btnThemKhuVucNhanh.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		ImageIcon iconThem = taoIconThuNho("/images/plus.png", 20, 20);
-		if (iconThem != null) btnThemKhuVucNhanh.setIcon(iconThem);
+		if (iconThem != null)
+			btnThemKhuVucNhanh.setIcon(iconThem);
 
 		boxKhuVuc.add(lbKhuVuc);
 		boxKhuVuc.add(Box.createHorizontalStrut(15));
@@ -211,34 +213,6 @@ public class DlgKhuVucBan extends JDialog {
 		boxKhuVuc.add(Box.createHorizontalStrut(5));
 		boxKhuVuc.add(btnThemKhuVucNhanh);
 		boxKhuVuc.add(Box.createHorizontalGlue());
-
-		Box boxKyHieu = Box.createHorizontalBox();
-		JLabel lbKyHieu = new JLabel("KÝ HIỆU:");
-		lbKyHieu.setPreferredSize(dLabel);
-		lbKyHieu.setFont(fontLabelRetro);
-		lbKyHieu.setForeground(MAU_NAU_VIEN);
-		tfKyHieu = new JTextField();
-		tfKyHieu.setPreferredSize(new Dimension(170, 30));
-		tfKyHieu.setMaximumSize(new Dimension(170, 30));
-		setupRetroInput(tfKyHieu);
-		boxKyHieu.add(lbKyHieu);
-		boxKyHieu.add(Box.createHorizontalStrut(15));
-		boxKyHieu.add(tfKyHieu);
-		boxKyHieu.add(Box.createHorizontalGlue());
-
-		Box boxChieuDaiSo = Box.createHorizontalBox();
-		JLabel lbChieuDaiSo = new JLabel("CHIỀU DÀI SỐ:");
-		lbChieuDaiSo.setPreferredSize(dLabel);
-		lbChieuDaiSo.setFont(fontLabelRetro);
-		lbChieuDaiSo.setForeground(MAU_NAU_VIEN);
-		tfChieuDaiSo = new JTextField("2");
-		tfChieuDaiSo.setPreferredSize(new Dimension(170, 30));
-		tfChieuDaiSo.setMaximumSize(new Dimension(170, 30));
-		setupRetroInput(tfChieuDaiSo);
-		boxChieuDaiSo.add(lbChieuDaiSo);
-		boxChieuDaiSo.add(Box.createHorizontalStrut(15));
-		boxChieuDaiSo.add(tfChieuDaiSo);
-		boxChieuDaiSo.add(Box.createHorizontalGlue());
 
 		Box boxTuSo = Box.createHorizontalBox();
 		JLabel lbTuSo = new JLabel("TỪ SỐ:");
@@ -249,17 +223,17 @@ public class DlgKhuVucBan extends JDialog {
 		tfTuSo.setPreferredSize(new Dimension(65, 30));
 		tfTuSo.setMaximumSize(new Dimension(65, 30));
 		setupRetroInput(tfTuSo);
-		
+
 		JLabel lbTilde = new JLabel(" ~ ");
 		lbTilde.setFont(fontLabelRetro);
 		lbTilde.setForeground(MAU_NAU_VIEN);
 		lbTilde.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		
+
 		tfDenSo = new JTextField("20");
 		tfDenSo.setPreferredSize(new Dimension(65, 30));
 		tfDenSo.setMaximumSize(new Dimension(65, 30));
 		setupRetroInput(tfDenSo);
-		
+
 		boxTuSo.add(lbTuSo);
 		boxTuSo.add(Box.createHorizontalStrut(15));
 		boxTuSo.add(tfTuSo);
@@ -270,7 +244,7 @@ public class DlgKhuVucBan extends JDialog {
 		Box boxButtons = Box.createHorizontalBox();
 		btnXoa = new JButton(" XÓA", taoIconThuNho("/images/delete.png", 20, 20));
 		setupRetroButton(btnXoa);
-		
+
 		btnTaoTuDong = new JButton(" TẠO TỰ ĐỘNG", taoIconThuNho("/images/gear.png", 20, 20));
 		setupRetroButton(btnTaoTuDong);
 
@@ -281,10 +255,6 @@ public class DlgKhuVucBan extends JDialog {
 
 		pnLeftInner.add(boxKhuVuc);
 		pnLeftInner.add(Box.createVerticalStrut(20));
-		pnLeftInner.add(boxKyHieu);
-		pnLeftInner.add(Box.createVerticalStrut(20));
-		pnLeftInner.add(boxChieuDaiSo);
-		pnLeftInner.add(Box.createVerticalStrut(20));
 		pnLeftInner.add(boxTuSo);
 		pnLeftInner.add(Box.createVerticalStrut(30));
 		pnLeftInner.add(boxButtons);
@@ -293,11 +263,12 @@ public class DlgKhuVucBan extends JDialog {
 
 		pnSoDoBanRight = new JPanel();
 		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
-		pnSoDoBanRight.setBackground(MAU_NEN_CHINH); // Nhuộm màu nền
+		pnSoDoBanRight.setBackground(MAU_NEN_CHINH);
 
 		JScrollPane scrollPane = new JScrollPane(pnSoDoBanRight);
-		scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4), "SƠ ĐỒ TRỰC QUAN",
-				TitledBorder.LEFT, TitledBorder.TOP, fontBungeeBase.deriveFont(Font.PLAIN, 16f), MAU_NAU_VIEN));
+		scrollPane.setBorder(
+				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4), "SƠ ĐỒ TRỰC QUAN",
+						TitledBorder.LEFT, TitledBorder.TOP, fontBungeeBase.deriveFont(Font.PLAIN, 16f), MAU_NAU_VIEN));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		scrollPane.setBackground(MAU_NEN_CHINH);
 		scrollPane.getViewport().setBackground(MAU_NEN_CHINH);
@@ -326,6 +297,7 @@ public class DlgKhuVucBan extends JDialog {
 		return pnSoDo;
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập giao diện cho tab Khu vực.
 	private JPanel khoiTaoTabKhuVuc() {
 		JPanel pnDanhMuc = new JPanel(new BorderLayout());
 		pnDanhMuc.setBackground(MAU_NEN_CHINH);
@@ -344,7 +316,7 @@ public class DlgKhuVucBan extends JDialog {
 		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
 
 		JLabel[] labels = { lbKV_Ma, lbKV_Ten, lbKV_PhuThu, lbKV_Tim };
-		for(JLabel lbl : labels) {
+		for (JLabel lbl : labels) {
 			lbl.setPreferredSize(dLabel);
 			lbl.setFont(fontLabelRetro);
 			lbl.setForeground(MAU_NAU_VIEN);
@@ -360,7 +332,7 @@ public class DlgKhuVucBan extends JDialog {
 
 		Dimension dInput = new Dimension(280, 30);
 		JTextField[] tfs = { tfKV_Ma, tfKV_Ten, tfKV_PhuThu };
-		for(JTextField tf : tfs) {
+		for (JTextField tf : tfs) {
 			tf.setPreferredSize(dInput);
 			tf.setMaximumSize(dInput);
 			setupRetroInput(tf);
@@ -379,7 +351,6 @@ public class DlgKhuVucBan extends JDialog {
 		pnNhapThongTin.setBorder(BorderFactory.createCompoundBorder(brdVienDen, brdThutVao));
 		pnDanhMuc.add(pnNhapThongTin, BorderLayout.NORTH);
 
-		// Thêm chân khí khoảng cách
 		boxKV_Row1.add(lbKV_Ma);
 		boxKV_Row1.add(Box.createHorizontalStrut(15));
 		boxKV_Row1.add(tfKV_Ma);
@@ -400,7 +371,8 @@ public class DlgKhuVucBan extends JDialog {
 
 		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
 		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
-		pnBangDuLieu.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0), brdVienDen));
+		pnBangDuLieu.setBorder(
+				BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0), brdVienDen));
 		pnDanhMuc.add(pnBangDuLieu, BorderLayout.CENTER);
 
 		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
@@ -422,7 +394,7 @@ public class DlgKhuVucBan extends JDialog {
 			}
 		};
 		tbKhuVuc = new JTable(tmKhuVuc);
-		
+
 		JTableHeader header = tbKhuVuc.getTableHeader();
 		header.setFont(new Font("Tahoma", Font.BOLD, 16));
 		header.setBackground(MAU_HEADER);
@@ -437,7 +409,7 @@ public class DlgKhuVucBan extends JDialog {
 
 		tbKhuVuc.getColumnModel().getColumn(0).setMaxWidth(40);
 		tbKhuVuc.getColumnModel().getColumn(1).setPreferredWidth(150);
-		
+
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		tbKhuVuc.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
@@ -470,10 +442,11 @@ public class DlgKhuVucBan extends JDialog {
 		return pnDanhMuc;
 	}
 
+	// CHỨC NĂNG: Cập nhật hiển thị toàn bộ sơ đồ bàn dựa trên danh sách truyền vào.
 	public void hienThiDanhSachBanToanBo(java.util.Map<String, java.util.List<entity.Ban>> mapKhuVucBan) {
 		pnSoDoBanRight.removeAll();
 		pnSoDoBanRight.setLayout(new BoxLayout(pnSoDoBanRight, BoxLayout.Y_AXIS));
-		pnSoDoBanRight.setBackground(MAU_NEN_CHINH); // Cập nhật nền Retro
+		pnSoDoBanRight.setBackground(MAU_NEN_CHINH);
 
 		for (java.util.Map.Entry<String, java.util.List<entity.Ban>> entry : mapKhuVucBan.entrySet()) {
 			String tenKhuVuc = entry.getKey();
@@ -486,7 +459,7 @@ public class DlgKhuVucBan extends JDialog {
 
 			JLabel lblKhuVuc = new JLabel(tenKhuVuc);
 			lblKhuVuc.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 22f));
-			lblKhuVuc.setForeground(MAU_NAU_VIEN); // Cập nhật màu Retro
+			lblKhuVuc.setForeground(MAU_NAU_VIEN);
 			pnTitle.add(lblKhuVuc);
 
 			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
@@ -503,16 +476,15 @@ public class DlgKhuVucBan extends JDialog {
 				btnBan.setFont(new Font("Arial", Font.BOLD, 16));
 				btnBan.setFocusPainted(false);
 				btnBan.setMargin(new java.awt.Insets(2, 2, 2, 2));
-				
-				// Nhuộm chân khí cho bàn
-				btnBan.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3), 
+
+				btnBan.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3),
 						BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
 				if (ban.getTrangThai() != null && ban.getTrangThai().equalsIgnoreCase("Có khách")) {
-					btnBan.setBackground(new Color(193, 71, 71)); // Đỏ mộc mạc Retro
+					btnBan.setBackground(new Color(193, 71, 71));
 					btnBan.setForeground(Color.WHITE);
 				} else {
-					btnBan.setBackground(MAU_HEADER); // Màu Bạc xỉu chờ khách
+					btnBan.setBackground(MAU_HEADER);
 					btnBan.setForeground(MAU_NAU_VIEN);
 				}
 				pnTables.add(btnBan);
@@ -527,6 +499,7 @@ public class DlgKhuVucBan extends JDialog {
 		pnSoDoBanRight.repaint();
 	}
 
+	// CHỨC NĂNG: Lấy danh sách mã bàn đang được chọn trên sơ đồ.
 	public java.util.List<String> getDanhSachMaBanDuocChon() {
 		java.util.List<String> listMaBan = new java.util.ArrayList<>();
 		for (java.awt.Component compKhuVuc : pnSoDoBanRight.getComponents()) {
@@ -547,6 +520,7 @@ public class DlgKhuVucBan extends JDialog {
 		return listMaBan;
 	}
 
+	// CHỨC NĂNG: Nạp danh sách khu vực vào hộp thoại thả xuống.
 	public void loadDataToComboBoxKhuVuc(java.util.List<entity.KhuVuc> listKhuVuc) {
 		cbKhuVuc.removeAllItems();
 		cbKhuVuc.addItem("--- Chọn khu vực ---");
@@ -662,6 +636,7 @@ public class DlgKhuVucBan extends JDialog {
 		javax.swing.JOptionPane.showMessageDialog(this, msg, title, type);
 	}
 
+	// Lớp phụ trợ để tự động xuống dòng các thành phần trên giao diện
 	class WrapLayout extends FlowLayout {
 		private static final long serialVersionUID = 1L;
 
@@ -713,5 +688,14 @@ public class DlgKhuVucBan extends JDialog {
 			dimHeight += insets.top + insets.bottom + vgap * 2;
 			return new Dimension(dimWidth, dimHeight);
 		}
+	}
+
+	// CHỨC NĂNG: Quản lý trạng thái bật/tắt các nút thao tác khu vực.
+	public void batTatNutKhuVuc(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
+		btnKV_Them.setEnabled(them);
+		btnKV_Xoa.setEnabled(xoa);
+		btnKV_Sua.setEnabled(sua);
+		btnKV_Luu.setEnabled(luu);
+		tfKV_Ma.setEditable(tfMaState);
 	}
 }

@@ -17,7 +17,7 @@ public class MainApp {
 			System.err.println("Khởi tạo FlatLaf thất bại!");
 		}
 
-		FrmManHinhChinh mainView = new FrmManHinhChinh("Admin");
+		FrmManHinhChinh mainView = new FrmManHinhChinh();
 		FrmDangNhap loginView = new FrmDangNhap(mainView);
 
 		ManHinhChinhController dashboardController = new ManHinhChinhController(mainView);

@@ -12,9 +12,8 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,17 +33,14 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import controller.ThanhToanController;
-import dao.BanDAO;
-import dao.KhuVucDAO;
-import dao.NhanVienDAO;
 import entity.Ban;
-import entity.KhuVuc;
-import entity.NhanVien;
+import entity.DanhMuc;
 import entity.SanPham;
 
 public class FrmManHinhChinh extends JFrame {
@@ -60,20 +56,20 @@ public class FrmManHinhChinh extends JFrame {
 	private JComboBox<Integer> cbBoxThue;
 	private DefaultTableModel tableModel;
 	private JTabbedPane tabbedPane;
+	private JButton btnThongKe;
 
 	private ThanhToanController thanhToanController;
 
-	// Hệ màu chuẩn Retro tông đất nung
 	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
 	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
 	private final Color MAU_NAU_NUT = new Color(110, 75, 59);
 	private final Color MAU_HEADER = new Color(209, 185, 161);
 
-	// Khai báo sẵn biến chứa chân kinh Bungee
 	private Font fontBungeeBase;
 
-	public FrmManHinhChinh(String tenNhanVien) {
-		this.setTitle("Hệ thống quản lý quán cà phê - Retro Version");
+	// CHỨC NĂNG: Khởi tạo giao diện màn hình chính của ứng dụng.
+	public FrmManHinhChinh() {
+		this.setTitle("Hệ thống quản lý quán cà phê");
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int targetWidth = (int) (screenSize.getWidth() * 0.9);
 		int targetHeight = (int) (screenSize.getHeight() * 0.9);
@@ -87,47 +83,43 @@ public class FrmManHinhChinh extends JFrame {
 			this.setIconImage(new ImageIcon(urllogo).getImage());
 		}
 
-		// NẠP TÂM PHÁP FONT CHỮ TRƯỚC KHI KHỞI TẠO GIAO DIỆN
 		loadCustomFont();
-
 		khoiTaoGiaoDien();
 
-		NhanVienDAO nvDAO = new NhanVienDAO();
-		NhanVien nv = nvDAO.timNhanVienTheoTenDangNhap(tenNhanVien);
-		if (nv != null) {
-			lbValueUSer.setText(nv.getHoTenNhanVien());
-		} else {
-			lbValueUSer.setText(tenNhanVien != null ? tenNhanVien : "Admin");
-		}
-
 		this.thanhToanController = new ThanhToanController(this);
-
-		loadDuLieuSoDoBanMain();
-		loadDuLieuHangHoaMain();
 	}
 
-	// Tà thuật hút font chữ từ file .ttf
+	// CHỨC NĂNG: Tải dữ liệu ban đầu cho danh mục, sản phẩm và sơ đồ bàn.
+	public void loadDataInitial() {
+		if (this.thanhToanController != null) {
+			this.thanhToanController.lamMoiSoDoBanMain();
+		}
+		dao.DanhMucDAO dmDAO = new dao.DanhMucDAO();
+		dao.SanPhamDAO spDAO = new dao.SanPhamDAO();
+		hienThiDanhSachHangHoaMain(dmDAO.findAll(), spDAO.findAll());
+	}
+
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh từ resource hoặc sử dụng font mặc định nếu
+	// xảy ra lỗi.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
 			if (is != null) {
 				fontBungeeBase = Font.createFont(Font.TRUETYPE_FONT, is);
 			} else {
-				System.err.println("Ây da! Không tìm thấy Bungee-Regular.ttf, chắc đường dẫn sai rồi!");
 				fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			fontBungeeBase = new Font("Impact", Font.PLAIN, 24); // Rớt đài thì xài font hệ thống
+			fontBungeeBase = new Font("Impact", Font.PLAIN, 24);
 		}
 	}
 
+	// CHỨC NĂNG: Khởi tạo và cấu hình các thành phần giao diện người dùng.
 	public void khoiTaoGiaoDien() {
 		JPanel pnMainLayout = new JPanel(new BorderLayout());
 		pnMainLayout.setBackground(MAU_NAU_VIEN);
 		this.setContentPane(pnMainLayout);
 
-		// Vận công ép size font từ bản gốc
 		Font fontLabel = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
 		Font fontButton = fontBungeeBase.deriveFont(Font.PLAIN, 24f);
 		Font fontTitleLg = fontBungeeBase.deriveFont(Font.PLAIN, 28f);
@@ -135,7 +127,6 @@ public class FrmManHinhChinh extends JFrame {
 
 		Border thickBorder = BorderFactory.createLineBorder(MAU_NAU_VIEN, 3);
 
-		// =================== TẢ BIÊN: SIDEBAR ===================
 		JPanel pnSidebar = new JPanel(new BorderLayout(0, 10));
 		pnSidebar.setBackground(MAU_NAU_VIEN);
 		pnSidebar.setPreferredSize(new Dimension(250, 0));
@@ -158,31 +149,26 @@ public class FrmManHinhChinh extends JFrame {
 		pnLogoArea.add(lbLogo, BorderLayout.CENTER);
 		pnSidebar.add(pnLogoArea, BorderLayout.NORTH);
 
-		// Khu vực các Nút chức năng
-		JPanel pnButtonsContainer = new JPanel(new GridLayout(7, 1, 0, 8));
+		JPanel pnButtonsContainer = new JPanel(new GridLayout(8, 1, 0, 8));
 		pnButtonsContainer.setBackground(MAU_NAU_VIEN);
 
 		btnHoaDon = new JButton("HÓA ĐƠN");
 		btnXemBangGia = new JButton("BẢNG GIÁ");
 		btnQLDatBan = new JButton("ĐẶT BÀN");
-		btnQLNhanVien = new JButton("NHÂN VIÊN");
+		btnQLCaLam = new JButton("LỊCH LÀM");
 		btnQLSoDo = new JButton("SƠ ĐỒ / BÀN");
 		btnQLHangHoa = new JButton("SẢN PHẨM");
-		btnQLCaLam = new JButton("LỊCH LÀM");
-
-		JButton[] arrBtns = { btnHoaDon, btnXemBangGia, btnQLDatBan, btnQLNhanVien, btnQLSoDo, btnQLHangHoa,
-				btnQLCaLam };
+		btnQLNhanVien = new JButton("NHÂN VIÊN");
+		btnThongKe = new JButton("THỐNG KÊ");
+		JButton[] arrBtns = { btnHoaDon, btnXemBangGia, btnQLDatBan, btnQLCaLam, btnQLSoDo, btnQLHangHoa, btnQLNhanVien,
+				btnThongKe };
 		for (JButton btn : arrBtns) {
-			btn.setFont(fontButton); // Áp dụng Bungee
+			btn.setFont(fontButton);
 			btn.setBackground(MAU_NAU_NUT);
 			btn.setForeground(Color.WHITE);
 			btn.setFocusPainted(false);
 			btn.setHorizontalAlignment(SwingConstants.LEFT);
-
-			// --- YÊU CẦU 1: Viền nút to chà bá lửa ---
-			btn.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NEN_CHINH, 6), // Ép lên
-																												// hẳn 6
-																												// pixel
+			btn.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(MAU_NEN_CHINH, 6),
 					BorderFactory.createEmptyBorder(0, 15, 0, 0)));
 			pnButtonsContainer.add(btn);
 		}
@@ -190,13 +176,11 @@ public class FrmManHinhChinh extends JFrame {
 		pnSidebar.add(pnButtonsContainer, BorderLayout.CENTER);
 		pnMainLayout.add(pnSidebar, BorderLayout.WEST);
 
-		// =================== KHU VỰC BÊN PHẢI ===================
 		JPanel pnRightContainer = new JPanel(new BorderLayout(10, 10));
 		pnRightContainer.setBackground(MAU_NAU_VIEN);
 		pnRightContainer.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
 		pnMainLayout.add(pnRightContainer, BorderLayout.CENTER);
 
-		// 1. TOP HEADER
 		JPanel pnTopHeader = new JPanel(new BorderLayout());
 		pnTopHeader.setBackground(MAU_HEADER);
 		pnTopHeader.setBorder(thickBorder);
@@ -212,7 +196,7 @@ public class FrmManHinhChinh extends JFrame {
 
 		JLabel[] arrLbs = { lbSrc, lbLh, lbDc };
 		for (JLabel lb : arrLbs) {
-			lb.setFont(fontLabel); // Bungee cỡ nhỏ
+			lb.setFont(fontLabel);
 			lb.setForeground(MAU_NAU_VIEN);
 			pnInfoTruongPhai.add(lb);
 		}
@@ -232,14 +216,12 @@ public class FrmManHinhChinh extends JFrame {
 		pnTopHeader.add(pnĐX, BorderLayout.EAST);
 		pnRightContainer.add(pnTopHeader, BorderLayout.NORTH);
 
-		// 2. MAIN CONTENT AREA
 		JPanel pnCenterArea = new JPanel(new BorderLayout(10, 0));
 		pnCenterArea.setBackground(MAU_NAU_VIEN);
 		pnRightContainer.add(pnCenterArea, BorderLayout.CENTER);
 
-		// --- KHU VỰC TRUNG TÂM (TABS) ---
 		tabbedPane = new JTabbedPane();
-		tabbedPane.setFont(fontButton); // Tab xài Bungee luôn cho chiến
+		tabbedPane.setFont(fontButton);
 		tabbedPane.setBackground(MAU_NEN_CHINH);
 		tabbedPane.setForeground(MAU_NAU_VIEN);
 		tabbedPane.setBorder(thickBorder);
@@ -251,7 +233,7 @@ public class FrmManHinhChinh extends JFrame {
 		pnDanhSachBan.setBackground(MAU_NEN_CHINH);
 		JScrollPane scrollSoDo = new JScrollPane(pnDanhSachBan);
 		scrollSoDo.setBorder(null);
-		scrollSoDo.getVerticalScrollBar().setUnitIncrement(16);
+		scrollSoDo.getVerticalScrollBar().setUnitIncrement(20);
 		pnSoDo.add(scrollSoDo, BorderLayout.CENTER);
 
 		JPanel pnHangHoa = new JPanel(new BorderLayout());
@@ -260,13 +242,13 @@ public class FrmManHinhChinh extends JFrame {
 		pnDanhSachMon.setBackground(MAU_NEN_CHINH);
 		JScrollPane scrollMon = new JScrollPane(pnDanhSachMon);
 		scrollMon.setBorder(null);
+		scrollMon.getVerticalScrollBar().setUnitIncrement(20);
 		pnHangHoa.add(scrollMon, BorderLayout.CENTER);
 
 		tabbedPane.addTab("  SƠ ĐỒ  ", pnSoDo);
 		tabbedPane.addTab("  SẢN PHẨM  ", pnHangHoa);
 		pnCenterArea.add(tabbedPane, BorderLayout.CENTER);
 
-		// --- KHU VỰC HỮU BIÊN: HÓA ĐƠN ---
 		JPanel pnHoaDon = new JPanel(new BorderLayout(0, 5));
 		pnHoaDon.setBackground(MAU_NEN_CHINH);
 		pnHoaDon.setBorder(
@@ -285,31 +267,31 @@ public class FrmManHinhChinh extends JFrame {
 
 		lbTitleUser = new JLabel("User:");
 		lbValueUSer = new JLabel("Chưa có");
-		JPanel pnUser = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		JPanel pnUser = new JPanel(new BorderLayout(5, 0));
 		pnUser.setOpaque(false);
-		pnUser.add(lbTitleUser);
-		pnUser.add(lbValueUSer);
+		pnUser.add(lbTitleUser, BorderLayout.WEST);
+		pnUser.add(lbValueUSer, BorderLayout.CENTER);
 
 		lbTitleGioVao = new JLabel("Giờ vào:");
 		lbValueGioVao = new JLabel("__/__/____");
-		JPanel pnGioVao = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		JPanel pnGioVao = new JPanel(new BorderLayout(5, 0));
 		pnGioVao.setOpaque(false);
-		pnGioVao.add(lbTitleGioVao);
-		pnGioVao.add(lbValueGioVao);
+		pnGioVao.add(lbTitleGioVao, BorderLayout.WEST);
+		pnGioVao.add(lbValueGioVao, BorderLayout.CENTER);
 
 		lbTitleKhuVuc = new JLabel("Khu vực:");
 		lbValueKhuVuc = new JLabel("Trống");
-		JPanel pnKhuVuc = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		JPanel pnKhuVuc = new JPanel(new BorderLayout(5, 0));
 		pnKhuVuc.setOpaque(false);
-		pnKhuVuc.add(lbTitleKhuVuc);
-		pnKhuVuc.add(lbValueKhuVuc);
+		pnKhuVuc.add(lbTitleKhuVuc, BorderLayout.WEST);
+		pnKhuVuc.add(lbValueKhuVuc, BorderLayout.CENTER);
 
-		lbTitleTienPhaiTra = new JLabel("Tạm tính:");
-		lbValueTienPhaiTra = new JLabel("0");
-		JPanel pnPhaiTra = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		lbTitleTienPhaiTra = new JLabel("Phụ thu:");
+		lbValueTienPhaiTra = new JLabel("0 VNĐ");
+		JPanel pnPhaiTra = new JPanel(new BorderLayout(5, 0));
 		pnPhaiTra.setOpaque(false);
-		pnPhaiTra.add(lbTitleTienPhaiTra);
-		pnPhaiTra.add(lbValueTienPhaiTra);
+		pnPhaiTra.add(lbTitleTienPhaiTra, BorderLayout.WEST);
+		pnPhaiTra.add(lbValueTienPhaiTra, BorderLayout.CENTER);
 
 		Component[] allComps = { lbTitleUser, lbValueUSer, lbTitleGioVao, lbValueGioVao, lbTitleKhuVuc, lbValueKhuVuc,
 				lbTitleTienPhaiTra, lbValueTienPhaiTra };
@@ -324,20 +306,16 @@ public class FrmManHinhChinh extends JFrame {
 		pnInfoHoaDon.add(pnPhaiTra);
 		pnHoaDon.add(pnInfoHoaDon, BorderLayout.NORTH);
 
-		// Bảng Hóa Đơn
 		JPanel pnDanhSachHangHoa = new JPanel(new BorderLayout());
 		pnDanhSachHangHoa.setOpaque(false);
 		JLabel lbTieuDeHoaDon = new JLabel("HÓA ĐƠN", SwingConstants.CENTER);
-		lbTieuDeHoaDon.setFont(fontTitleLg); // Bungee bự
+		lbTieuDeHoaDon.setFont(fontTitleLg);
 		lbTieuDeHoaDon.setForeground(MAU_NAU_VIEN);
 		lbTieuDeHoaDon.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 		pnDanhSachHangHoa.add(lbTieuDeHoaDon, BorderLayout.NORTH);
 
-		// 1. ĐÃ SỬA "Tên hàng" thành "Tên sản phẩm"
 		String[] columnNames = { "#", "Tên sản phẩm", "S.L", "Giá bán", "T.Tiền" };
 		tableModel = new DefaultTableModel(columnNames, 0) {
-			// Hàm này chính là khiên chắn, tuyệt đối KHÔNG cho khách hàng click đúp vào sửa
-			// số liệu!
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
@@ -350,11 +328,9 @@ public class FrmManHinhChinh extends JFrame {
 		tbDanhSachHangHoa.setBackground(MAU_NEN_CHINH);
 		tbDanhSachHangHoa.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
-		// 2. PHONG ẤN TABLE HEADER CHỐNG KÉO THẢ VÀ CO GIÃN
-		tbDanhSachHangHoa.getTableHeader().setReorderingAllowed(false); // Khóa không cho đổi chỗ các cột
-		tbDanhSachHangHoa.getTableHeader().setResizingAllowed(false); // Khóa không cho kéo giãn độ rộng cột
+		tbDanhSachHangHoa.getTableHeader().setReorderingAllowed(false);
+		tbDanhSachHangHoa.getTableHeader().setResizingAllowed(false);
 
-		// Trang trí Header
 		tbDanhSachHangHoa.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
 		tbDanhSachHangHoa.getTableHeader().setBackground(MAU_HEADER);
 		tbDanhSachHangHoa.getTableHeader().setForeground(MAU_NAU_VIEN);
@@ -363,21 +339,20 @@ public class FrmManHinhChinh extends JFrame {
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-		// Khóa chết độ rộng của cột # và S.L (Tùy chọn thêm để đẹp hơn)
 		tbDanhSachHangHoa.getColumnModel().getColumn(0).setPreferredWidth(35);
-		tbDanhSachHangHoa.getColumnModel().getColumn(0).setMaxWidth(35); // Khóa cứng cột số thứ tự
+		tbDanhSachHangHoa.getColumnModel().getColumn(0).setMaxWidth(35);
 		tbDanhSachHangHoa.getColumnModel().getColumn(2).setPreferredWidth(50);
-		tbDanhSachHangHoa.getColumnModel().getColumn(2).setMaxWidth(50); // Khóa cứng cột số lượng
+		tbDanhSachHangHoa.getColumnModel().getColumn(2).setMaxWidth(50);
 
 		tbDanhSachHangHoa.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 		tbDanhSachHangHoa.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
 
 		JScrollPane scrollPane = new JScrollPane(tbDanhSachHangHoa);
 		scrollPane.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
+		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		pnDanhSachHangHoa.add(scrollPane, BorderLayout.CENTER);
 		pnHoaDon.add(pnDanhSachHangHoa, BorderLayout.CENTER);
 
-		// Thanh toán
 		JPanel pnThanhToan = new JPanel(new BorderLayout(0, 5));
 		pnThanhToan.setOpaque(false);
 
@@ -393,7 +368,6 @@ public class FrmManHinhChinh extends JFrame {
 		tfGiamGia.setPreferredSize(new Dimension(80, 35));
 		tfGiamGia.setBackground(MAU_NEN_CHINH);
 		tfGiamGia.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
-		// --- YÊU CẦU 2: Căn giữa số cho TextField ---
 		tfGiamGia.setHorizontalAlignment(JTextField.CENTER);
 
 		JPanel pnGiamGia = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -407,7 +381,6 @@ public class FrmManHinhChinh extends JFrame {
 		cbBoxThue = new JComboBox<>(new Integer[] { 0, 5, 8, 10 });
 		cbBoxThue.setFont(fontChietKhau);
 		cbBoxThue.setPreferredSize(new Dimension(80, 35));
-		// --- YÊU CẦU 2: Căn giữa số cho ComboBox (phải dùng tà thuật Renderer) ---
 		DefaultListCellRenderer centerRendererBox = new DefaultListCellRenderer();
 		centerRendererBox.setHorizontalAlignment(DefaultListCellRenderer.CENTER);
 		cbBoxThue.setRenderer(centerRendererBox);
@@ -424,13 +397,12 @@ public class FrmManHinhChinh extends JFrame {
 		pnChietKhau.add(pnThue, BorderLayout.EAST);
 		pnThanhToan.add(pnChietKhau, BorderLayout.NORTH);
 
-		// Box Tổng Tiền
 		JPanel pnTongTien = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
 		pnTongTien.setBackground(new Color(193, 71, 71));
 		pnTongTien.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3));
 
 		lbTitleTongTien = new JLabel("TỔNG TIỀN:");
-		lbTitleTongTien.setFont(fontTitleLg); // Bungee bự
+		lbTitleTongTien.setFont(fontTitleLg);
 		lbTitleTongTien.setForeground(Color.WHITE);
 
 		lbTongTien = new JLabel("0 VNĐ");
@@ -442,7 +414,7 @@ public class FrmManHinhChinh extends JFrame {
 		pnThanhToan.add(pnTongTien, BorderLayout.CENTER);
 
 		btnThanhToan = new JButton("THANH TOÁN");
-		btnThanhToan.setFont(fontThanhToanBtn); // Bungee chà bá lửa
+		btnThanhToan.setFont(fontThanhToanBtn);
 		btnThanhToan.setPreferredSize(new Dimension(0, 60));
 		btnThanhToan.setBackground(new Color(56, 163, 42));
 		btnThanhToan.setForeground(Color.WHITE);
@@ -453,40 +425,7 @@ public class FrmManHinhChinh extends JFrame {
 		pnHoaDon.add(pnThanhToan, BorderLayout.SOUTH);
 	}
 
-	// =========================================================================
-	// PHẦN LOGIC ĐỔ DỮ LIỆU ĐƯỢC GIỮ NGUYÊN HOÀN TOÀN TỪ CODE TRƯỚC
-	// =========================================================================
-
-	public void loadDuLieuSoDoBanMain() {
-		BanDAO banDAO = new BanDAO();
-		KhuVucDAO khuVucDAO = new KhuVucDAO();
-		List<Ban> listBanToanBo = banDAO.findAll();
-		List<KhuVuc> listKhuVucToanBo = khuVucDAO.findAll();
-		Map<String, List<Ban>> mapKhuVucBan = new LinkedHashMap<>();
-
-		for (KhuVuc kv : listKhuVucToanBo) {
-			List<Ban> banCuaKv = new ArrayList<>();
-			for (Ban b : listBanToanBo) {
-				if (b != null && b.getMaKhuVuc() != null && b.getMaKhuVuc().equals(kv.getMaKhuVuc())) {
-					banCuaKv.add(b);
-				}
-			}
-			if (!banCuaKv.isEmpty()) {
-				banCuaKv.sort((b1, b2) -> {
-					int n1 = Integer.parseInt(b1.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
-							: b1.getTenBan().replaceAll("\\D", ""));
-					int n2 = Integer.parseInt(b2.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
-							: b2.getTenBan().replaceAll("\\D", ""));
-					if (n1 == n2)
-						return b1.getTenBan().compareTo(b2.getTenBan());
-					return Integer.compare(n1, n2);
-				});
-				mapKhuVucBan.put(kv.getTenKhuVuc(), banCuaKv);
-			}
-		}
-		hienThiDanhSachBanToanBo(mapKhuVucBan);
-	}
-
+	// CHỨC NĂNG: Hiển thị toàn bộ sơ đồ bàn ra giao diện.
 	public void hienThiDanhSachBanToanBo(Map<String, List<Ban>> mapKhuVucBan) {
 		pnDanhSachBan.removeAll();
 		Font fontLabel = fontBungeeBase.deriveFont(Font.PLAIN, 24f);
@@ -494,8 +433,12 @@ public class FrmManHinhChinh extends JFrame {
 		for (Map.Entry<String, List<Ban>> entry : mapKhuVucBan.entrySet()) {
 			JPanel pnTitle = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			pnTitle.setBackground(MAU_NEN_CHINH);
+
+			pnTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+			pnTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 			JLabel lblKhuVuc = new JLabel("[" + entry.getKey().toUpperCase() + "]");
-			lblKhuVuc.setFont(fontLabel); // xài Bungee cho tên khu vực
+			lblKhuVuc.setFont(fontLabel);
 			lblKhuVuc.setForeground(MAU_NAU_VIEN);
 
 			lblKhuVuc.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
@@ -503,6 +446,8 @@ public class FrmManHinhChinh extends JFrame {
 
 			JPanel pnTables = new JPanel(new WrapLayout(FlowLayout.LEFT, 15, 15));
 			pnTables.setBackground(MAU_NEN_CHINH);
+
+			pnTables.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 			for (Ban ban : entry.getValue()) {
 				JToggleButton btnBan = new JToggleButton();
@@ -537,21 +482,17 @@ public class FrmManHinhChinh extends JFrame {
 		pnDanhSachBan.repaint();
 	}
 
-	public void loadDuLieuHangHoaMain() {
-		dao.SanPhamDAO sanPhamDAO = new dao.SanPhamDAO();
-		dao.DanhMucDAO danhMucDAO = new dao.DanhMucDAO();
-		List<SanPham> listSanPham = sanPhamDAO.findAll();
-		List<entity.DanhMuc> listDanhMuc = danhMucDAO.findAll();
-
+	// CHỨC NĂNG: Cập nhật danh sách hàng hóa và danh mục hiển thị trên giao diện.
+	public void hienThiDanhSachHangHoaMain(List<DanhMuc> listDanhMuc, List<SanPham> listSanPham) {
 		pnDanhSachMon.removeAll();
 		pnDanhSachMon.setLayout(new BoxLayout(pnDanhSachMon, BoxLayout.Y_AXIS));
 		Font fontLabel = fontBungeeBase.deriveFont(Font.PLAIN, 24f);
 
-		for (entity.DanhMuc dm : listDanhMuc) {
+		for (DanhMuc dm : listDanhMuc) {
 			JPanel pnGroupDanhMuc = new JPanel(new BorderLayout());
 			pnGroupDanhMuc.setBackground(MAU_NEN_CHINH);
 			JLabel lblTieuDeDM = new JLabel("[" + dm.getTenDanhMuc().toUpperCase() + "]");
-			lblTieuDeDM.setFont(fontLabel); // xài Bungee luôn
+			lblTieuDeDM.setFont(fontLabel);
 			lblTieuDeDM.setForeground(MAU_NAU_VIEN);
 
 			lblTieuDeDM.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 0));
@@ -568,15 +509,55 @@ public class FrmManHinhChinh extends JFrame {
 					btnSp.setBackground(MAU_HEADER);
 					btnSp.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
-					JLabel lblImage = new JLabel();
+					JLabel lblImage = new JLabel("Đang tải...", SwingConstants.CENTER);
 					lblImage.setPreferredSize(new Dimension(120, 80));
-					try {
-						lblImage.setIcon(new ImageIcon(new ImageIcon(sp.getHinhAnh()).getImage().getScaledInstance(120,
-								80, Image.SCALE_SMOOTH)));
-					} catch (Exception ex) {
-						lblImage.setText("Trống");
-						lblImage.setHorizontalAlignment(SwingConstants.CENTER);
-					}
+					lblImage.setForeground(Color.GRAY);
+
+					new Thread(() -> {
+						try {
+							String tenHinh = sp.getHinhAnh();
+							if (tenHinh != null && !tenHinh.trim().isEmpty()) {
+								tenHinh = tenHinh.trim();
+
+								File fileHinh = new File("product-images", tenHinh);
+
+								if (!fileHinh.exists()) {
+									fileHinh = new File("src/images", tenHinh);
+								}
+
+								if (!fileHinh.exists()) {
+									fileHinh = new File(tenHinh);
+								}
+
+								if (fileHinh.exists()) {
+									ImageIcon iconGoc = new ImageIcon(fileHinh.getAbsolutePath());
+									Image imgScale = iconGoc.getImage().getScaledInstance(120, 80, Image.SCALE_SMOOTH);
+									ImageIcon finalIcon = new ImageIcon(imgScale);
+
+									SwingUtilities.invokeLater(() -> {
+										lblImage.setIcon(finalIcon);
+										lblImage.setText("");
+									});
+								} else {
+									SwingUtilities.invokeLater(() -> {
+										lblImage.setText("No Image");
+										lblImage.setForeground(Color.RED);
+									});
+								}
+							} else {
+								SwingUtilities.invokeLater(() -> {
+									lblImage.setText("Trống");
+									lblImage.setForeground(MAU_NAU_VIEN);
+								});
+							}
+						} catch (Exception ex) {
+							SwingUtilities.invokeLater(() -> {
+								lblImage.setText("Lỗi Ảnh");
+								lblImage.setForeground(Color.RED);
+							});
+						}
+					}).start();
+
 					btnSp.add(lblImage, BorderLayout.NORTH);
 
 					JPanel pnInfoText = new JPanel(new GridLayout(2, 1));
@@ -657,6 +638,23 @@ public class FrmManHinhChinh extends JFrame {
 		}
 	}
 
+	// CHỨC NĂNG: Phân quyền hiển thị các chức năng trên giao diện dựa vào vai trò.
+	public void phanQuyen(String vaiTro) {
+		if (vaiTro != null && vaiTro.toLowerCase().contains("thu")) {
+			btnQLNhanVien.setVisible(false);
+			btnQLSoDo.setVisible(false);
+			btnQLHangHoa.setVisible(false);
+			btnQLCaLam.setVisible(true);
+			btnThongKe.setVisible(false);
+		} else {
+			btnQLNhanVien.setVisible(true);
+			btnQLSoDo.setVisible(true);
+			btnQLHangHoa.setVisible(true);
+			btnQLCaLam.setVisible(true);
+			btnThongKe.setVisible(true);
+		}
+	}
+
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
@@ -697,16 +695,19 @@ public class FrmManHinhChinh extends JFrame {
 		return btnThanhToan;
 	}
 
+	// CHỨC NĂNG: Đặt tên nhân viên trên hóa đơn.
 	public void setTenNhanVien(String tenHienThi) {
 		if (lbValueUSer != null) {
 			lbValueUSer.setText(tenHienThi);
 		}
 	}
 
+	// CHỨC NĂNG: Xóa sạch các dữ liệu tạm trong hóa đơn hiện tại để chuẩn bị cho
+	// giao dịch mới.
 	public void resetDuLieu() {
 		lbValueGioVao.setText("__/__/____");
 		lbValueKhuVuc.setText("Trống");
-		lbValueTienPhaiTra.setText("0");
+		lbValueTienPhaiTra.setText("0 VNĐ");
 		lbTongTien.setText("");
 		tfGiamGia.setText("0");
 		cbBoxThue.setSelectedIndex(0);
@@ -743,5 +744,10 @@ public class FrmManHinhChinh extends JFrame {
 
 	public void addHoaDonListener(ActionListener l) {
 		btnHoaDon.addActionListener(l);
+	}
+
+	public void addThongKeListener(ActionListener l) {
+		btnThongKe.addActionListener(l);
+
 	}
 }

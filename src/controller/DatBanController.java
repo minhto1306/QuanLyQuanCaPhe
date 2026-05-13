@@ -22,6 +22,9 @@ public class DatBanController {
 	private DlgDatBan view;
 	private DatBanDAO dao;
 
+	private boolean isEditingDB = false;
+
+	// CHỨC NĂNG: Khởi tạo luồng điều khiển xử lý việc đặt bàn.
 	public DatBanController(DlgDatBan view) {
 		this.view = view;
 		this.dao = new DatBanDAO();
@@ -30,6 +33,7 @@ public class DatBanController {
 		setupEvents();
 	}
 
+	// CHỨC NĂNG: Tải toàn bộ cấu hình dữ liệu mặc định lên giao diện.
 	private void initData() {
 		loadKhuVuc();
 		if (view.getCbMaKhuVuc().getItemCount() > 0) {
@@ -39,11 +43,41 @@ public class DatBanController {
 		loadDuLieuLenBang();
 	}
 
+	// CHỨC NĂNG: Đăng ký các bộ lắng nghe sự kiện tương tác của người dùng.
 	private void setupEvents() {
-		this.view.addBtnThemListener(e -> handleAction("THEM"));
-		this.view.addBtnSuaListener(e -> handleAction("SUA"));
+		this.view.addBtnThemListener(e -> {
+			isEditingDB = false;
+			handleAction("THEM");
+		});
+
+		this.view.addBtnSuaListener(e -> {
+			int row = view.getTbDatBan().getSelectedRow();
+			if (row == -1) {
+				JOptionPane.showMessageDialog(view, "Chọn 1 dòng để sửa!");
+				return;
+			}
+			isEditingDB = true;
+			view.batTatNutDatBan(false, false, false, true);
+		});
+
 		this.view.addBtnXoaListener(e -> xoaDatBan());
-		this.view.addBtnXoaTrangListener(e -> xoaTrang());
+
+		this.view.addBtnXoaTrangListener(e -> {
+			xoaTrang();
+			isEditingDB = false;
+			view.batTatNutDatBan(true, true, true, false);
+		});
+
+		this.view.addBtnLuuListener(e -> {
+			if (isEditingDB) {
+				handleAction("SUA");
+			} else {
+				JOptionPane.showMessageDialog(view, "Chỉ dùng nút Lưu khi đang Sửa Đặt Bàn!");
+			}
+		});
+
+		this.view.addTfTimKiemListener(e -> timKiemDatBan());
+		this.view.addBtnTimListener(e -> timKiemDatBan());
 
 		this.view.getCbMaKhuVuc().addActionListener(e -> {
 			String selectedKV = (String) view.getCbMaKhuVuc().getSelectedItem();
@@ -70,6 +104,7 @@ public class DatBanController {
 		});
 	}
 
+	// CHỨC NĂNG: Truy xuất danh sách mã khu vực từ cơ sở dữ liệu.
 	private void loadKhuVuc() {
 		view.getCbMaKhuVuc().removeAllItems();
 		Connection c = DataBaseConnection.getInstance().getConnection();
@@ -83,6 +118,7 @@ public class DatBanController {
 		}
 	}
 
+	// CHỨC NĂNG: Truy xuất danh sách các bàn tương ứng với mã khu vực cung cấp.
 	private void loadBanTheoKhuVuc(String maKV) {
 		view.getCbMaBan().removeAllItems();
 		Connection c = DataBaseConnection.getInstance().getConnection();
@@ -99,6 +135,8 @@ public class DatBanController {
 		}
 	}
 
+	// CHỨC NĂNG: Gửi tín hiệu hiển thị chi tiết đặt bàn của một dòng trong bảng dữ
+	// liệu.
 	private void xemChiTiet(int row) {
 		DefaultTableModel tm = view.getTmDatBan();
 		String maDB = tm.getValueAt(row, 1) != null ? tm.getValueAt(row, 1).toString() : "";
@@ -112,10 +150,16 @@ public class DatBanController {
 		view.hienThiDialogChiTiet(maDB, khuVuc, ban, tenKhach, sdt, thoiGian, trangThai);
 	}
 
+	// CHỨC NĂNG: Nạp toàn bộ thông tin đặt bàn lên giao diện hiển thị.
 	private void loadDuLieuLenBang() {
+		List<DatBan> ds = dao.findAll();
+		hienThiDanhSachDatBan(ds);
+	}
+
+	// CHỨC NĂNG: Tạo và hiển thị các bản ghi danh sách đặt bàn được truyền vào.
+	private void hienThiDanhSachDatBan(List<DatBan> ds) {
 		DefaultTableModel tm = view.getTmDatBan();
 		tm.setRowCount(0);
-		List<DatBan> ds = dao.findAll();
 		int stt = 1;
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -130,6 +174,39 @@ public class DatBanController {
 		}
 	}
 
+	// CHỨC NĂNG: Truy xuất các yêu cầu đặt bàn dựa trên kết quả lọc của chuỗi tìm
+	// kiếm.
+	private void timKiemDatBan() {
+		String keyword = view.getTfTimKiem().getText().trim().toLowerCase();
+		if (keyword.isEmpty()) {
+			loadDuLieuLenBang();
+			return;
+		}
+
+		List<DatBan> list = dao.findAll();
+		DefaultTableModel model = view.getTmDatBan();
+		model.setRowCount(0);
+		int stt = 1;
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+		for (DatBan db : list) {
+			String ma = db.getMaDatBan() != null ? db.getMaDatBan().toLowerCase() : "";
+			String sdt = db.getSoDienThoai() != null ? db.getSoDienThoai().toLowerCase() : "";
+			String ten = db.getTenKhachHang() != null ? db.getTenKhachHang().toLowerCase() : "";
+
+			if (ma.contains(keyword) || sdt.contains(keyword) || ten.contains(keyword)) {
+				String chuTrangThai = db.isTrangThai() ? "Đã nhận bàn" : "Chờ nhận bàn";
+				String chuThoiGianNhan = db.getThoiGianNhanBan() != null ? db.getThoiGianNhanBan().format(df) : "";
+				String maKV = db.getMaKhuVuc() != null ? db.getMaKhuVuc() : "";
+				String maBan = db.getMaBan() != null ? db.getMaBan() : "";
+
+				model.addRow(new Object[] { stt++, db.getMaDatBan(), maKV, maBan, db.getTenKhachHang(),
+						db.getSoDienThoai(), chuThoiGianNhan, chuTrangThai, "Xem" });
+			}
+		}
+	}
+
+	// CHỨC NĂNG: Nạp chi tiết bản ghi đặt bàn đã chọn lên khu vực biểu mẫu.
 	private void hienThiLenForm(int row) {
 		DefaultTableModel tm = view.getTmDatBan();
 		view.getTfTenKhach().setText(tm.getValueAt(row, 4).toString());
@@ -163,6 +240,8 @@ public class DatBanController {
 		}
 	}
 
+	// CHỨC NĂNG: Cấu hình lại các thành phần thông tin trên biểu mẫu để loại bỏ các
+	// dữ liệu đã nhập.
 	private void xoaTrang() {
 		view.getTfTenKhach().setText("");
 		view.getTfSoDienThoai().setText("");
@@ -171,8 +250,12 @@ public class DatBanController {
 		}
 		view.getSpThoiGianNhan().setValue(new Date());
 		view.getTbDatBan().clearSelection();
+		view.getTfTimKiem().setText("");
+		loadDuLieuLenBang();
 	}
 
+	// CHỨC NĂNG: Quản lý luồng xử lý và lưu trữ dữ liệu đối với thao tác tạo mới
+	// hoặc chỉnh sửa.
 	private void handleAction(String action) {
 		try {
 			String ten = view.getTfTenKhach().getText().trim();
@@ -196,7 +279,6 @@ public class DatBanController {
 
 			if (action.equals("THEM")) {
 				String maMoi = "DB" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmss"));
-				// Khởi tạo DatBan đủ 8 tham số
 				DatBan db = new DatBan(maMoi, maBan, ten, sdt, null, thoiGianNhanBan, trangThai, maKhuVuc);
 				if (dao.insert(db)) {
 					JOptionPane.showMessageDialog(view, "Thêm thành công!\nMã: " + maMoi);
@@ -216,6 +298,9 @@ public class DatBanController {
 				if (dao.update(db)) {
 					JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
 					loadDuLieuLenBang();
+
+					isEditingDB = false;
+					view.batTatNutDatBan(true, true, true, false);
 				} else {
 					JOptionPane.showMessageDialog(view, "Cập nhật thất bại!");
 				}
@@ -226,6 +311,8 @@ public class DatBanController {
 		}
 	}
 
+	// CHỨC NĂNG: Loại bỏ thông tin ghi nhận đặt bàn tương ứng đã chọn khỏi cơ sở dữ
+	// liệu.
 	private void xoaDatBan() {
 		int row = view.getTbDatBan().getSelectedRow();
 		if (row == -1) {

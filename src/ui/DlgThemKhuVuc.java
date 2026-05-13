@@ -23,6 +23,7 @@ public class DlgThemKhuVuc extends JDialog {
 	private JButton btnLuuThemMoi, btnDong;
 	private JLabel lbMaKhuVuc, lbTenKhuVuc, lbPhuThu;
 
+	// CHỨC NĂNG: Khởi tạo giao diện hộp thoại cấu hình thêm khu vực
 	public DlgThemKhuVuc(JDialog parent) {
 		super(parent, "THÊM KHU VỰC", true);
 		this.setSize(400, 260);
@@ -33,6 +34,7 @@ public class DlgThemKhuVuc extends JDialog {
 		khoiTaoGiaoDien();
 	}
 
+	// CHỨC NĂNG: Xử lý thay đổi kích thước ảnh theo tham số cung cấp
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null) {
@@ -44,6 +46,7 @@ public class DlgThemKhuVuc extends JDialog {
 		return new ImageIcon(imgThuNho);
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập các thành phần giao diện của bảng
 	private void khoiTaoGiaoDien() {
 		JPanel pnMain = new JPanel();
 		pnMain.setLayout(new BorderLayout());
@@ -132,9 +135,7 @@ public class DlgThemKhuVuc extends JDialog {
 		this.add(pnMain);
 	}
 
-	// =======================================================
-	// CÁC HÀM GETTER VÀ LISTENER CHO FORM THÊM NHANH
-	// =======================================================
+	// CHỨC NĂNG: Các phương thức Getter và Listener hỗ trợ tương tác trên giao diện
 	public String getMaKhuVuc() {
 		return tfMaKhuVuc.getText().trim();
 	}

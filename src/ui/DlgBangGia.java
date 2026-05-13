@@ -30,9 +30,10 @@ public class DlgBangGia extends JDialog {
 	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo giao diện hộp thoại hiển thị bảng giá hàng hóa.
 	public DlgBangGia(JFrame parent) {
 		super(parent, "BẢNG GIÁ", true);
-		this.setSize(800, 700);
+		this.setSize(900, 700);
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -46,6 +47,7 @@ public class DlgBangGia extends JDialog {
 		khoiTaoGiaoDien();
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -59,6 +61,7 @@ public class DlgBangGia extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Xây dựng và bố trí các thành phần giao diện.
 	public void khoiTaoGiaoDien() {
 		JPanel pnMainLayout = new JPanel(new BorderLayout());
 		pnMainLayout.setBackground(MAU_NEN_CHINH);
@@ -110,7 +113,6 @@ public class DlgBangGia extends JDialog {
 		rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
 		table.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
 
-		// CHIÊU THỨC CẤP MÀU SẮC CHO TRẠNG THÁI
 		table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
 			private static final long serialVersionUID = 1L;
 
@@ -122,18 +124,15 @@ public class DlgBangGia extends JDialog {
 
 				if (value != null) {
 					String status = value.toString();
-					// Nếu "Ngừng bán" thì nhuộm Đỏ, "Đang bán" thì nhuộm Xanh
 					if (status.equalsIgnoreCase("Ngừng bán")) {
 						c.setForeground(Color.RED);
 					} else if (status.equalsIgnoreCase("Đang bán")) {
-						c.setForeground(new Color(0, 153, 0)); // Màu xanh lá đậm để không chói lóa
+						c.setForeground(new Color(0, 153, 0));
 					} else {
-						c.setForeground(Color.BLACK); // Phòng hờ lỗi
+						c.setForeground(Color.BLACK);
 					}
 				}
 
-				// Khi người dùng click chọn dòng thì chữ vẫn phải giữ nguyên màu hoặc theo màu
-				// hệ thống
 				if (isSelected) {
 					c.setBackground(table.getSelectionBackground());
 				} else {

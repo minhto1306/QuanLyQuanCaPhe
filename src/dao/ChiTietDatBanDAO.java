@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entity.ChiTietDatBan;
+import entity.ChiTietHoaDon;
 import util.DataBaseConnection;
 
 public class ChiTietDatBanDAO implements BaseDAO<ChiTietDatBan, String> {
@@ -89,5 +90,24 @@ public class ChiTietDatBanDAO implements BaseDAO<ChiTietDatBan, String> {
 			e.printStackTrace();
 		}
 		return ds;
+	}
+
+	// Thêm vào trong ChiTietHoaDonDAO.java
+	public List<ChiTietHoaDon> findByMaHoaDon(String maHD) {
+		List<ChiTietHoaDon> danhSach = new ArrayList<>();
+		String sql = "SELECT * FROM ChiTietHoaDon WHERE maHoaDon = ?";
+		Connection cnnct = util.DataBaseConnection.getInstance().getConnection();
+		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
+			pstmt.setString(1, maHD);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					danhSach.add(new ChiTietHoaDon(rs.getString("maHoaDon"), rs.getString("maSanPham"),
+							rs.getInt("soLuong"), rs.getDouble("giaBan"), rs.getString("ghiChu")));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return danhSach;
 	}
 }

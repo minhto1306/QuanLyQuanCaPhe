@@ -17,6 +17,11 @@ public class NhanVienController {
 	private NhanVienDAO nvDAO;
 	private TaiKhoanDAO tkDAO;
 
+	private boolean isEditingNV = false;
+	private boolean isEditingTK = false;
+
+	// CHỨC NĂNG: Khởi tạo luồng điều khiển xử lý chức năng quản lý nhân viên và tài
+	// khoản.
 	public NhanVienController(DlgNhanVien view) {
 		this.view = view;
 		this.nvDAO = new NhanVienDAO();
@@ -27,13 +32,40 @@ public class NhanVienController {
 		lamMoiBangTaiKhoan();
 	}
 
+	// CHỨC NĂNG: Lắng nghe và điều hướng các thao tác trên giao diện.
 	private void dangKySuKien() {
-		view.addThemNVListener(e -> xuLyThemNV());
-		view.addSuaNVListener(e -> xuLySuaNV());
+		view.addThemNVListener(e -> {
+			isEditingNV = false;
+			xuLyThemNV();
+		});
+
+		view.addSuaNVListener(e -> {
+			String ma = view.getMaNVInput().trim();
+			if (ma.isEmpty()) {
+				JOptionPane.showMessageDialog(view, "Chưa chọn nhân viên cần sửa!");
+				return;
+			}
+			isEditingNV = true;
+			view.batTatNutNhanVien(false, false, false, true, false);
+		});
+
 		view.addXoaNVListener(e -> xuLyXoaNV());
-		view.addXoaTrangNVListener(e -> view.xoaTrangFormNhanVien());
+
+		view.addXoaTrangNVListener(e -> {
+			view.xoaTrangFormNhanVien();
+			isEditingNV = false;
+			view.batTatNutNhanVien(true, true, true, false, true);
+		});
+
+		view.addLuuNVListener(e -> {
+			if (isEditingNV) {
+				xuLySuaNV();
+			} else {
+				JOptionPane.showMessageDialog(view, "Chỉ dùng nút Lưu khi đang Sửa!");
+			}
+		});
+
 		view.addTimNVListener(e -> xuLyTimNV());
-		view.addLuuNVListener(e -> JOptionPane.showMessageDialog(view, "Vui lòng dùng nút Thêm hoặc Sửa!"));
 
 		view.addBangNhanVienMouseListener(new MouseAdapter() {
 			@Override
@@ -50,12 +82,38 @@ public class NhanVienController {
 			}
 		});
 
-		view.addThemTKListener(e -> xuLyThemTK());
-		view.addSuaTKListener(e -> xuLySuaTK());
+		view.addThemTKListener(e -> {
+			isEditingTK = false;
+			xuLyThemTK();
+		});
+
+		view.addSuaTKListener(e -> {
+			String user = view.getTK_TenDangNhapSelected();
+			if (user.isEmpty() || tkDAO.findById(user) == null) {
+				JOptionPane.showMessageDialog(view, "Chưa chọn tài khoản cần sửa!");
+				return;
+			}
+			isEditingTK = true;
+			view.batTatNutTaiKhoan(false, false, false, true, false);
+		});
+
 		view.addXoaTKListener(e -> xuLyXoaTK());
-		view.addXoaTrangTKListener(e -> view.xoaTrangFormTaiKhoan());
+
+		view.addXoaTrangTKListener(e -> {
+			view.xoaTrangFormTaiKhoan();
+			isEditingTK = false;
+			view.batTatNutTaiKhoan(true, true, true, false, true);
+		});
+
+		view.addLuuTKListener(e -> {
+			if (isEditingTK) {
+				xuLySuaTK();
+			} else {
+				JOptionPane.showMessageDialog(view, "Chỉ dùng nút Lưu khi đang Sửa!");
+			}
+		});
+
 		view.addTimTKListener(e -> xuLyTimTK());
-		view.addLuuTKListener(e -> JOptionPane.showMessageDialog(view, "Vui lòng dùng nút Thêm hoặc Sửa!"));
 
 		view.addBangTaiKhoanMouseListener(new MouseAdapter() {
 			@Override
@@ -71,6 +129,7 @@ public class NhanVienController {
 		});
 	}
 
+	// CHỨC NĂNG: Cập nhật lại dữ liệu hiển thị trên bảng danh sách nhân viên.
 	private void lamMoiBangNhanVien() {
 		view.getTmNhanVien().setRowCount(0);
 		List<NhanVien> list = nvDAO.findAll();
@@ -91,11 +150,14 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Khởi tạo một đối tượng Nhân viên từ dữ liệu nhập trên form.
 	private NhanVien layDuLieuNhanVienTuForm() {
 		return new NhanVien(view.getMaNVInput(), view.getTenDangNhapNVInput(), view.getHoTenNVInput(),
 				view.getCCCDInput(), view.getSDTInput(), true);
 	}
 
+	// CHỨC NĂNG: Xác thực và xử lý việc lưu thông tin nhân viên mới vào cơ sở dữ
+	// liệu.
 	private void xuLyThemNV() {
 		String ma = view.getMaNVInput().trim();
 		String tenDN = view.getTenDangNhapNVInput().trim();
@@ -163,13 +225,8 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Xác thực và xử lý việc cập nhật thông tin nhân viên đã tồn tại.
 	private void xuLySuaNV() {
-		String ma = view.getMaNVInput().trim();
-		if (ma.isEmpty()) {
-			JOptionPane.showMessageDialog(view, "Chưa chọn nhân viên cần sửa!");
-			return;
-		}
-
 		String hoTen = view.getHoTenNVInput().trim();
 		String cccd = view.getCCCDInput().trim();
 		String sdt = view.getSDTInput().trim();
@@ -198,12 +255,16 @@ public class NhanVienController {
 			JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
 			lamMoiBangNhanVien();
 			lamMoiBangTaiKhoan();
+
 			view.xoaTrangFormNhanVien();
+			isEditingNV = false;
+			view.batTatNutNhanVien(true, true, true, false, true);
 		} else {
 			JOptionPane.showMessageDialog(view, "Cập nhật thất bại!");
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thao tác loại bỏ nhân viên khỏi cơ sở dữ liệu.
 	private void xuLyXoaNV() {
 		String ma = view.getMaNVInput();
 		if (ma.isEmpty())
@@ -213,27 +274,28 @@ public class NhanVienController {
 		if (nv == null)
 			return;
 
-		if (JOptionPane.showConfirmDialog(view, "Xác nhận vô hiệu hóa nhân viên " + ma + " và khóa tài khoản của họ?",
+		if (JOptionPane.showConfirmDialog(view, "Xác nhận xóa hoàn toàn nhân viên " + ma + " và tài khoản của họ?",
 				"Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
 			String tenDN = nv.getTenDangNhap();
 
 			if (nvDAO.delete(ma)) {
-				TaiKhoan tk = tkDAO.findById(tenDN);
-				if (tk != null) {
-					tk.setTrangThai(false);
-					tkDAO.update(tk);
+				if (tenDN != null && !tenDN.isEmpty()) {
+					tkDAO.delete(tenDN);
 				}
 				lamMoiBangNhanVien();
 				lamMoiBangTaiKhoan();
 				view.xoaTrangFormNhanVien();
-				JOptionPane.showMessageDialog(view, "Đã vô hiệu hóa nhân viên!");
+				JOptionPane.showMessageDialog(view, "Đã xóa thành công nhân viên và tài khoản!");
 			} else {
-				JOptionPane.showMessageDialog(view, "Lỗi khi vô hiệu hóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(view,
+						"Lỗi khi xóa! Chắc chắn nhân viên này không còn tồn tại trong Hóa Đơn hoặc Lịch Làm Việc.",
+						"Lỗi Ràng Buộc", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý chức năng tìm kiếm thông tin nhân viên trong bảng.
 	private void xuLyTimNV() {
 		String key = view.getTimKiemNVInput().toLowerCase().trim();
 		if (key.isEmpty()) {
@@ -261,6 +323,7 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Cập nhật lại dữ liệu hiển thị trên bảng danh sách tài khoản.
 	private void lamMoiBangTaiKhoan() {
 		view.getTmTaiKhoan().setRowCount(0);
 		List<TaiKhoan> list = tkDAO.findAll();
@@ -273,6 +336,7 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Khởi tạo một đối tượng Tài Khoản từ dữ liệu nhập trên form.
 	private TaiKhoan layDuLieuTaiKhoanTuForm() {
 		String user = view.getTK_TenDangNhapSelected();
 		String pass = view.getTK_MatKhauInput();
@@ -282,6 +346,7 @@ public class NhanVienController {
 		return new TaiKhoan(user, pass, trangThai, maDB);
 	}
 
+	// CHỨC NĂNG: Xác thực và xử lý việc lưu thông tin tài khoản mới.
 	private void xuLyThemTK() {
 		String user = view.getTK_TenDangNhapSelected();
 		if (user.isEmpty()) {
@@ -299,40 +364,34 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Xác thực và xử lý việc cập nhật thông tin tài khoản đã tồn tại.
 	private void xuLySuaTK() {
-		String user = view.getTK_TenDangNhapSelected();
-		if (user.isEmpty() || tkDAO.findById(user) == null) {
-			JOptionPane.showMessageDialog(view, "Không tìm thấy tài khoản để sửa!");
-			return;
-		}
 		TaiKhoan tk = layDuLieuTaiKhoanTuForm();
 		if (tkDAO.update(tk)) {
 			JOptionPane.showMessageDialog(view, "Cập nhật tài khoản thành công!");
 			lamMoiBangTaiKhoan();
 			lamMoiBangNhanVien();
+
+			view.xoaTrangFormTaiKhoan();
+			isEditingTK = false;
+			view.batTatNutTaiKhoan(true, true, true, false, true);
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thao tác loại bỏ tài khoản ra khỏi cơ sở dữ liệu.
 	private void xuLyXoaTK() {
 		String user = view.getTK_TenDangNhapSelected();
 		if (user.isEmpty())
 			return;
 
 		NhanVien nvCheck = nvDAO.timNhanVienTheoTenDangNhap(user);
-		if (nvCheck != null && nvCheck.isTrangThai()) {
+		if (nvCheck != null) {
 			JOptionPane.showMessageDialog(view, "Tài khoản đang được nhân viên " + nvCheck.getMaNhanVien()
-					+ " sử dụng. Sẽ tiến hành khóa tài khoản thay vì xóa!");
-			TaiKhoan tk = tkDAO.findById(user);
-			if (tk != null) {
-				tk.setTrangThai(false);
-				tkDAO.update(tk);
-				lamMoiBangTaiKhoan();
-				JOptionPane.showMessageDialog(view, "Đã khóa tài khoản!");
-			}
+					+ " sử dụng. Phải xóa nhân viên trước khi xóa tài khoản!");
 			return;
 		}
 
-		if (JOptionPane.showConfirmDialog(view, "Xác nhận xóa tài khoản " + user + "?", "Xóa",
+		if (JOptionPane.showConfirmDialog(view, "Xác nhận xóa hoàn toàn tài khoản " + user + "?", "Xóa",
 				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			if (tkDAO.delete(user)) {
 				lamMoiBangTaiKhoan();
@@ -342,6 +401,7 @@ public class NhanVienController {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý chức năng tìm kiếm thông tin tài khoản trong bảng.
 	private void xuLyTimTK() {
 		String key = view.getTK_TimInput().toLowerCase().trim();
 		if (key.isEmpty()) {

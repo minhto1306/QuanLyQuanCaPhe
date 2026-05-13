@@ -6,6 +6,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="product-images"/>
+	<classpathentry kind="src" path="sql"/>
 	<classpathentry kind="lib" path="lib/mssql-jdbc-13.4.0.jre11.jar"/>
 	<classpathentry kind="lib" path="D:/JAVA_JDK/flatlaf-3.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>

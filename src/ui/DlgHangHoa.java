@@ -12,6 +12,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -68,12 +69,12 @@ public class DlgHangHoa extends JDialog {
 	private JTable tbDanhMuc;
 	private DefaultTableModel tmDanhMuc;
 
-	// BỘ CHÂN KHÍ MÀU SẮC ĐỒNG BỘ RETRO
-	private final Color MAU_NEN_CHINH = new Color(242, 233, 216); // Vani
-	private final Color MAU_NAU_VIEN = new Color(89, 58, 47); // Nâu đậm
-	private final Color MAU_HEADER = new Color(209, 185, 161); // Bạc xỉu
+	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
+	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
+	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo giao diện quản lý hàng hóa và danh mục.
 	public DlgHangHoa(JFrame parent) {
 		super(parent, "HÀNG HÓA VÀ DANH MỤC", true);
 		this.setSize(950, 750);
@@ -99,14 +100,14 @@ public class DlgHangHoa extends JDialog {
 		tabbedPane.addTab("THÔNG TIN HÀNG HÓA", iconHangHoa, tabHangHoa, "Xem thông tin hàng hóa");
 		tabbedPane.addTab("THÔNG TIN DANH MỤC", iconDanhMuc, tabDanhMuc, "Xem thông tin danh mục");
 
-		// Nền tổng thể Nâu Đậm, lót thêm một lớp panel để tạo viền padding
 		JPanel container = new JPanel(new BorderLayout());
 		container.setBackground(MAU_NAU_VIEN);
-		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Khoảng cách viền ngoài
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.add(tabbedPane, BorderLayout.CENTER);
 		this.setContentPane(container);
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -120,6 +121,7 @@ public class DlgHangHoa extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thu nhỏ kích thước hình ảnh.
 	private ImageIcon taoIconThuNho(String duongDan, int width, int height) {
 		java.net.URL url = getClass().getResource(duongDan);
 		if (url == null)
@@ -127,7 +129,7 @@ public class DlgHangHoa extends JDialog {
 		return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
 
-	// CHIÊU THỨC: Trang trí chung cho các TextField / ComboBox
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các thành phần nhập liệu.
 	private void setupRetroInput(Component comp) {
 		if (comp instanceof JTextField) {
 			JTextField tf = (JTextField) comp;
@@ -141,7 +143,7 @@ public class DlgHangHoa extends JDialog {
 		}
 	}
 
-	// CHIÊU THỨC: Trang trí Nút Bấm
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các nút bấm.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 16f));
 		btn.setBackground(MAU_NEN_CHINH);
@@ -151,9 +153,10 @@ public class DlgHangHoa extends JDialog {
 				BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập giao diện cho tab Hàng hóa.
 	private JPanel khoiTaoTabHangHoa() {
 		pnHangHoa = new JPanel(new BorderLayout());
-		pnHangHoa.setBackground(MAU_NEN_CHINH); // Nhuộm màu nền
+		pnHangHoa.setBackground(MAU_NEN_CHINH);
 		pnHangHoa.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		lbTimSP = new JLabel("TÌM SẢN PHẨM:");
@@ -173,9 +176,8 @@ public class DlgHangHoa extends JDialog {
 		Dimension dRightLabel = new Dimension(110, 25);
 		lbDanhMuc.setPreferredSize(dRightLabel);
 		lbHinhAnhText.setPreferredSize(dRightLabel);
-		lbTimSP.setPreferredSize(new Dimension(140, 25));
+		lbTimSP.setPreferredSize(new Dimension(180, 25));
 
-		// Đổi Font Bungee cho Labels
 		Font fontLabelRetro = fontBungeeBase.deriveFont(Font.PLAIN, 18f);
 		JLabel[] labels = { lbTimSP, lbMaSanPham, lbTenSanPham, lbGiaBan, lbTrangThai, lbDanhMuc, lbHinhAnhText };
 		for (JLabel lbl : labels) {
@@ -241,7 +243,6 @@ public class DlgHangHoa extends JDialog {
 		btnTim.setBackground(MAU_NEN_CHINH);
 		btnTim.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 2));
 
-		// BẢNG NHẬP LIỆU PHÍA TRÊN
 		JPanel pnNhapThongTin = new JPanel();
 		pnNhapThongTin.setLayout(new BoxLayout(pnNhapThongTin, BoxLayout.X_AXIS));
 		pnNhapThongTin.setBackground(MAU_NEN_CHINH);
@@ -310,7 +311,6 @@ public class DlgHangHoa extends JDialog {
 		pnNhapThongTin.add(Box.createHorizontalStrut(50));
 		pnNhapThongTin.add(pnPhai);
 
-		// VÙNG BẢNG DỮ LIỆU
 		JPanel pnBangDuLieu = new JPanel(new BorderLayout());
 		pnBangDuLieu.setBackground(MAU_NEN_CHINH);
 		pnBangDuLieu.setBorder(
@@ -318,7 +318,7 @@ public class DlgHangHoa extends JDialog {
 		pnHangHoa.add(pnBangDuLieu, BorderLayout.CENTER);
 
 		JPanel pnTimKiem = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-		pnTimKiem.setBackground(MAU_HEADER); // Cho dải tìm kiếm nổi bật xíu
+		pnTimKiem.setBackground(MAU_HEADER);
 		pnTimKiem.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 0, MAU_NAU_VIEN));
 		Box boxTimSP = Box.createHorizontalBox();
 		boxTimSP.add(lbTimSP);
@@ -337,7 +337,6 @@ public class DlgHangHoa extends JDialog {
 		};
 		tbSanPham = new JTable(tmSanPham);
 
-		// Style bảng
 		JTableHeader header = tbSanPham.getTableHeader();
 		header.setFont(new Font("Tahoma", Font.BOLD, 16));
 		header.setBackground(MAU_HEADER);
@@ -356,15 +355,31 @@ public class DlgHangHoa extends JDialog {
 		tbSanPham.getColumnModel().getColumn(3).setPreferredWidth(100);
 		tbSanPham.getColumnModel().getColumn(4).setPreferredWidth(100);
 
-		// Render canh lề và NHUỘM MÀU TRẠNG THÁI
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		tbSanPham.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 		tbSanPham.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
 
-		DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-		rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-		tbSanPham.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+		tbSanPham.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = 1L;
+			private DecimalFormat df = new DecimalFormat("#,### VNĐ");
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				if (value instanceof Number) {
+					value = df.format(((Number) value).doubleValue());
+				} else if (value instanceof String) {
+					try {
+						value = df.format(Double.parseDouble((String) value));
+					} catch (Exception ex) {
+					}
+				}
+				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				setHorizontalAlignment(SwingConstants.RIGHT);
+				return c;
+			}
+		});
 
 		tbSanPham.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
 			private static final long serialVersionUID = 1L;
@@ -393,10 +408,9 @@ public class DlgHangHoa extends JDialog {
 		});
 
 		JScrollPane scrollPane = new JScrollPane(tbSanPham);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder()); // Xóa viền thừa
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		pnBangDuLieu.add(scrollPane, BorderLayout.CENTER);
 
-		// VÙNG NÚT CHỨC NĂNG
 		JPanel pnNutChucNang = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
 		pnNutChucNang.setBackground(MAU_NEN_CHINH);
 		pnNutChucNang.setBorder(brdVienDen);
@@ -421,6 +435,7 @@ public class DlgHangHoa extends JDialog {
 		return pnHangHoa;
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập giao diện cho tab Danh mục.
 	private JPanel khoiTaoTabDanhMuc() {
 		pnDanhMuc = new JPanel(new BorderLayout());
 		pnDanhMuc.setBackground(MAU_NEN_CHINH);
@@ -674,6 +689,7 @@ public class DlgHangHoa extends JDialog {
 		return tmDanhMuc;
 	}
 
+	// CHỨC NĂNG: Quản lý trạng thái bật/tắt các nút thao tác sản phẩm.
 	public void batTatNutSanPham(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
 		btnThem.setEnabled(them);
 		btnXoa.setEnabled(xoa);
@@ -682,6 +698,7 @@ public class DlgHangHoa extends JDialog {
 		tfMaSanPham.setEditable(tfMaState);
 	}
 
+	// CHỨC NĂNG: Quản lý trạng thái bật/tắt các nút thao tác danh mục.
 	public void batTatNutDanhMuc(boolean them, boolean xoa, boolean sua, boolean luu, boolean tfMaState) {
 		btnDM_Them.setEnabled(them);
 		btnDM_Xoa.setEnabled(xoa);

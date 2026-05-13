@@ -24,6 +24,7 @@ public class DlgInHoaDon extends JDialog {
 	private JTextArea txtBill;
 	private JButton btnLuuDong;
 
+	// CHỨC NĂNG: Khởi tạo hộp thoại hiển thị chi tiết hóa đơn.
 	public DlgInHoaDon(JFrame parent, HoaDon hd, String tenNhanVien, String tenBan, List<Object[]> danhSachMon) {
 		super(parent, "📄 CHI TIẾT HÓA ĐƠN - MIO COFFEE", true);
 		setSize(420, 650);
@@ -39,7 +40,6 @@ public class DlgInHoaDon extends JDialog {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		add(scrollPane, BorderLayout.CENTER);
 
-		// Chỉ giữ 1 nút Lưu & Đóng như Qẹoooo muốn hỉ
 		JPanel pnBottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		btnLuuDong = new JButton("Lưu & Đóng");
 		btnLuuDong.setFont(new Font("Arial", Font.BOLD, 14));
@@ -48,22 +48,32 @@ public class DlgInHoaDon extends JDialog {
 
 		veHoaDon(hd, tenNhanVien, tenBan, danhSachMon);
 
-		// Bấm là đóng thôi vì dữ liệu đã lưu ở Controller rồi
 		btnLuuDong.addActionListener(e -> this.dispose());
 	}
 
+	// CHỨC NĂNG: Xuất thông tin hóa đơn ra định dạng văn bản để hiển thị.
 	private void veHoaDon(HoaDon hd, String tenNhanVien, String tenBan, List<Object[]> danhSachMon) {
 		StringBuilder sb = new StringBuilder();
 		DecimalFormat df = new DecimalFormat("#,###");
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+		double tongTienMon = 0;
+		for (Object[] row : danhSachMon) {
+			tongTienMon += Double.parseDouble(row[3].toString());
+		}
+
+		double phuThu = hd.getTongTien() - tongTienMon;
+		if (phuThu < 0)
+			phuThu = 0;
 
 		sb.append("                  MIO COFFEE\n");
 		sb.append("      611 Thống Nhất, P16, Q.Gò Vấp, HCM\n");
 		sb.append("----------------------------------------------\n");
 		sb.append("Mã HĐ   : ").append(hd.getMaHoaDon()).append("\n");
 		sb.append("Ngày lập: ").append(hd.getThoiGianLap().format(dtf)).append("\n");
-		sb.append("Thu ngân: ").append(tenNhanVien).append("\n"); // Đổ đúng tên người trực vô đây
+		sb.append("Thu ngân: ").append(tenNhanVien).append("\n");
 		sb.append("Bàn     : ").append(tenBan).append("\n");
+
 		sb.append("----------------------------------------------\n");
 		sb.append(String.format("%-18s %-4s %-9s %-11s\n", "Tên món", "SL", "Đơn giá", "Thành tiền"));
 		sb.append("----------------------------------------------\n");
@@ -78,7 +88,13 @@ public class DlgInHoaDon extends JDialog {
 		}
 
 		sb.append("----------------------------------------------\n");
-		sb.append(String.format("%-28s %15s\n", "Tổng cộng:", df.format(hd.getTongTien())));
+
+		sb.append(String.format("%-28s %15s\n", "Tổng tiền món:", df.format(tongTienMon)));
+
+		if (phuThu > 0) {
+			sb.append(String.format("%-28s %15s\n", "Phụ thu :", df.format(phuThu)));
+		}
+
 		sb.append(String.format("%-28s %15s\n", "Thuế VAT:", df.format(hd.getThueVAT())));
 		sb.append(String.format("%-28s %15s\n", "Giảm giá:", df.format(hd.getGiamGia())));
 		sb.append("----------------------------------------------\n");

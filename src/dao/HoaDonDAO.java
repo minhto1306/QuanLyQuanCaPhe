@@ -15,7 +15,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public boolean insert(HoaDon hd) {
-		String sql = "INSERT INTO HoaDon (maHoaDon, maNhanVien, maBan, thoiGianLap, tongTien, thueVAT, giamGia, thanhTien, phuongThucThanhToan, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO HoaDon (maHoaDon, maNhanVien, maBan, thoiGianLap, tongTien, thueVAT, giamGia, thanhTien, trangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, hd.getMaHoaDon());
@@ -26,8 +26,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 			pstmt.setDouble(6, hd.getThueVAT());
 			pstmt.setDouble(7, hd.getGiamGia());
 			pstmt.setDouble(8, hd.getThanhTien());
-			pstmt.setString(9, hd.getPhuongThucThanhToan());
-			pstmt.setBoolean(10, hd.isTrangThai());
+			pstmt.setBoolean(9, hd.isTrangThai());
 
 			return pstmt.executeUpdate() > 0;
 		} catch (SQLException e) {
@@ -38,7 +37,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 
 	@Override
 	public boolean update(HoaDon hd) {
-		String sql = "UPDATE HoaDon SET maNhanVien = ?, maBan = ?, thoiGianLap = ?, tongTien = ?, thueVAT = ?, giamGia = ?, thanhTien = ?, phuongThucThanhToan = ?, trangThai = ? WHERE maHoaDon = ?";
+		String sql = "UPDATE HoaDon SET maNhanVien = ?, maBan = ?, thoiGianLap = ?, tongTien = ?, thueVAT = ?, giamGia = ?, thanhTien = ?, trangThai = ? WHERE maHoaDon = ?";
 		Connection cnnct = DataBaseConnection.getInstance().getConnection();
 		try (PreparedStatement pstmt = cnnct.prepareStatement(sql)) {
 			pstmt.setString(1, hd.getMaNhanVien());
@@ -48,9 +47,8 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 			pstmt.setDouble(5, hd.getThueVAT());
 			pstmt.setDouble(6, hd.getGiamGia());
 			pstmt.setDouble(7, hd.getThanhTien());
-			pstmt.setString(8, hd.getPhuongThucThanhToan());
-			pstmt.setBoolean(9, hd.isTrangThai());
-			pstmt.setString(10, hd.getMaHoaDon());
+			pstmt.setBoolean(8, hd.isTrangThai());
+			pstmt.setString(9, hd.getMaHoaDon());
 
 			return pstmt.executeUpdate() > 0;
 		} catch (SQLException e) {
@@ -83,7 +81,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 					return new HoaDon(rs.getString("maHoaDon"), rs.getString("maNhanVien"), rs.getString("maBan"),
 							rs.getTimestamp("thoiGianLap").toLocalDateTime(), rs.getDouble("tongTien"),
 							rs.getDouble("thueVAT"), rs.getDouble("giamGia"), rs.getDouble("thanhTien"),
-							rs.getString("phuongThucThanhToan"), rs.getBoolean("trangThai"));
+							rs.getBoolean("trangThai"));
 				}
 			}
 		} catch (SQLException e) {
@@ -102,7 +100,7 @@ public class HoaDonDAO implements BaseDAO<HoaDon, String> {
 				danhSach.add(new HoaDon(rs.getString("maHoaDon"), rs.getString("maNhanVien"), rs.getString("maBan"),
 						rs.getTimestamp("thoiGianLap").toLocalDateTime(), rs.getDouble("tongTien"),
 						rs.getDouble("thueVAT"), rs.getDouble("giamGia"), rs.getDouble("thanhTien"),
-						rs.getString("phuongThucThanhToan"), rs.getBoolean("trangThai")));
+						rs.getBoolean("trangThai")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

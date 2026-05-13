@@ -49,12 +49,15 @@ public class DlgCaLamViec extends JDialog {
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	private List<String> danhSachNhanVien = new ArrayList<>();
 
+	private boolean quyenChinhSua = true;
+
 	private final Color MAU_NEN_CHINH = new Color(242, 233, 216);
 	private final Color MAU_NAU_VIEN = new Color(89, 58, 47);
 	private final Color MAU_NAU_NUT = new Color(110, 75, 59);
 	private final Color MAU_HEADER = new Color(209, 185, 161);
 	private Font fontBungeeBase;
 
+	// CHỨC NĂNG: Khởi tạo hộp thoại giao diện quản lý lịch làm việc.
 	public DlgCaLamViec(JFrame parent) {
 		super(parent, "QUẢN LÝ LỊCH LÀM VIỆC", true);
 		this.setSize(1450, 700);
@@ -72,6 +75,7 @@ public class DlgCaLamViec extends JDialog {
 		capNhatDuLieuTuan();
 	}
 
+	// CHỨC NĂNG: Tải font chữ tùy chỉnh cho giao diện.
 	private void loadCustomFont() {
 		try {
 			InputStream is = getClass().getResourceAsStream("/font/Bungee-Regular.ttf");
@@ -85,6 +89,7 @@ public class DlgCaLamViec extends JDialog {
 		}
 	}
 
+	// CHỨC NĂNG: Thiết lập định dạng chuẩn cho các nút tương tác.
 	private void setupRetroButton(JButton btn) {
 		btn.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 18f));
 		btn.setBackground(MAU_NAU_NUT);
@@ -94,8 +99,8 @@ public class DlgCaLamViec extends JDialog {
 		btn.setPreferredSize(new Dimension(140, 40));
 	}
 
+	// CHỨC NĂNG: Khởi tạo và thiết lập các thành phần giao diện.
 	private void khoiTaoGiaoDien() {
-		// Viền ngoài cùng của ứng dụng
 		pnMain = new JPanel(new BorderLayout(5, 5));
 		pnMain.setBackground(MAU_NAU_VIEN);
 		pnMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -178,9 +183,11 @@ public class DlgCaLamViec extends JDialog {
 					return;
 
 				if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON1) {
-					JPopupMenu popup = taoMenuChonNhanVien(row, col);
-					if (popup != null)
-						popup.show(tbCaLamViec, e.getX(), e.getY());
+					if (quyenChinhSua) {
+						JPopupMenu popup = taoMenuChonNhanVien(row, col);
+						if (popup != null)
+							popup.show(tbCaLamViec, e.getX(), e.getY());
+					}
 				} else if (e.getClickCount() == 2) {
 					Object val = tmCaLamViec.getValueAt(row, col);
 					String text = (val == null || val.toString().trim().isEmpty()) ? "Trống!" : val.toString();
@@ -197,18 +204,16 @@ public class DlgCaLamViec extends JDialog {
 		scrollPane.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4));
 		pnMain.add(scrollPane, BorderLayout.CENTER);
 
-		// CHIÊU THỨC: Đổi màu nền vùng Nút bấm cho tiệp màu với Bảng, thêm viền cho
-		// ngầu
 		JPanel pnSouth = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		pnSouth.setBackground(MAU_NEN_CHINH); // <-- Màu trùng với màu bảng
-		pnSouth.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4)); // <-- Thêm viền nâu
+		pnSouth.setBackground(MAU_NEN_CHINH);
+		pnSouth.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 4));
 
 		btnLuu = new JButton("LƯU PHÂN CÔNG");
 		btnLuu.setFont(fontBungeeBase.deriveFont(Font.PLAIN, 20f));
 		btnLuu.setBackground(new Color(56, 163, 42));
 		btnLuu.setForeground(Color.WHITE);
 		btnLuu.setFocusPainted(false);
-		btnLuu.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3)); // Viền nâu cho đồng bộ
+		btnLuu.setBorder(BorderFactory.createLineBorder(MAU_NAU_VIEN, 3));
 		btnLuu.setPreferredSize(new Dimension(250, 50));
 
 		pnSouth.add(btnLuu);
@@ -217,11 +222,12 @@ public class DlgCaLamViec extends JDialog {
 		this.setContentPane(pnMain);
 	}
 
+	// CHỨC NĂNG: Khởi tạo danh sách thao tác chọn nhân viên cho từng ô.
 	private JPopupMenu taoMenuChonNhanVien(int row, int col) {
 		if (danhSachNhanVien == null || danhSachNhanVien.isEmpty())
 			return null;
 		JPopupMenu popup = new JPopupMenu();
-		JMenuItem itemXoa = new JMenuItem("❌ Xóa trống ô này");
+		JMenuItem itemXoa = new JMenuItem("Xóa trống ô này");
 		itemXoa.setForeground(Color.RED);
 		itemXoa.addActionListener(e -> tmCaLamViec.setValueAt("", row, col));
 		popup.add(itemXoa);
@@ -244,6 +250,7 @@ public class DlgCaLamViec extends JDialog {
 		return popup;
 	}
 
+	// CHỨC NĂNG: Cập nhật hiển thị và dữ liệu cho tuần làm việc mới.
 	public void capNhatDuLieuTuan() {
 		LocalDate ngayKetThucTuan = ngayBatDauTuan.plusDays(6);
 		lbTuanHienTai.setText("Tuần: " + ngayBatDauTuan.format(formatter) + " - " + ngayKetThucTuan.format(formatter));
@@ -268,7 +275,17 @@ public class DlgCaLamViec extends JDialog {
 		tmCaLamViec.addRow(caToi);
 	}
 
-	// Giữ nguyên các hàm Getter/Setter/Listeners
+	// CHỨC NĂNG: Phân quyền sử dụng các tính năng dựa trên vai trò của nhân viên.
+	public void phanQuyen(String vaiTro) {
+		if (vaiTro != null && vaiTro.toLowerCase().contains("thu")) {
+			quyenChinhSua = false;
+			btnLuu.setVisible(false);
+		} else {
+			quyenChinhSua = true;
+			btnLuu.setVisible(true);
+		}
+	}
+
 	public void setDanhSachNhanVien(List<String> ds) {
 		this.danhSachNhanVien = ds;
 	}
@@ -305,10 +322,8 @@ public class DlgCaLamViec extends JDialog {
 		btnLuu.addActionListener(l);
 	}
 
+	// Lớp phụ trợ phục vụ hiển thị nội dung nhiều dòng trong một ô bảng
 	class MultiLineCellRenderer extends DefaultTableCellRenderer {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private final Insets PADDING = new Insets(10, 10, 10, 10);
 

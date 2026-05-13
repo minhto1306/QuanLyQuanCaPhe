@@ -22,6 +22,9 @@ public class KhuVucController {
 	private KhuVucDAO khuVucDAO;
 	private BanDAO banDAO;
 
+	private boolean isEditingKV = false;
+
+	// CHỨC NĂNG: Khởi tạo điều khiển quản lý khu vực và sơ đồ bàn.
 	public KhuVucController(DlgKhuVucBan view) {
 		this.view = view;
 		this.khuVucDAO = new KhuVucDAO();
@@ -31,11 +34,40 @@ public class KhuVucController {
 		loadDataToTableAndComboBox();
 	}
 
+	// CHỨC NĂNG: Khởi tạo và liên kết các sự kiện tương tác của người dùng.
 	private void initEvents() {
-		this.view.addThemKhuVucListener(e -> handleAddKhuVuc());
+		this.view.addThemKhuVucListener(e -> {
+			isEditingKV = false;
+			handleAddKhuVuc();
+		});
+
 		this.view.addXoaKhuVucListener(e -> handleDeleteKhuVuc());
-		this.view.addSuaKhuVucListener(e -> handleUpdateKhuVuc());
-		this.view.addXoaTrangKhuVucListener(e -> clearForm());
+
+		this.view.addSuaKhuVucListener(e -> {
+			int row = view.getSelectedRow();
+			if (row < 0) {
+				view.showMessage("Vui lòng chọn khu vực cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			isEditingKV = true;
+			view.batTatNutKhuVuc(false, false, false, true, false);
+		});
+
+		this.view.addXoaTrangKhuVucListener(e -> {
+			clearForm();
+			isEditingKV = false;
+			view.batTatNutKhuVuc(true, true, true, false, true);
+		});
+
+		this.view.addLuuKhuVucListener(e -> {
+			if (isEditingKV) {
+				handleUpdateKhuVuc();
+			} else {
+				JOptionPane.showMessageDialog(view, "Chỉ dùng nút Lưu khi đang Sửa Khu Vực!");
+			}
+		});
+
+		this.view.addTimKhuVucListener(e -> handleTimKiemKhuVuc());
 
 		this.view.addTableSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) {
@@ -46,18 +78,42 @@ public class KhuVucController {
 		this.view.addThemKhuVucNhanhListener(e -> handleShowQuickAdd());
 		this.view.addTaoTuDongListener(e -> handleTaoTuDong());
 		this.view.addKhuVucComboBoxListener(e -> handleFilterBanByKhuVuc());
-
 		this.view.addXoaBanListener(e -> handleDeleteBan());
 
 		this.view.addThoatSoDoListener(e -> {
 			this.view.dispose();
 			Window parent = SwingUtilities.getWindowAncestor(this.view);
 			if (parent instanceof ui.FrmManHinhChinh) {
-				((ui.FrmManHinhChinh) parent).loadDuLieuSoDoBanMain();
+				List<KhuVuc> listKV = khuVucDAO.findAll();
+				List<Ban> listBan = banDAO.findAll();
+				Map<String, List<Ban>> mapKhuVucBan = new LinkedHashMap<>();
+				for (KhuVuc kv : listKV) {
+					List<Ban> banCuaKv = new ArrayList<>();
+					for (Ban b : listBan) {
+						if (b.getMaKhuVuc() != null && b.getMaKhuVuc().equals(kv.getMaKhuVuc())) {
+							banCuaKv.add(b);
+						}
+					}
+					if (!banCuaKv.isEmpty()) {
+						banCuaKv.sort((b1, b2) -> {
+							int n1 = Integer.parseInt(b1.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
+									: b1.getTenBan().replaceAll("\\D", ""));
+							int n2 = Integer.parseInt(b2.getTenBan().replaceAll("\\D", "").isEmpty() ? "0"
+									: b2.getTenBan().replaceAll("\\D", ""));
+							if (n1 == n2)
+								return b1.getTenBan().compareTo(b2.getTenBan());
+							return Integer.compare(n1, n2);
+						});
+						mapKhuVucBan.put(kv.getTenKhuVuc(), banCuaKv);
+					}
+				}
+				((ui.FrmManHinhChinh) parent).hienThiDanhSachBanToanBo(mapKhuVucBan);
 			}
 		});
 	}
 
+	// CHỨC NĂNG: Nạp dữ liệu khu vực từ cơ sở dữ liệu lên bảng và danh sách thả
+	// xuống.
 	private void loadDataToTableAndComboBox() {
 		List<KhuVuc> list = khuVucDAO.findAll();
 
@@ -70,6 +126,28 @@ public class KhuVucController {
 		view.loadDataToComboBoxKhuVuc(list);
 	}
 
+	// CHỨC NĂNG: Xử lý tìm kiếm thông tin khu vực dựa trên mã.
+	private void handleTimKiemKhuVuc() {
+		String keyword = view.getKV_TimInput().toLowerCase();
+		if (keyword.isEmpty()) {
+			loadDataToTableAndComboBox();
+			return;
+		}
+
+		List<KhuVuc> list = khuVucDAO.findAll();
+		DefaultTableModel model = view.getKhuVucTableModel();
+		model.setRowCount(0);
+		int stt = 1;
+
+		for (KhuVuc kv : list) {
+			if (kv.getMaKhuVuc().toLowerCase().contains(keyword)) {
+				model.addRow(new Object[] { stt++, kv.getMaKhuVuc(), kv.getTenKhuVuc(), kv.getPhuThu() });
+			}
+		}
+	}
+
+	// CHỨC NĂNG: Cập nhật thông tin chi tiết khu vực lên form khi chọn một dòng
+	// trên bảng.
 	private void handleTableClick() {
 		int row = view.getSelectedRow();
 		if (row >= 0) {
@@ -79,6 +157,7 @@ public class KhuVucController {
 		}
 	}
 
+	// CHỨC NĂNG: Xác thực và lưu thông tin khu vực mới vào hệ thống.
 	private void handleAddKhuVuc() {
 		KhuVuc kv = getKhuVucFromForm(view.getMaKhuVuc(), view.getTenKhuVuc(), view.getPhuThu(), view);
 		if (kv == null)
@@ -96,6 +175,7 @@ public class KhuVucController {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý việc loại bỏ khu vực khỏi cơ sở dữ liệu.
 	private void handleDeleteKhuVuc() {
 		int row = view.getSelectedRow();
 		if (row < 0) {
@@ -116,21 +196,10 @@ public class KhuVucController {
 		}
 	}
 
+	// CHỨC NĂNG: Xác thực và cập nhật thông tin chỉnh sửa của khu vực hiện có.
 	private void handleUpdateKhuVuc() {
-		int row = view.getSelectedRow();
-		if (row < 0) {
-			view.showMessage("Vui lòng chọn khu vực cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
-
-		String maTrenBang = view.getKhuVucTable().getValueAt(row, 1).toString();
-		if (!view.getMaKhuVuc().equals(maTrenBang)) {
-			view.showMessage("Không được phép thay đổi mã khu vực!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-			view.setMaKhuVuc(maTrenBang);
-			return;
-		}
-
-		KhuVuc kv = getKhuVucFromForm(view.getMaKhuVuc(), view.getTenKhuVuc(), view.getPhuThu(), view);
+		String maTrenBang = view.getMaKhuVuc();
+		KhuVuc kv = getKhuVucFromForm(maTrenBang, view.getTenKhuVuc(), view.getPhuThu(), view);
 		if (kv == null)
 			return;
 
@@ -138,9 +207,13 @@ public class KhuVucController {
 			view.showMessage("Cập nhật khu vực thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 			loadDataToTableAndComboBox();
 			clearForm();
+
+			isEditingKV = false;
+			view.batTatNutKhuVuc(true, true, true, false, true);
 		}
 	}
 
+	// CHỨC NĂNG: Hiển thị hộp thoại hỗ trợ thao tác thêm khu vực nhanh.
 	private void handleShowQuickAdd() {
 		DlgThemKhuVuc dlgThemNhanh = new DlgThemKhuVuc(view);
 
@@ -168,6 +241,7 @@ public class KhuVucController {
 		dlgThemNhanh.setVisible(true);
 	}
 
+	// CHỨC NĂNG: Xóa dữ liệu tạm thời trên các trường thông tin khu vực.
 	private void clearForm() {
 		view.setMaKhuVuc("");
 		view.setTenKhuVuc("");
@@ -175,6 +249,8 @@ public class KhuVucController {
 		view.getKhuVucTable().clearSelection();
 	}
 
+	// CHỨC NĂNG: Rút xuất và kiểm tra tính hợp lệ của dữ liệu nhập để tạo đối tượng
+	// KhuVuc.
 	private KhuVuc getKhuVucFromForm(String ma, String ten, String phuThuStr, java.awt.Component parentView) {
 		if (ma.isEmpty() || ten.isEmpty()) {
 			JOptionPane.showMessageDialog(parentView, "Vui lòng nhập đầy đủ Mã và Tên khu vực!", "Cảnh báo",
@@ -201,11 +277,13 @@ public class KhuVucController {
 		}
 	}
 
+	// CHỨC NĂNG: Trích xuất giá trị số từ chuỗi định danh để phục vụ việc sắp xếp.
 	private int extractNumber(String s) {
 		String num = s.replaceAll("\\D", "");
 		return num.isEmpty() ? 0 : Integer.parseInt(num);
 	}
 
+	// CHỨC NĂNG: Lọc và hiển thị danh sách các bàn tương ứng với khu vực được chọn.
 	private void handleFilterBanByKhuVuc() {
 		String tenKhuVuc = view.getKhuVucDuocChon();
 
@@ -262,6 +340,8 @@ public class KhuVucController {
 		view.hienThiDanhSachBanToanBo(mapKhuVucBan);
 	}
 
+	// CHỨC NĂNG: Khởi tạo hàng loạt các bàn mới dựa trên các tham số cấu hình tự
+	// động.
 	private void handleTaoTuDong() {
 		String tenKhuVuc = view.getKhuVucDuocChon();
 
@@ -311,7 +391,6 @@ public class KhuVucController {
 
 					if (!daTonTai) {
 						String tenBan = "Bàn " + i;
-						// ĐÃ VÁ LỖI TẠI ĐÂY: Dùng "Trống" thay vì false
 						Ban banMoi = new Ban(maBan, maKhuVuc, tenBan, "Trống");
 						if (banDAO.insert(banMoi)) {
 							soBanTaoMoi++;
@@ -335,6 +414,7 @@ public class KhuVucController {
 		}
 	}
 
+	// CHỨC NĂNG: Xử lý thao tác loại bỏ các bàn được chọn khỏi hệ thống.
 	private void handleDeleteBan() {
 		List<String> listMaBan = view.getDanhSachMaBanDuocChon();
 

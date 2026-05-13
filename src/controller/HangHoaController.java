@@ -8,6 +8,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -29,6 +31,8 @@ public class HangHoaController {
 	private SanPhamDAO sanPhamDAO;
 	private String duongDanAnh = "";
 
+	// CHỨC NĂNG: Khởi tạo điều khiển quá trình quản lý thông tin sản phẩm và phân
+	// loại.
 	public HangHoaController(DlgHangHoa view) {
 		this.view = view;
 		this.danhMucDAO = new DanhMucDAO();
@@ -41,6 +45,8 @@ public class HangHoaController {
 		taiDuLieuSanPham();
 	}
 
+	// CHỨC NĂNG: Lấy dữ liệu toàn bộ danh mục từ cơ sở dữ liệu và hiển thị lên giao
+	// diện.
 	private void taiDuLieuDanhMuc() {
 		view.getTmDanhMuc().setRowCount(0);
 		view.getCbDanhMuc().removeAllItems();
@@ -51,6 +57,8 @@ public class HangHoaController {
 		}
 	}
 
+	// CHỨC NĂNG: Lấy dữ liệu toàn bộ sản phẩm từ cơ sở dữ liệu và hiển thị lên giao
+	// diện.
 	private void taiDuLieuSanPham() {
 		view.getTmSanPham().setRowCount(0);
 		List<SanPham> list = sanPhamDAO.findAll();
@@ -61,18 +69,65 @@ public class HangHoaController {
 		}
 	}
 
-	private void hienThiAnhLenLabel(String path) {
+	// CHỨC NĂNG: Chỉnh sửa và cập nhật tài nguyên đồ họa tương ứng cho sản phẩm
+	// được chọn.
+	private void hienThiAnhLenLabel(String pathOrName) {
 		try {
-			ImageIcon icon = new ImageIcon(path);
-			Image img = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
-			view.getLbHinhAnh().setIcon(new ImageIcon(img));
-			view.getLbHinhAnh().setText("");
+			File file = new File(pathOrName);
+			if (!file.exists() && !pathOrName.isEmpty()) {
+				file = new File("product-images", pathOrName);
+			}
+
+			if (file.exists()) {
+				ImageIcon icon = new ImageIcon(file.getAbsolutePath());
+				Image img = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+				view.getLbHinhAnh().setIcon(new ImageIcon(img));
+				view.getLbHinhAnh().setText("");
+			} else {
+				view.getLbHinhAnh().setIcon(null);
+				view.getLbHinhAnh().setText("Lỗi ảnh");
+			}
 		} catch (Exception e) {
 			view.getLbHinhAnh().setIcon(null);
 			view.getLbHinhAnh().setText("Lỗi ảnh");
 		}
 	}
 
+	// CHỨC NĂNG: Thực hiện cơ chế sao chép và quản lý lưu trữ tập tin đồ họa của
+	// sản phẩm.
+	private String luuAnhVaoThuMucProduct(String duongDanGoc, String maSanPham) {
+		if (duongDanGoc == null || duongDanGoc.trim().isEmpty()) {
+			return null;
+		}
+
+		File fileGoc = new File(duongDanGoc);
+
+		if (!fileGoc.exists()) {
+			return duongDanGoc;
+		}
+
+		try {
+			File thuMucLuu = new File("product-images");
+			if (!thuMucLuu.exists()) {
+				thuMucLuu.mkdirs();
+			}
+
+			String tenFileGoc = fileGoc.getName();
+			String phanMoRong = tenFileGoc.contains(".") ? tenFileGoc.substring(tenFileGoc.lastIndexOf(".")) : ".png";
+			String tenFileMoi = maSanPham + phanMoRong;
+
+			File fileDich = new File(thuMucLuu, tenFileMoi);
+			Files.copy(fileGoc.toPath(), fileDich.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+			return tenFileMoi;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// CHỨC NĂNG: Hoàn nguyên trạng thái của biểu mẫu chỉnh sửa sản phẩm về mặc
+	// định.
 	private void xoaTrangSanPham() {
 		view.getTfMaSanPham().setText("");
 		view.getTfTenSanPham().setText("");
@@ -90,6 +145,8 @@ public class HangHoaController {
 		view.batTatNutSanPham(true, true, true, false, true);
 	}
 
+	// CHỨC NĂNG: Hoàn nguyên trạng thái của biểu mẫu chỉnh sửa danh mục về mặc
+	// định.
 	private void xoaTrangDanhMuc() {
 		view.getTfDM_Ma().setText("");
 		view.getTfDM_Ten().setText("");
@@ -99,6 +156,8 @@ public class HangHoaController {
 		view.batTatNutDanhMuc(true, true, true, false, true);
 	}
 
+	// CHỨC NĂNG: Cấu hình và kích hoạt các bộ tiếp nhận tín hiệu từ giao diện quản
+	// lý Sản phẩm.
 	private void khoiTaoSuKienHangHoa() {
 		view.addBtnThemDanhMucNhanhListener(e -> {
 			DlgThemDanhMuc dlgThem = new DlgThemDanhMuc(view);
@@ -213,7 +272,9 @@ public class HangHoaController {
 				double gia = Double.parseDouble(view.getTfGiaBan().getText().trim());
 				boolean trangThai = view.getCbTrangThai().getSelectedIndex() == 0;
 
-				SanPham sp = new SanPham(ma, maDM, ten, gia, trangThai, duongDanAnh);
+				String tenFileAnToan = luuAnhVaoThuMucProduct(duongDanAnh, ma);
+
+				SanPham sp = new SanPham(ma, maDM, ten, gia, trangThai, tenFileAnToan);
 				if (sanPhamDAO.insert(sp)) {
 					taiDuLieuSanPham();
 					xoaTrangSanPham();
@@ -266,7 +327,9 @@ public class HangHoaController {
 				double gia = Double.parseDouble(view.getTfGiaBan().getText().trim());
 				boolean trangThai = view.getCbTrangThai().getSelectedIndex() == 0;
 
-				SanPham sp = new SanPham(ma, maDM, ten, gia, trangThai, duongDanAnh);
+				String tenFileAnToan = luuAnhVaoThuMucProduct(duongDanAnh, ma);
+
+				SanPham sp = new SanPham(ma, maDM, ten, gia, trangThai, tenFileAnToan);
 				if (sanPhamDAO.update(sp)) {
 					taiDuLieuSanPham();
 					xoaTrangSanPham();
@@ -281,6 +344,8 @@ public class HangHoaController {
 		});
 	}
 
+	// CHỨC NĂNG: Cấu hình và kích hoạt các bộ tiếp nhận tín hiệu từ giao diện quản
+	// lý Danh Mục.
 	private void khoiTaoSuKienDanhMuc() {
 		view.addTbDanhMucMouseListener(new MouseAdapter() {
 			@Override

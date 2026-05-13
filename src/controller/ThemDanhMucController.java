@@ -11,12 +11,14 @@ public class ThemDanhMucController {
 	private DlgThemDanhMuc view;
 	private DanhMucDAO danhMucDAO;
 
+	// CHỨC NĂNG: Khởi tạo điều khiển quá trình thêm mới danh mục hàng hóa.
 	public ThemDanhMucController(DlgThemDanhMuc view) {
 		this.view = view;
 		this.danhMucDAO = new DanhMucDAO();
 		khoiTaoSuKien();
 	}
 
+	// CHỨC NĂNG: Định nghĩa hành vi xử lý khi có tương tác tại giao diện hộp thoại.
 	private void khoiTaoSuKien() {
 		view.addDongListener(e -> view.dispose());
 
